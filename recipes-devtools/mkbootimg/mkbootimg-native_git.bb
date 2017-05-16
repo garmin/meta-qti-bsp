@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
 ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 HOMEPAGE = "http://android.git.kernel.org/?p=platform/system/core.git"
 PROVIDES = "mkbootimg-native"
-
+S = "${WORKDIR}"
 DEPENDS = "libmincrypt-native"
 
 PR = "r6"

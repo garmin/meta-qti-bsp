@@ -9,8 +9,9 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
 ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 PROVIDES = "dtbtool-native"
+S = "${WORKDIR}"
 
-# Handle do_fetch ourselves...  The automated tools don't work nicely with this...
+# Handle do_fetch ourselves.The automated tools don't work nicely with this.
 do_fetch () {
 	install -d ${S}
 	cp -rf ${WORKSPACE}/android_compat/device/qcom/common/${MY_PN}/* ${S}
