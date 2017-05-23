@@ -6,8 +6,6 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
 COMPATIBLE_MACHINE = "(mdm9607|mdm9650|apq8009|apq8096|apq8053|apq8017|msm8909w|sdx20)"
 
-# Default image type is zImage, change it in machine conf if needed.
-KERNEL_IMAGETYPE ?= "zImage"
 
 python __anonymous () {
   if (d.getVar('PERF_BUILD', True) == '1'):
@@ -77,44 +75,20 @@ do_configure () {
     oe_runmake_call -C ${S} ARCH=${ARCH} ${KERNEL_EXTRA_ARGS} ${KERNEL_CONFIG}
 }
 
-do_shared_workdir () {
-        cd ${B}
+do_compile () {
+    oe_runmake CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS} $use_alternate_initrd
+}
 
-        kerneldir=${STAGING_KERNEL_BUILDDIR}
-        install -d $kerneldir
+do_shared_workdir_append () {
 
-        #
-        # Store the kernel version in sysroots for module-base.bbclass
-        #
-
-        echo "${KERNEL_VERSION}" > $kerneldir/kernel-abiversion
-
-        # Copy files required for module builds
-        cp System.map $kerneldir/System.map-${KERNEL_VERSION}
-        cp Module.symvers $kerneldir/Module.symvers
         cp Makefile $kerneldir/
-        cp .config $kerneldir/
+
         cp -fR usr $kerneldir/
 
-        # Signing keys may not be present
-        [ -f signing_key.priv ] && cp signing_key.priv $kerneldir/
-        [ -f signing_key.x509 ] && cp signing_key.x509 $kerneldir/
 
-        # include/config
-        mkdir -p $kerneldir/include/config
-        cp include/config/kernel.release $kerneldir/include/config/kernel.release
         cp include/config/auto.conf $kerneldir/include/config/auto.conf
 
-        # We can also copy over all the generated files and avoid special cases
-        # like version.h, but we've opted to keep this small until file creep starts
-        # to happen
-        if [ -e include/linux/version.h ]; then
-                mkdir -p $kerneldir/include/linux
-                cp include/linux/version.h $kerneldir/include/linux/version.h
-        fi
 
-        mkdir -p $kerneldir/include/generated/
-        cp -fR include/generated/* $kerneldir/include/generated/
 
         if [ -d arch/${ARCH}/include ]; then
                 mkdir -p $kerneldir/arch/${ARCH}/include/
@@ -149,14 +123,14 @@ do_shared_workdir () {
         cp ${STAGING_KERNEL_DIR}/scripts/gen_initramfs_list.sh $kerneldir/scripts/
 
         # Make vmlinux available as soon as possible
-        if [ ${PERF_BUILD} == "1" ]; then
+        if [[ ${PERF_BUILD} == "1" ]]; then
 		install -d ${STAGING_DIR_TARGET}-perf/${KERNEL_IMAGEDEST}
-	        install -m 0644 ${KERNEL_OUTPUT} ${STAGING_DIR_TARGET}-perf/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}
+	        install -m 0644 ${KERNEL_OUTPUT_DIR}/${KERNEL_IMAGETYPE} ${STAGING_DIR_TARGET}-perf/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}
 	        install -m 0644 vmlinux ${STAGING_DIR_TARGET}-perf/${KERNEL_IMAGEDEST}/vmlinux-${KERNEL_VERSION}
 	        install -m 0644 vmlinux ${STAGING_DIR_TARGET}-perf/${KERNEL_IMAGEDEST}/vmlinux
 	else
 	        install -d ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}
-	        install -m 0644 ${KERNEL_OUTPUT} ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}
+	        install -m 0644 ${KERNEL_OUTPUT_DIR}/${KERNEL_IMAGETYPE} ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}
 	        install -m 0644 vmlinux ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}/vmlinux-${KERNEL_VERSION}
 	        install -m 0644 vmlinux ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}/vmlinux
 	fi
@@ -166,9 +140,9 @@ do_install_append() {
     oe_runmake_call -C ${STAGING_KERNEL_DIR} ARCH=${ARCH} CC="${KERNEL_CC}" LD="${KERNEL_LD}" headers_install O=${STAGING_KERNEL_BUILDDIR}
 }
 
-nand_boot_flag = "${@base_contains('DISTRO_FEATURES', 'nand-boot', '1', '0', d)}"
+nand_boot_flag = "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', '1', '0', d)}"
 
-do_deploy_prepend() {
+do_deploy() {
 
     if [ -f ${D}/${KERNEL_IMAGEDEST}/-${KERNEL_VERSION} ]; then
         mv ${D}/${KERNEL_IMAGEDEST}/-${KERNEL_VERSION} ${D}/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}
@@ -191,9 +165,6 @@ do_deploy_prepend() {
             fi
         done
     fi
-}
-
-do_deploy () {
 
     extra_mkbootimg_params=""
     if [ ${nand_boot_flag} == "1" ]; then
@@ -211,4 +182,3 @@ do_deploy () {
         --ramdisk_offset 0x0 \
         ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img
 }
-
