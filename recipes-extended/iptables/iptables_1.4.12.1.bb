@@ -41,7 +41,7 @@ CFLAGS += "-I${STAGING_KERNEL_BUILDDIR}/usr/include/linux/netfilter_ipv4"
 inherit autotools pkgconfig
 
 EXTRA_OECONF = "--with-kernel=${STAGING_INCDIR} \
-                ${@base_contains('DISTRO_FEATURES', 'ipv6', '', '--disable-ipv6', d)}"
+                ${@bb.utils.contains('DISTRO_FEATURES', 'ipv6', '', '--disable-ipv6', d)}"
 
 do_configure_prepend() {
         # Remove some libtool m4 files

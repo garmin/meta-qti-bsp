@@ -24,7 +24,7 @@ CACHED_CONFIGUREVARS = "ac_cv_linux_vers=${ac_cv_linux_vers=2}"
 EXTRA_OEMAKE = "KERNEL_INCLUDES=${STAGING_KERNEL_BUILDDIR}/usr/include"
 
 EXTRA_OECONF = "--without-crypto \
-        ${@base_contains('DISTRO_FEATURES', 'ipv6', '--enable-ipv6', '--disable-ipv6', d)}"
+        ${@bb.utils.contains('DISTRO_FEATURES', 'ipv6', '--enable-ipv6', '--disable-ipv6', d)}"
 
 PACKAGES = "${PN} ${PN}-doc"
 INHIBIT_PACKAGE_DEBUG_SPLIT = "1"

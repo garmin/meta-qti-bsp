@@ -13,8 +13,8 @@ LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
 ${LICENSE};md5=3775480a712fc46a69647678acb234cb"
 
-SYSTEMD_PACKAGES = "${@base_contains('DISTRO_FEATURES','systemd','${PN}','',d)}"
-SYSTEMD_SERVICE_${PN} = "${@base_contains('DISTRO_FEATURES','systemd','persist-prop.service','',d)}"
+SYSTEMD_PACKAGES = "${@bb.utils.contains('DISTRO_FEATURES','systemd','${PN}','',d)}"
+SYSTEMD_SERVICE_${PN} = "${@bb.utils.contains('DISTRO_FEATURES','systemd','persist-prop.service','',d)}"
 
 do_compile() {
     # Remove empty lines and lines starting with '#'
@@ -30,7 +30,7 @@ do_install() {
     install -d ${D}
     install ${S}/build.prop ${D}/build.prop
     install -m 0755 ${WORKDIR}/persist-prop.sh -D ${D}${sysconfdir}/init.d/persist-prop
-    if ${@base_contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+    if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
        install -d ${D}${systemd_unitdir}/system
        install -d ${D}${systemd_unitdir}/system/multi-user.target.wants/
        install -m 0755 ${WORKDIR}/persist-prop.sh -D ${D}${sysconfdir}/initscripts/persist-prop

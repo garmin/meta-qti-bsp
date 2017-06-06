@@ -30,7 +30,7 @@ dirs755_append_apq8017 += "/firmware /persist /cache /dsp"
 do_install_append(){
     install -m 755 -o diag -g diag -d ${D}/media
     install -m 755 -o diag -g diag -d ${D}/mnt/sdcard
-    if ${@base_contains('DISTRO_FEATURES','ro-rootfs','true','false',d)}; then
+    if ${@bb.utils.contains('DISTRO_FEATURES','ro-rootfs','true','false',d)}; then
         # Override fstab for apq8017
         if [ ${BASEMACHINE} == "apq8053" || ${BASEMACHINE} == "mdm9607" ]; then
             install -m 0644 ${WORKDIR}/${BASEMACHINE}/ro-fstab ${D}${sysconfdir}/fstab

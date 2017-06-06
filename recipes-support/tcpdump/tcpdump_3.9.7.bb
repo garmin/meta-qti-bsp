@@ -16,7 +16,7 @@ SRC_URI = " \
 inherit autotools
 
 EXTRA_OECONF = "--without-crypto \
-		${@base_contains('DISTRO_FEATURES', 'ipv6', '--enable-ipv6', '--disable-ipv6', d)}"
+		${@bb.utils.contains('DISTRO_FEATURES', 'ipv6', '--enable-ipv6', '--disable-ipv6', d)}"
 
 do_configure() {
 	gnu-configize

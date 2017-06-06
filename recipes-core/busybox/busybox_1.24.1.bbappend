@@ -27,7 +27,7 @@ BUSYBOX_SPLIT_SUID = "0"
 
 do_install_append() {
     # systemd is udev compatible.
-    if ${@base_contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+    if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d ${D}${sysconfdir}/udev/scripts/
         install -m 0755 ${WORKDIR}/automountsdcard.sh \
             ${D}${sysconfdir}/udev/scripts/automountsdcard.sh

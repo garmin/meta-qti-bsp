@@ -1,4 +1,4 @@
-DEPENDS += "${@base_contains('PRODUCT','base','machine-image','machine-${PRODUCT}-image',d)}"
+DEPENDS += "${@bb.utils.contains('PRODUCT','base','machine-image','machine-${PRODUCT}-image',d)}"
 
 OTA_TARGET_BASENAME_EXT4     = "${MACHINE}-ota-target-image-ext4"
 OTA_TARGET_IMAGE_ROOTFS_EXT4 = "${IMAGE_ROOTFS}/../${OTA_TARGET_BASENAME_EXT4}"

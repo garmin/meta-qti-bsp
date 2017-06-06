@@ -3,11 +3,11 @@ require machine-recovery-bootimg.inc
 
 DEPENDS += "bzip2 fsconfig-native applypatch-native bsdiff-native"
 
-IMAGE_FSTYPES += "${@base_contains('DISTRO', 'mdm', 'ubi', '', d)}"
+IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO', 'mdm', 'ubi', '', d)}"
 
-MKUBIFS_ARGS = "${@base_contains('DISTRO', 'mdm', '-m 4096 -e 253952 -c 83 -F', '', d)}"
+MKUBIFS_ARGS = "${@bb.utils.contains('DISTRO', 'mdm', '-m 4096 -e 253952 -c 83 -F', '', d)}"
 
-UBI_VOLNAME = "${@base_contains('DISTRO', 'mdm', 'rootfs', '', d)}"
+UBI_VOLNAME = "${@bb.utils.contains('DISTRO', 'mdm', 'rootfs', '', d)}"
 
 # The OE-Core minimal boot image files.
 IMAGE_INSTALL += "packagegroup-core-boot"
@@ -36,9 +36,9 @@ IMAGE_INSTALL += "libe2p"
 IMAGE_INSTALL += "libext2fs"
 
 # utils and scripts needed for SELinux
-IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','selinux','packagegroup-core-selinux',' ',d)}"
-IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','selinux','selinux-config',' ',d)}"
-IMAGE_INSTALL += "${@base_contains('DISTRO_FEATURES','selinux','refpolicy-mls',' ',d)}"
+IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','packagegroup-core-selinux',' ',d)}"
+IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','selinux-config',' ',d)}"
+IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','refpolicy-mls',' ',d)}"
 
 # Limit the recovery image size to 136M
 RECOVERYFS_SIZE_EXT4 ?= "136000000"
