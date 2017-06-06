@@ -7,7 +7,8 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
 ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 FILESPATH =+ "${WORKSPACE}:"
-SRC_URI   = "file://system/core/"
+SRC_URI   = "file://system/core/ \
+             file://disable-libsync-logd.patch"
 
 S = "${WORKDIR}/system/core"
 PR = "r19"
