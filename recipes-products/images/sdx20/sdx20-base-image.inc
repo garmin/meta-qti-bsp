@@ -1,13 +1,11 @@
 # Rootfs creation.
 
-DEPENDS_append_aarch64 += " lib32-lk"
-DEPENDS_append_arm += " lk"
-
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4 ubi"
+#DEPENDS_append_aarch64 += "lib32-lk"
+#DEPENDS_append_arm += "lk"
 
 IMAGE_INSTALL += "packagegroup-core-boot"
-IMAGE_INSTALL += "${ROOTFS_PKGMANAGE_BOOTSTRAP}"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
 
 # The MSM Linux minimal boot image files.
@@ -29,7 +27,7 @@ IMAGE_INSTALL += "libstdc++"
 IMAGE_INSTALL += "libxml2"
 IMAGE_INSTALL += "minidlna"
 IMAGE_INSTALL += "openssl"
-IMAGE_INSTALL += "pimd"
+#IMAGE_INSTALL += "pimd"
 IMAGE_INSTALL += "powerapp"
 IMAGE_INSTALL += "powerapp-powerconfig"
 IMAGE_INSTALL += "powerapp-reboot"
@@ -44,7 +42,7 @@ IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "tcpdump"
 IMAGE_INSTALL += "wireless-tools"
 
-IMAGE_PREPROCESS_COMMAND += "echo ${MACHINE} >> ${IMAGE_ROOTFS}/target;"
+#IMAGE_PREPROCESS_COMMAND += "echo ${MACHINE} >> ${IMAGE_ROOTFS}/target;"
 
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
 
