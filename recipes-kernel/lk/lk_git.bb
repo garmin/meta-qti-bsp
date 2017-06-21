@@ -14,7 +14,7 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 FILESPATH =+ "${WORKSPACE}:"
 
 SRC_URI   =  "file://bootable/bootloader/lk"
-S         =  "${WORKDIR}/bootable/lk"
+S         =  "${WORKDIR}/bootable/bootloader/lk"
 
 MY_TARGET_mdm9650 = "mdm9640"
 MY_TARGET_sdx20 = "mdm9640"
@@ -31,7 +31,7 @@ BOOTLOADER_NAME = "${@bb.utils.contains('DISTRO_FEATURES', 'emmc-boot', 'emmc_ap
 
 emmc_bootloader = "${@bb.utils.contains('DISTRO_FEATURES', 'emmc-boot', '1', '0', d)}"
 
-LIBGCC = "${STAGING_LIBDIR}/${TARGET_SYS}/4.9.3/libgcc.a"
+LIBGCC = "${STAGING_LIBDIR}/${TARGET_SYS}/6.3.0/libgcc.a"
 
 DISPLAY_SCREEN = "${@base_conditional('PRODUCT', 'drone', '0', '1', d)}"
 
