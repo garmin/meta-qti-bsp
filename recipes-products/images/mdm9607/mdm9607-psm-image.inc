@@ -12,5 +12,4 @@ PACKAGE_EXCLUDE += "bt-property"
 PACKAGE_EXCLUDE+= "fluoride"
 PACKAGE_EXCLUDE += "libbt-vendor"
 
-PACKAGE_EXCLUDE += "libsensors"
 PACKAGE_EXCLUDE += "start-scripts-init-can"
