@@ -34,13 +34,6 @@ SYSTEM_SIZE_EXT4 ?= "768000000"
 USERDATA_SIZE_EXT4 ?= "3000000000"
 CACHE_SIZE_EXT4 ?= "65536000"
 
-# Multilib configuration
-# This sets any packages preprended with lib32- to be built with
-# the armv7a tuning (32 bit) instead of 64 bit aarch.
-require conf/multilib.conf
-MULTILIBS = "multilib:lib32"
-DEFAULTTUNE_virtclass-multilib-lib32 = "armv7a-neon"
-
 #Enable SDK feature
 SDK_IMAGE ?= "1"
 
