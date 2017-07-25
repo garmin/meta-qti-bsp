@@ -5,6 +5,7 @@ BUGTRACKER = "http://sourceforge.net/tracker/?group_id=12272&atid=112272"
 LICENSE = "LGPLv2.1"
 PRIORITY = "optional"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/LGPL-2.1;md5=1a6d268fd218675ffea8be556788b780"
+FILES_${PN} += "/lib/*"
 
 # Package Revision (update whenever recipe is changed)
 PR = "r0"

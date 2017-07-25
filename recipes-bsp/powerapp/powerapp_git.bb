@@ -14,6 +14,7 @@ PACKAGES =+ "${PN}-reboot ${PN}-shutdown ${PN}-powerconfig"
 FILES_${PN}-reboot = "${sysconfdir}/init.d/reboot"
 FILES_${PN}-shutdown = "${sysconfdir}/init.d/shutdown"
 FILES_${PN}-powerconfig = "${sysconfdir}/init.d/power_config"
+FILES_${PN} += "/data/*"
 
 # TODO - add depedency on virtual/sh
 PROVIDES =+ "${PN}-reboot ${PN}-shutdown ${PN}-powerconfig"

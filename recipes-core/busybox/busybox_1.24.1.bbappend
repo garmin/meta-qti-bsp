@@ -48,4 +48,9 @@ do_install_append() {
     ln -s /bin/env ${D}/usr/bin/env
 }
 
+python do_package_append_mdm() {
+    import subprocess
+    subprocess.call('rm -f ${D}/../packages-split/busybox/usr/lib/busybox/sbin/modprobe', shell=True)
+}
+
 #FILES_${PN}-mdev += "${sysconfdir}/mdev/* "

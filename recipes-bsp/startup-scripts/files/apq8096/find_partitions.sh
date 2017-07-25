@@ -72,6 +72,7 @@ FindAndMountVFAT () {
 FindAndMountEXT4 userdata /data
 FindAndMountVFAT modem   /firmware
 FindAndMountEXT4 persist /persist
+FindAndMountEXT4 cache  /cache
 FindAndMountEXT4 dsp /dsp
 
 /sbin/restorecon -RF /data/misc/wifi

@@ -1,4 +1,4 @@
-inherit autotools-brokensep pkgconfig
+inherit autotools-brokensep pkgconfig sdllvm
 
 DESCRIPTION = "Build Android liblog"
 HOMEPAGE = "http://developer.android.com/"
@@ -16,7 +16,7 @@ S = "${WORKDIR}/liblog"
 
 BBCLASSEXTEND = "native"
 
-EXTRA_OECONF  = " --with-core-includes=${WORKSPACE}/system/core/include"
+EXTRA_OECONF += " --with-core-includes=${WORKSPACE}/system/core/include"
 EXTRA_OECONF += " --disable-static"
 EXTRA_OECONF_append_class-target = " --with-logd-logging"
 

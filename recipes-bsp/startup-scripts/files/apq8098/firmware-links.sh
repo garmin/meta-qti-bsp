@@ -86,5 +86,5 @@ cd /
 # which are stored at /persist partition.
 ln -s /persist/WCNSS_qcom_wlan_nv.bin /lib/firmware/wlan/prima/WCNSS_qcom_wlan_nv.bin
 ln -s /persist/WCNSS_wlan_dictionary.dat /lib/firmware/wlan/prima/WCNSS_wlan_dictionary.dat
-
+ln -s /dev/block/bootdevice/by-name/msadp /lib/firmware/msadp
 exit 0

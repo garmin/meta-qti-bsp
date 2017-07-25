@@ -12,6 +12,8 @@ SRC_URI = "file://android_compat/device/qcom/common/recovery/oem-recovery/"
 
 S = "${WORKDIR}/android_compat/device/qcom/common/recovery/oem-recovery/"
 
+DEPENDS += "virtual/kernel"
+
 EXTRA_OECONF = "--with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include \
                 --with-core-headers=${STAGING_INCDIR_NATIVE}"
 

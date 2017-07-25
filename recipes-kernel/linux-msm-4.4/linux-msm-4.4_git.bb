@@ -49,10 +49,11 @@ SRC_DIR   =  "${WORKSPACE}/kernel/msm-4.4"
 S         =  "${WORKDIR}/kernel/msm-4.4"
 GITVER    =  "${@base_get_metadata_git_revision('${SRC_DIR}',d)}"
 PV = "git"
-PR = "r5-${GITVER}"
+PR = "r6"
 
 DEPENDS += "dtbtool-native mkbootimg-native"
 DEPENDS += "mkbootimg-native dtc-native"
+DEPENDS += "bouncycastle"
 PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
 RDEPENDS_kernel-base = ""
 
@@ -156,6 +157,25 @@ do_deploy_prepend() {
     fi
 }
 
+
+#-----------------------------------------
+#  create siged bootimage
+#-----------------------------------------
+boot_signing () {
+    B_BASE=`echo ${WORKDIR} | grep -oP "/.+/tmp-glibc/"`
+    BC_BUILD="${B_BASE}/work/aarch64-oe-linux/bouncycastle/git-r0"
+
+    /usr/bin/java -Xmx512M -jar ${BC_BUILD}/build/libs/BootSignature.jar \
+        /boot                                                     \
+        ${DEPLOY_DIR_IMAGE}/boot.img                   \
+	${BC_BUILD}/security/target/product/security/verity.pk8 \
+	${BC_BUILD}/security/target/product/security/verity.x509.pem \
+        ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img
+
+    rm -f ${DEPLOY_DIR_IMAGE}/boot.img
+}
+
+
 do_deploy () {
 
     extra_mkbootimg_params=""
@@ -173,12 +193,21 @@ do_deploy () {
         --base ${KERNEL_BASE} \
         --ramdisk_offset 0x0 \
         ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img
+
 }
 
 do_module_signing() {
     for i in $(find ${PKGDEST} -name "*.ko"); do
     ${STAGING_KERNEL_BUILDDIR}/scripts/sign-file sha512 ${STAGING_KERNEL_BUILDDIR}/certs/signing_key.pem ${STAGING_KERNEL_BUILDDIR}/certs/signing_key.x509 ${i}
     done
+    cp -fR ${STAGING_KERNEL_BUILDDIR}/usr/include/drm/* ${STAGING_INCDIR}/drm/
+    mkdir -p ${STAGING_INCDIR}/media
+    cp -fR ${STAGING_KERNEL_BUILDDIR}/usr/include/media/* ${STAGING_INCDIR}/media/
+    cp -fR ${STAGING_KERNEL_BUILDDIR}/usr/include/linux/ion.h ${STAGING_INCDIR}/linux/
+    cp -fR ${STAGING_KERNEL_BUILDDIR}/usr/include/linux/msm_ion.h ${STAGING_INCDIR}/linux/
+    cp -fR ${STAGING_KERNEL_BUILDDIR}/usr/include/linux/msm_mdp.h ${STAGING_INCDIR}/linux/
+    cp -fR ${STAGING_KERNEL_BUILDDIR}/usr/include/linux/msm_mdp_ext.h ${STAGING_INCDIR}/linux/
+    cp -fR ${STAGING_KERNEL_BUILDDIR}/usr/include/linux/mdss_rotator.h ${STAGING_INCDIR}/linux/
 }
 
 addtask do_module_signing after do_package before do_package_write_ipk

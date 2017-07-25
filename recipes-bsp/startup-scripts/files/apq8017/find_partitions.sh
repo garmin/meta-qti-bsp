@@ -28,7 +28,25 @@
 #
 # find_partitions        init.d script to dynamically find partitions
 #
-
+#following function is just for debugging not enabled by default
+timestamp()
+{
+   seconds="$(date +%s)"
+}
+#following function is just for debugging not enabled by default
+RESTORECON()
+{
+    timestamp
+    echo "$seconds $2 start" > /dev/console
+    context_check="$(matchpathcon -V $2)"
+    if test "${context_check#*verified}" == "$context_check"
+    then
+       # Only do a restorecon if necessary
+        /sbin/restorecon $1 $2
+    fi
+    timestamp
+    echo "$seconds $2 end" > /dev/console
+}
 FindAndMountEXT4 () {
    partition=$1
    dir=$2

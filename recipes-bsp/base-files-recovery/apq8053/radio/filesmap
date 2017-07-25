@@ -30,10 +30,10 @@
 NON-HLOS.ubi            modem
 NON-HLOS.bin            /dev/block/bootdevice/by-name/modem
 
-sbl1.mbn                sbl
-tz.mbn                  tz
-rpm.mbn                 rpm
-appsboot.mbn            aboot
+sbl1.mbn                /dev/block/bootdevice/by-name/sbl1
+tz.mbn                  /dev/block/bootdevice/by-name/tz
+rpm.mbn                 /dev/block/bootdevice/by-name/rpm
+emmc_appsboot.mbn       /dev/block/bootdevice/by-name/aboot
 
 # filename + .bak       backup partition
 

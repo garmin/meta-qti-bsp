@@ -8,11 +8,8 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/LGPL-2.1;md5=1
 # Package Revision (update whenever recipe is changed)
 PR = "r0"
 
-SRC_URI = "\
-    http://www.ffmpeg.org/releases/${PN}-${PV}.tar.gz \
-"
-SRC_URI[md5sum] = "d63e952716c27e23927bfd64518d6dee"
-SRC_URI[sha256sum] = "f3b437dbdf9f1519fa5e0a923428e77ba3babefbcfeda9aebb7cd72ae8924c1d"
+SRC_URI = "git://source.codeaurora.org/quic/le/ffmpeg/;protocol=http;branch=ffmpeg/release/2.3;destsuffix=ffmpeg-2.3;name=ffmpeg-2.3"
+SRCREV = "${AUTOREV}"
 
 EXTRA_OEMAKE = ""
 

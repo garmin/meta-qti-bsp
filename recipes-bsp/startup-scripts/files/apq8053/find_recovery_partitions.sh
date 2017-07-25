@@ -120,16 +120,16 @@ FindAndMountMTD () {
 
    UpdateRecoveryVolume $1 $2 "mtd" /dev/$mtd_block_device
 }
-mount -o remount,rw /
+
 echo -n > $fstab_file
 
 if [ -d $emmc_dir ]
 then
     fstype="EXT4"
-    eval FindAndMountEXT4 system     /system   1
-    eval FindAndMountEXT4 userdata  /data      1
+    eval FindAndMountEXT4 system   /system   1
+    eval FindAndMountEXT4 userdata /data     1
     eval FindAndMountEXT4 cache    /cache
-    eval FindAndMountEXT4 misc    /misc        1
+    eval FindAndMountEXT4 misc     /misc     1
 else
     fstype="UBI"
     eval FindAndAttachUBI modem
@@ -140,5 +140,12 @@ else
 fi
 
 eval FindAndMount${fstype} modem /firmware
+
+# TODO: recovery image should also move to enforce mode
+# till all the meta_data is updated we are moving to
+# permissive. This is the best place where selinux is
+# enabled and enforced and early startup.
+
+/usr/sbin/setenforce 0
 
 exit

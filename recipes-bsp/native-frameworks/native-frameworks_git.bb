@@ -1,4 +1,4 @@
-inherit autotools pkgconfig
+inherit autotools pkgconfig sdllvm
 
 DESCRIPTION = "Android IPC utilities"
 HOMEPAGE = "http://developer.android.com/"
@@ -16,7 +16,7 @@ SRC_URI += "file://servicemanager.service"
 
 S = "${WORKDIR}/native"
 
-EXTRA_OECONF = " --with-core-includes=${WORKSPACE}/system/core/include --with-glib"
+EXTRA_OECONF += " --with-core-includes=${WORKSPACE}/system/core/include --with-glib"
 
 CFLAGS += "-I${STAGING_INCDIR}/libselinux"
 

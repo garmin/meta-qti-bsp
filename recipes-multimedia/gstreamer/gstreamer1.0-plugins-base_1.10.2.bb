@@ -17,6 +17,7 @@ SRC_URI = " \
     file://Add-Flac.patch \
     file://Add-Vorbis.patch \
     file://0001-audioringbuffer-add-wma-and-alac-to-encoded-audio-fo.patch \
+    file://0002-audioringbuffer-Fix-8kHz-MP3-playback-issue.patch \
 "
 SRC_URI[md5sum] = "8efa9e9ad9a841a900359604da82fb8b"
 SRC_URI[sha256sum] = "fbc0d40fcb746d2efe2ea47444674029912f66e6107f232766d33b722b97de20"

@@ -1,4 +1,4 @@
-inherit autotools pkgconfig
+inherit autotools pkgconfig sdllvm
 
 DESCRIPTION = "Build Android libcutils"
 HOMEPAGE = "http://developer.android.com/"
@@ -17,7 +17,7 @@ SRC_URI   = "file://libcutils"
 
 S = "${WORKDIR}/libcutils"
 
-EXTRA_OECONF  = " --with-core-includes=${WORKSPACE}/system/core/include"
+EXTRA_OECONF += " --with-core-includes=${WORKSPACE}/system/core/include"
 EXTRA_OECONF += " --with-host-os=${HOST_OS}"
 EXTRA_OECONF += " --disable-static"
 EXTRA_OECONF += "${@base_conditional('BASEMACHINE', 'apq8017', ' LE_PROPERTIES_ENABLED=true', '', d)}"

@@ -36,4 +36,3 @@ auth_allow_fileops_shadow(local_login_t)
 #allow local_login_t user_home_dir_t:file { read getattr open };
 userdom_allow_fileops(local_login_t)
 init_udgram_socket_set(local_login_t)
-allow local_login_t tmpfs_t:dir { search };

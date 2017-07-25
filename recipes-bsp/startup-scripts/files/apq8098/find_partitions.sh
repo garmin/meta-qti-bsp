@@ -42,12 +42,12 @@ FindAndMountVFAT () {
    dir=$2
    mmc_block_device=/dev/block/bootdevice/by-name/$partition
    mkdir -p $dir
-   mount -t vfat $mmc_block_device $dir
+   mount -t vfat $mmc_block_device $dir -o context=$3
 }
 FindAndMountEXT4 userdata /data
-FindAndMountVFAT modem   /firmware
+FindAndMountVFAT modem /firmware system_u:object_r:firmware_t:s0
 FindAndMountEXT4 persist /persist
 FindAndMountEXT4 dsp /dsp
-FindAndMountVFAT bluetooth /bt_firmware
+FindAndMountVFAT bluetooth /bt_firmware system_u:object_r:firmware_t:s0
 
 exit 0

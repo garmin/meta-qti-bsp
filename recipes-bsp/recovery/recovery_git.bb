@@ -22,7 +22,7 @@ SYSTEMD_SUPPORT = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemd',
 
 PARALLEL_MAKE = ""
 INITSCRIPT_NAME = "recovery"
-INITSCRIPT_PARAMS = "start 27 5 . stop 80 0 1 6 ."
+INITSCRIPT_PARAMS = "start 99 5 . stop 80 0 1 6 ."
 
 FILES_${PN} += "/cache"
 FILES_${PN} += "/system"

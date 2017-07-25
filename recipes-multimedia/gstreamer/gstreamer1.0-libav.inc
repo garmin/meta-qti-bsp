@@ -3,9 +3,9 @@ HOMEPAGE = "http://gstreamer.freedesktop.org/"
 SECTION = "multimedia"
 
 LICENSE = "GPLv2+ & LGPLv2+ & ( (GPLv2+ & LGPLv2.1+) | (GPLv3+ & LGPLv3+) )"
-LICENSE_FLAGS = "commercial"
+#LICENSE_FLAGS = "commercial"
 
-DEPENDS = "gstreamer1.0 gstreamer1.0-plugins-base zlib bzip2 xz"
+DEPENDS = "gstreamer1.0 gstreamer1.0-plugins-base zlib bzip2 xz ffmpeg"
 
 inherit autotools pkgconfig upstream-version-is-even gtk-doc
 

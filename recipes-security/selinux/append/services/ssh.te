@@ -26,12 +26,9 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 allow sshd_t self:capability net_raw;
-fs_search_tmpfs(ssh_keygen_t)
 allow ssh_t self:capability net_raw;
 allow sshd_t device_t:sock_file { read write open getattr };
 allow sshd_t bin_t:file { read write open getattr execute };
 init_udgram_socket_set(sshd_t)
-#fs_allow_rw_tmpfs_files(sshd_t)
-allow sshd_t tmpfs_t:file { read write open lock getattr };
 allow sshd_t var_t:file { read write getattr open lock };
 allow sshd_t initrc_t:unix_dgram_socket { sendto };

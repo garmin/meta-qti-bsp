@@ -43,3 +43,6 @@ DEFAULTTUNE_virtclass-multilib-lib32 = "armv7a-neon"
 
 #Enable SDK feature
 SDK_IMAGE ?= "1"
+
+#Enable Recovery image generation
+RECOVERY_IMAGE ?= "1"

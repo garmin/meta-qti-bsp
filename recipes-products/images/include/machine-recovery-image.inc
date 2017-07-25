@@ -1,13 +1,10 @@
-# The mkbootimg production process.
-require machine-recovery-bootimg.inc
+DEPENDS_append_aarch64 += " lib32-lk"
+DEPENDS_append_arm += " lk"
 
-DEPENDS += "bzip2 fsconfig-native applypatch-native bsdiff-native"
+DEPENDS += "virtual/kernel"
 
-IMAGE_FSTYPES += "${@bb.utils.contains('DISTRO', 'mdm', 'ubi', '', d)}"
-
-MKUBIFS_ARGS = "${@bb.utils.contains('DISTRO', 'mdm', '-m 4096 -e 253952 -c 83 -F', '', d)}"
-
-UBI_VOLNAME = "${@bb.utils.contains('DISTRO', 'mdm', 'rootfs', '', d)}"
+DEPENDS += "pkgconfig-native gtk-doc-native gettext-native mkbootimg-native dtbtool-native"
+DEPENDS += "bzip2 fsconfig-native applypatch-native bsdiff-native ext4-utils-native"
 
 # The OE-Core minimal boot image files.
 IMAGE_INSTALL += "packagegroup-core-boot"
@@ -43,19 +40,28 @@ IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','refpolicy-ml
 # Limit the recovery image size to 136M
 RECOVERYFS_SIZE_EXT4 ?= "136000000"
 
-# Below is to generate sparse ext4 recovery image (OE by default supports raw ext4 images)
+# Needed for generating recovery.ubi ignored for ext4
+MKUBIFS_ARGS = "${@bb.utils.contains('IMAGE_FSTYPES', 'ubi', '-m 4096 -e 253952 -c 83 -F', '', d)}"
+UBI_VOLNAME  = "${@bb.utils.contains('IMAGE_FSTYPES', 'ubi', 'rootfs', '', d)}"
+
 SELINUX_FILE_CONTEXTS = "${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_contexts"
+
+# Below is to generate sparse ext4 recovery image (OE by default supports raw ext4 images)
 do_makesystem() {
-if [ "${MACHINE}" != "mdm9607" ]; then
-    # SELinux feature is enabled
-    if [[ "${DISTRO_FEATURES}" =~ "selinux" ]]; then
-        make_ext4fs -s -a / -S ${SELINUX_FILE_CONTEXTS} -l ${RECOVERYFS_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-recovery.ext4 ${IMAGE_ROOTFS}
-    else
-        make_ext4fs -s -l ${RECOVERYFS_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-recovery.ext4 ${IMAGE_ROOTFS}
+    if [ "${MACHINE}" != "mdm9607" ]; then
+        # SELinux feature is enabled
+        if [[ "${DISTRO_FEATURES}" =~ "selinux" ]]; then
+            make_ext4fs -s -a / -S ${SELINUX_FILE_CONTEXTS} -l ${RECOVERYFS_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-recovery.ext4 ${IMAGE_ROOTFS}
+        else
+            make_ext4fs -s -l ${RECOVERYFS_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-recovery.ext4 ${IMAGE_ROOTFS}
+        fi
     fi
-fi
-#rename machine-recovery-image.ubi if exists
-if [ -f "${DEPLOY_DIR_IMAGE}/machine-recovery-image-${MACHINE}.ubi" ]; then
-mv ${DEPLOY_DIR_IMAGE}/machine-recovery-image-${MACHINE}.ubi ${DEPLOY_DIR_IMAGE}/${MACHINE}-recovery.ubi
-fi
+
+    #rename machine-recovery-image.ubi if exists
+    if [ -f "${DEPLOY_DIR_IMAGE}/machine-recovery-image-${MACHINE}.ubi" ]; then
+        mv ${DEPLOY_DIR_IMAGE}/machine-recovery-image-${MACHINE}.ubi ${DEPLOY_DIR_IMAGE}/${MACHINE}-recovery.ubi
+    fi
 }
+
+# Call function makesystem to generate sparse ext4 image
+addtask makesystem after do_rootfs before do_build

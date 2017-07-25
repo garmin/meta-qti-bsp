@@ -16,6 +16,7 @@ include conf/machine/include/tune-cortexa8.inc
 
 BBMASK = ".*/*/recipes-kernel/linux-msm-4.4"
 BBMASK .= "|.*/*/recipes-security/libselinux/"
+BBMASK .= "|.*/*/recipes-devtools/mtd/"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
@@ -40,7 +41,7 @@ SYSTEM_VOLUME_SIZE ?= "90MiB"
 CACHE_VOLUME_SIZE ?= "70MiB"
 
 # Sizes for EXT4 (in bytes)
-SYSTEM_SIZE_EXT4 ?= "100000000"
+SYSTEM_SIZE_EXT4 ?= "140000000"
 USERDATA_SIZE_EXT4 ?= "2000000000"
 CACHE_SIZE_EXT4 ?= "80000000"
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2016, The Linux Foundation. All rights reserved.
+# Copyright (c) 2016-17, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -37,10 +37,10 @@ type bootlogd_exec_t;
 init_daemon_domain(bootlogd_t, bootlogd_exec_t)
 init_getattr_initctl(bootlogd_t);
 allow bootlogd_t device_t:chr_file getattr;
-allow bootlogd_t tmpfs_t:blk_file getattr;
 allow bootlogd_t device_t:file { read write getattr };
-allow bootlogd_t tmpfs_t:lnk_file getattr;
-fs_list_tmpfs(bootlogd_t)
+
+# Full access to /var/log
+logging_log_file(bootlogd_t);
 
 #used for index reading
 fs_getattr_all_chr_files(bootlogd_t)
@@ -48,8 +48,6 @@ dev_getattr_all_blk_files(bootlogd_t)
 dev_getattr_all_chr_files(bootlogd_t)
 term_dontaudit_use_ptmx(bootlogd_t)
 dev_rw_null(bootlogd_t)
-fs_rw_tmpfs_chr_files(bootlogd_t)
-fs_getattr_tmpfs(bootlogd_t)
 term_getattr_pty_fs(bootlogd_t)
 files_rw_etc_files(bootlogd_t)
 term_setattr_generic_ptys(bootlogd_t)

@@ -21,6 +21,8 @@ do_configure() {
 }
 
 FILES_${PN} +="/usr/libexec/*"
+FILES_${PN} += "/usr/etc*"
+FILES_${PN} += "/data/*"
 
 SRC_URI[md5sum] = "c65e8cef3281eaf2e12a84bd882f5c63"
 SRC_URI[sha256sum] = "d3325c697d6e2a2d09c80cedb358bb78561da33304183874d7c44f96fd5d9f5f"
