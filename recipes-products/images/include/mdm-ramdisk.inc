@@ -26,30 +26,32 @@ do_ramdisk_create() {
         ln -s bin sbin
         cp ${IMAGE_ROOTFS}/bin/busybox bin/
         cp ${IMAGE_ROOTFS}/sbin/adbd sbin/
-        cp ${STAGING_LIBDIR}/libadbd.so.0 lib/libadbd.so.0
-        cp ${STAGING_LIBDIR}/libext4_utils.so.0 lib/libext4_utils.so.0
+        cp ${IMAGE_ROOTFS}/sbin/usb_composition sbin/
+        cp -r ${IMAGE_ROOTFS}/sbin/usb/ sbin/
+        cp ${IMAGE_ROOTFS}/usr/lib/libadbd.so.0 lib/libadbd.so.0
+        cp ${IMAGE_ROOTFS}/usr/lib/libext4_utils.so.0 lib/libext4_utils.so.0
         cp ${IMAGE_ROOTFS}/lib/libselinux.so.1 lib/libselinux.so.1
         cp ${IMAGE_ROOTFS}/usr/lib/libbase.so.0 lib/libbase.so.0
-        cp ${STAGING_LIBDIR}/libfs_mgr.so.0 lib/libfs_mgr.so.0
-        cp ${STAGING_LIBDIR}/libcutils.so.0 lib/libcutils.so.0
-        cp ${STAGING_LIBDIR}/liblog.so.0 lib/liblog.so.0
-        cp ${STAGING_LIBDIR}/libsparse.so.0 lib/libsparse.so.0
-        cp ${STAGING_LIBDIR}/libmincrypt.so.0 lib/libmincrypt.so.0
-        cp ${STAGING_LIBDIR}/libgthread-2.0.so.0 lib/libgthread-2.0.so.0
-        cp ${STAGING_LIBDIR}/libglib-2.0.so.0 lib/libglib-2.0.so.0
-        cp ${STAGING_LIBDIR}/liblogwrap.so.0 lib/liblogwrap.so.0
+        cp ${IMAGE_ROOTFS}/usr/lib/libfs_mgr.so.0 lib/libfs_mgr.so.0
+        cp ${IMAGE_ROOTFS}/usr/lib/libcutils.so.0 lib/libcutils.so.0
+        cp ${IMAGE_ROOTFS}/usr/lib/liblog.so.0 lib/liblog.so.0
+        cp ${IMAGE_ROOTFS}/usr/lib/libsparse.so.0 lib/libsparse.so.0
+        cp ${IMAGE_ROOTFS}/usr/lib/libmincrypt.so.0 lib/libmincrypt.so.0
+        cp ${IMAGE_ROOTFS}/usr/lib/libgthread-2.0.so.0 lib/libgthread-2.0.so.0
+        cp ${IMAGE_ROOTFS}/usr/lib/libglib-2.0.so.0 lib/libglib-2.0.so.0
+        cp ${IMAGE_ROOTFS}/usr/lib/liblogwrap.so.0 lib/liblogwrap.so.0
         cp ${IMAGE_ROOTFS}/lib/libpcre.so.1 lib/libpcre.so.1
         cp ${IMAGE_ROOTFS}/lib/libz.so.1 lib/libz.so.1
         cp ${IMAGE_ROOTFS}/lib/libc.so.6 lib/libc.so.6
         cp ${IMAGE_ROOTFS}/lib/libm.so.6 lib/libm.so.6
         cp ${IMAGE_ROOTFS}/lib/librt.so.1 lib/librt.so.1
         cp ${IMAGE_ROOTFS}/lib/libpthread.so.0 lib/libpthread.so.0
-        cp ${IMAGE_ROOTFS}/lib/ld-linux.so.3 lib/ld-linux.so.3
+        cp ${IMAGE_ROOTFS}/lib/ld-linux-armhf.so.3 lib/ld-linux-armhf.so.3
         cp ${IMAGE_ROOTFS}/lib/libgcc_s.so.1 lib/libgcc_s.so.1
         cp ${IMAGE_ROOTFS}/lib/libdl.so.2 lib/libdl.so.2
         cp ${IMAGE_ROOTFS}/lib/libresolv.so.2 lib/libresolv.so.2
         #cp ${IMAGE_ROOTFS}/lib/libcrypto.so.1.0.0 lib/libcrypto.so.1.0.0
-        cp ${STAGING_LIBDIR}/libstdc++.so.6 lib/libstdc++.so.6
+        cp ${IMAGE_ROOTFS}/usr/lib/libstdc++.so.6 lib/libstdc++.so.6
         cp ${IMAGE_ROOTFS}/etc/init.d/mdev etc/init.d/
         cp ${IMAGE_ROOTFS}/etc/mdev.conf etc/
         cp -r ${IMAGE_ROOTFS}/etc/mdev etc/
