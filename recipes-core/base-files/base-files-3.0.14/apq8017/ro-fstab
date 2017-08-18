@@ -12,7 +12,7 @@ PARTLABEL=modem      /firmware       auto      defaults              0  2
 PARTLABEL=persist    /persist        auto      defaults              0  2
 PARTLABEL=cache      /cache          auto      defaults              0  2
 PARTLABEL=dsp        /dsp            auto      defaults              0  2
-
+PARTLABEL=systemrw   /systemrw       auto      defaults              0  2
 # uncomment this if your device has a SD/MMC/Transflash slot
 /dev/mmcblk0p1       /media/card          auto       defaults,sync,noauto  0  0
 
