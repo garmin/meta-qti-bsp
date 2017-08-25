@@ -8,8 +8,6 @@ ${LICENSE};md5=3775480a712fc46a69647678acb234cb"
 
 DEPENDS += "glib-2.0"
 
-LDFLAGS_append = " -llog "
-
 FILESPATH =+ "${WORKSPACE}:"
 SRC_URI = "file://qcom-opensource/bt/gatt/"
 
