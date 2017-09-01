@@ -13,10 +13,10 @@ LLVM_PREBUILTS_VERSION = "clang-2690385"
 BUILD_OS = "linux"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-FILESPATH =+ "${WORKSPACE}:"
+FILESPATH =+ "${WORKSPACE}/bootable/bootloader/:"
 
-SRC_URI = "file://bootable/bootloader/edk2"
-S         =  "${WORKDIR}/bootable/edk2"
+SRC_URI = "file://edk2"
+S         =  "${WORKDIR}/edk2"
 
 INSANE_SKIP_${PN} = "arch"
 
@@ -24,16 +24,16 @@ EXTRA_OEMAKE = "'ANDROID_BUILD_TOP=${WORKSPACE}'\
                 'TARGET_GCC_VERSION=4.9'\
                 'LLVM_PREBUILTS_PATH=${LLVM_PREBUILTS_BASE}/${BUILD_OS}-x86/${LLVM_PREBUILTS_VERSION}/bin'\
                 'CLANG_BIN=${WORKSPACE}/${LLVM_PREBUILTS_PATH}/'\
+                'TARGET_ARCHITECTURE=MACHINE_ARCH'\
                 'BUILDDIR=${S}'\
                 'BOOTLOADER_OUT=${S}/out'\
                 'EDK_TOOLS_PATH=${S}/BaseTools'"
 
 do_compile () {
-    unset CC
-    unset ARCH
-    unset CXX
-    unset LD
-    unset LINKER
+    export CC=${BUILD_CC}
+    export CXX=${BUILD_CXX}
+    export LD=${BUILD_LD}
+    export AR=${BUILD_AR}
     oe_runmake -f makefile all
 }
 do_install() {

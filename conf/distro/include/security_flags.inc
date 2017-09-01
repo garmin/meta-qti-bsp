@@ -13,3 +13,6 @@ SECURITY_CFLAGS_pn-loc-stub = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-gps-utils = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-loc-net-iface = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-liblog  = "${SECURITY_PIC_CFLAGS}"
+
+# edk2 packages to use -pie in security flags instead of -fP
+SECURITY_CFLAGS_pn-edk2 = "-pie -fpie -Wa,--noexecstack"
