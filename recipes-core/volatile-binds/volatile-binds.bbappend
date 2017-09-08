@@ -5,6 +5,9 @@ SRC_URI += "\
     file://bind-files.sh \
     file://unbind-files.sh \
     file://start_robind \
+    file://mount-copybind \
+    file://umount-copybind \
+    file://volatile-binds.service.in \
 "
 do_install() {
     install -d ${D}${base_sbindir}
@@ -13,6 +16,7 @@ if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
     install -d ${D}${systemd_unitdir}/system
     for service in ${SYSTEMD_SERVICE_volatile-binds}; do
         install -m 0644 $service ${D}${systemd_unitdir}/system/
+        install -m 0755 umount-copybind ${D}${base_sbindir}/
     done
 else
   install -m 0755 bind-files.sh ${D}${base_sbindir}/
