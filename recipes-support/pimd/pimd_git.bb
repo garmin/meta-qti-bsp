@@ -12,6 +12,7 @@ SRCREV = "c4b1c9f4b5eaa70931d0f62f456ae10ac4c4a829"
 SRC_URI = "git://codeaurora.org/quic/le/pimd.git;protocol=git;branch=github/master \
            file://0001-pimb-multicast-support-on-network.patch \
            file://no-deprecated-declarations.patch \
+           file://0001-pimd-Resolve-wrong-missing-if-clause-gaurds-error-fo.patch \
 "
 
 SRC_URI_append_9615-cdp += " \
