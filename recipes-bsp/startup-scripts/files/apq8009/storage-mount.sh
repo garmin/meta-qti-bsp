@@ -97,10 +97,13 @@ then
     mount -t ext4 /dev/mmcblk0p22 /persist -o relatime,data=ordered,noauto_da_alloc,discard
     mount -t ext4 /dev/mmcblk0p23 /cache -o relatime,data=ordered,noauto_da_alloc,discard
 else
-    mkdir -p /data/usb/
     eval FindAndMountVolumeUBI usrfs /data
     eval FindAndMountUBI persist /persist
     #eval FindAndMountUBI modem /firmware
+fi
+
+if [ ! -d /data/usb ]; then
+   mkdir -p /data/usb
 fi
 
 exit 0
