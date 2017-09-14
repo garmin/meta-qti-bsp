@@ -93,7 +93,8 @@ then
     #eval FindAndMountEXT4 cache /cache
     #eval FindAndMountEXT4 persist /persist
     #eval FindAndMountEXT4 userdata /data
-    mount -t ext4 /dev/mmcblk0p30 /data  -o relatime,data=ordered,noauto_da_alloc,discard
+    mount -t ext4 /dev/mmcblk0p30 /systemrw  -o relatime,data=ordered,noauto_da_alloc,discard
+    mount -t ext4 /dev/mmcblk0p31 /data  -o relatime,data=ordered,noauto_da_alloc,discard
     mount -t ext4 /dev/mmcblk0p22 /persist -o relatime,data=ordered,noauto_da_alloc,discard
     mount -t ext4 /dev/mmcblk0p23 /cache -o relatime,data=ordered,noauto_da_alloc,discard
 else
