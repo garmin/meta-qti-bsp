@@ -30,7 +30,7 @@ do_ramdisk_create() {
         cp -r ${IMAGE_ROOTFS}/sbin/usb/ sbin/
         cp ${IMAGE_ROOTFS}/usr/lib/libadbd.so.0 lib/libadbd.so.0
         cp ${IMAGE_ROOTFS}/usr/lib/libext4_utils.so.0 lib/libext4_utils.so.0
-        cp ${IMAGE_ROOTFS}/lib/libselinux.so.1 lib/libselinux.so.1
+        cp ${IMAGE_ROOTFS}/usr/lib/libselinux.so.0 lib/libselinux.so.0
         cp ${IMAGE_ROOTFS}/usr/lib/libbase.so.0 lib/libbase.so.0
         cp ${IMAGE_ROOTFS}/usr/lib/libfs_mgr.so.0 lib/libfs_mgr.so.0
         cp ${IMAGE_ROOTFS}/usr/lib/libcutils.so.0 lib/libcutils.so.0
@@ -40,7 +40,7 @@ do_ramdisk_create() {
         cp ${IMAGE_ROOTFS}/usr/lib/libgthread-2.0.so.0 lib/libgthread-2.0.so.0
         cp ${IMAGE_ROOTFS}/usr/lib/libglib-2.0.so.0 lib/libglib-2.0.so.0
         cp ${IMAGE_ROOTFS}/usr/lib/liblogwrap.so.0 lib/liblogwrap.so.0
-        cp ${IMAGE_ROOTFS}/lib/libpcre.so.1 lib/libpcre.so.1
+        cp ${IMAGE_ROOTFS}/usr/lib/libpcre.so.1 lib/libpcre.so.1
         cp ${IMAGE_ROOTFS}/lib/libz.so.1 lib/libz.so.1
         cp ${IMAGE_ROOTFS}/lib/libc.so.6 lib/libc.so.6
         cp ${IMAGE_ROOTFS}/lib/libm.so.6 lib/libm.so.6

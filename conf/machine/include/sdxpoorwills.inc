@@ -13,7 +13,6 @@ include conf/machine/include/tune-cortexa8.inc
 
 BBMASK = ".*/*/recipes-kernel/linux-msm-4.4"
 BBMASK = ".*/*/recipes-kernel/linux-quic"
-BBMASK .= "|.*/*/recipes-security/libselinux/"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
