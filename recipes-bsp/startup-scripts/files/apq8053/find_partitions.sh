@@ -42,5 +42,6 @@ FindAndMountEXT4 userdata /data
 FindAndMountEXT4 dsp /dsp
 FindAndMountEXT4 persist /persist
 FindAndMountEXT4 cache  /cache
+FindAndMountEXT4 systemrw  /systemrw
 
 exit 0

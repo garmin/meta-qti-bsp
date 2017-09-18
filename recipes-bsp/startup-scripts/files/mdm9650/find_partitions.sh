@@ -82,9 +82,11 @@ then
         fstype="EXT4"
         eval FindAndMount${fstype} userdata /data
         eval FindAndMount${fstype} cache /cache
+        eval FindAndMount${fstype} systemrw /systemrw
 else
         fstype="UBI"
         eval FindAndMountVolume${fstype} usrfs /data
+        eval FindAndMountVolume${fstype} systemrw /systemrw
 fi
 
 eval FindAndMount${fstype} modem /firmware

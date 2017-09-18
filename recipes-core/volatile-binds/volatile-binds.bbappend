@@ -21,9 +21,10 @@ else
 fi
 }
 VOLATILE_BINDS = "\
-/persist/bootmisc.sh /etc/init.d/bootmisc.sh\n\
-/var/volatile/lib /var/lib\n\
+/systemrw/adb_devid  /etc/adb_devid\n\
+/systemrw/build.prop /etc/build.prop\n\
 "
 INITSCRIPT_PACKAGES =+ "${PN}"
 INITSCRIPT_NAME_${PN} = "robind"
-INITSCRIPT_PARAMS_${PN} = "start 91 2 3 4 5 ."
+INITSCRIPT_PARAMS_${PN} = "start 37 S 2 3 4 5 ."
+INITSCRIPT_PARAMS_${PN}_mdm = "start 30 S ."
