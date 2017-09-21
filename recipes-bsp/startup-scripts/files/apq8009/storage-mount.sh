@@ -88,19 +88,19 @@ mtd_file=/proc/mtd
 
 ubifs_cmdline_flag=`cat /proc/cmdline`
 
-if echo "$ubifs_cmdline_flag" | grep -i "emmc=true" >/dev/null 2>&1
+if echo "$ubifs_cmdline_flag" | grep -i "rootfstype=ubifs" >/dev/null 2>&1
 then
-    #eval FindAndMountEXT4 cache /cache
-    #eval FindAndMountEXT4 persist /persist
-    #eval FindAndMountEXT4 userdata /data
-    mount -t ext4 /dev/mmcblk0p30 /systemrw  -o relatime,data=ordered,noauto_da_alloc,discard
-    mount -t ext4 /dev/mmcblk0p31 /data  -o relatime,data=ordered,noauto_da_alloc,discard
-    mount -t ext4 /dev/mmcblk0p22 /persist -o relatime,data=ordered,noauto_da_alloc,discard
-    mount -t ext4 /dev/mmcblk0p23 /cache -o relatime,data=ordered,noauto_da_alloc,discard
-else
     eval FindAndMountVolumeUBI usrfs /data
     eval FindAndMountUBI persist /persist
     #eval FindAndMountUBI modem /firmware
+else
+    if [ ! -d /systemrw ]; then
+       mkdir -p /systemrw
+    fi
+    mount -t ext4 /dev/mmcblk0p31 /data  -o relatime,data=ordered,noauto_da_alloc,discard
+    mount -t ext4 /dev/mmcblk0p30 /systemrw  -o relatime,data=ordered,noauto_da_alloc,discard
+    mount -t ext4 /dev/mmcblk0p22 /persist -o relatime,data=ordered,noauto_da_alloc,discard
+    mount -t ext4 /dev/mmcblk0p23 /cache -o relatime,data=ordered,noauto_da_alloc,discard
 fi
 
 if [ ! -d /data/usb ]; then
