@@ -1,4 +1,1 @@
-DEPENDS += "virtual/androidcompat"
-RDEPENDS_${PN} += "glibc"
-inherit androidmk_base
-
+# Androidmk files are no more supported move to autotools.
