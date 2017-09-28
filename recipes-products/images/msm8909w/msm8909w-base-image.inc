@@ -19,7 +19,6 @@ IMAGE_INSTALL += "start-scripts-firmware-links"
 IMAGE_INSTALL += "system-core-adbd"
 IMAGE_INSTALL += "system-core-usb"
 IMAGE_INSTALL += "system-conf"
-IMAGE_INSTALL += "tcpdump"
 IMAGE_INSTALL += "wireless-tools"
 
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)

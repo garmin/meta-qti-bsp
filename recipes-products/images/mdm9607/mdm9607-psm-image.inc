@@ -1,8 +1,6 @@
 #packages installed to root file system of PSM build
 require mdm9607-base-image.inc
 
-PACKAGE_EXCLUDE += "ddclient"
-PACKAGE_EXCLUDE += "minidlna"
 PACKAGE_EXCLUDE += "openssl"
 PACKAGE_EXCLUDE += "system-conf"
 
