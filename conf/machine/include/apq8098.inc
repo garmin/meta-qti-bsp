@@ -39,3 +39,6 @@ CACHE_SIZE_EXT4 ?= "65536000"
 require conf/multilib.conf
 MULTILIBS = "multilib:lib32"
 DEFAULTTUNE_virtclass-multilib-lib32 = "armv7a"
+
+# Formats of root filesystem images.
+IMAGE_FSTYPES += "ext4"

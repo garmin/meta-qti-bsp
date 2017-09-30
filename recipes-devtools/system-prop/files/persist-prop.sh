@@ -29,10 +29,5 @@
 # persist-prop      init.d script to start persist properties usage
 #
 
-# This service assumes /data is already mounted and available for use.
-if [ ! -d /data/persist ]; then
-    mkdir -p /data/persist
-fi
-
 # Start using persist properties
 setprop le.persistprop.enable true

@@ -2,8 +2,8 @@
 
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4 ubi"
-#DEPENDS_append_aarch64 += "lib32-lk"
-#DEPENDS_append_arm += "lk"
+DEPENDS_append_aarch64 += " lib32-lk"
+DEPENDS_append_arm += " lk"
 
 IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
@@ -27,7 +27,7 @@ IMAGE_INSTALL += "libstdc++"
 IMAGE_INSTALL += "libxml2"
 IMAGE_INSTALL += "minidlna"
 IMAGE_INSTALL += "openssl"
-#IMAGE_INSTALL += "pimd"
+IMAGE_INSTALL += "pimd"
 IMAGE_INSTALL += "powerapp"
 IMAGE_INSTALL += "powerapp-powerconfig"
 IMAGE_INSTALL += "powerapp-reboot"
@@ -41,6 +41,7 @@ IMAGE_INSTALL += "system-core-usb"
 IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "tcpdump"
 IMAGE_INSTALL += "wireless-tools"
+IMAGE_INSTALL += "volatile-binds"
 
 #IMAGE_PREPROCESS_COMMAND += "echo ${MACHINE} >> ${IMAGE_ROOTFS}/target;"
 
@@ -48,4 +49,5 @@ IMAGE_INSTALL += "wireless-tools"
 
 do_makesystem() {
     make_ext4fs -s -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-${PRODUCT}-sysfs.ext4 ${IMAGE_ROOTFS}
+    make_ext4fs -s -l ${SYSTEMRW_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-${PRODUCT}-systemrw.ext4
 }

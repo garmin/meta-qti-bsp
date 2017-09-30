@@ -2,8 +2,6 @@
 
 DEPENDS += "edk2"
 
-# Formats of root filesystem images.
-IMAGE_FSTYPES += "ext4"
 
 IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${ROOTFS_PKGMANAGE_BOOTSTRAP}"
@@ -42,11 +40,6 @@ IMAGE_INSTALL += "wireless-tools"
 IMAGE_INSTALL += "pixman"
 IMAGE_INSTALL += "libinput"
 
-IMAGE_INSTALL += "gstreamer1.0"
-IMAGE_INSTALL += "gstreamer1.0-plugins-base"
-IMAGE_INSTALL += "gstreamer1.0-plugins-good"
-IMAGE_INSTALL += "gstreamer1.0-plugins-bad"
-IMAGE_INSTALL += "gstreamer1.0-rtsp-server"
 #IMAGE_PREPROCESS_COMMAND += "echo ${MACHINE} >> ${IMAGE_ROOTFS}/target;"
 
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)

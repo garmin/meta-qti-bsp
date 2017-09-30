@@ -24,7 +24,7 @@ do_compile() {
 inherit update-rc.d
 
 INITSCRIPT_NAME   = "persist-prop.sh"
-INITSCRIPT_PARAMS = "start 50 2 3 4 5 ."
+INITSCRIPT_PARAMS = "start 20 2 3 4 5 ."
 
 do_install() {
     install -d ${D}

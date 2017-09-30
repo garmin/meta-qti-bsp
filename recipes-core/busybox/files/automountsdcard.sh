@@ -23,8 +23,9 @@ mount_partition()
 check_if_boot_dev()
 {
                 ret_val=`cat /proc/cmdline | grep "androidboot.bootdevice" |wc -l`
-                if  [ $ret_val -eq 1 ]; then
-                    boot_dev=`cat /proc/cmdline | awk '{ for ( n=1; n<=NF; n++ ) if($n ~ "androidboot.bootdevice") print $n }' | awk '{split($0,a, "=");print a[2]}'`
+                if  [ $ret_val -ne 0 ]; then
+                    boot_dev_list=`cat /proc/cmdline | awk '{ for ( n=1; n<=NF; n++ ) if($n ~ "androidboot.bootdevice") print $n }' | awk '{split($0,a, "=");print a[2]}'`
+                    boot_dev=`echo $boot_dev_list | awk '{print $NF}'`
                     real_sysfs_path=`realpath /sys/class/block/$1`
                     ret_val=`echo $real_sysfs_path | grep /sys/devices/ | grep $boot_dev | wc -l`
                 fi

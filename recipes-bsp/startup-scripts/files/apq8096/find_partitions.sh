@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2016, The Linux Foundation. All rights reserved.
+# Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -29,33 +29,13 @@
 # find_partitions        init.d script to dynamically find partitions
 #
 
-#following function is just for debugging not enabled by default
-timestamp()
-{
-   seconds="$(date +%s)"
-}
-
-#following function is just for debugging not enabled by default
-RESTORECON()
-{
-    timestamp
-    echo "$seconds $2 start" > /dev/console
-    context_check="$(matchpathcon -V $2)"
-    if test "${context_check#*verified}" == "$context_check"
-    then
-       # Only do a restorecon if necessary
-        /sbin/restorecon $1 $2
-    fi
-    timestamp
-    echo "$seconds $2 end" > /dev/console
-}
-
 FindAndMountEXT4 () {
    partition=$1
    dir=$2
    mmc_block_device=/dev/block/bootdevice/by-name/$partition
    mkdir -p $dir
    mount -t ext4 $mmc_block_device $dir -o relatime,data=ordered,noauto_da_alloc,discard
+   /sbin/restorecon -R $2
 }
 
 #For now we only have firmware with VFAT and which need protection ( selinux)
@@ -75,8 +55,4 @@ FindAndMountEXT4 persist /persist
 FindAndMountEXT4 cache  /cache
 FindAndMountEXT4 dsp /dsp
 
-/sbin/restorecon -RF /data/misc/wifi
-/sbin/restorecon -RF /persist
-/sbin/restorecon -RF /dsp
-/sbin/restorecon -RF /dev
 exit 0

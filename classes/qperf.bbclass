@@ -3,11 +3,14 @@
 #
 
 python __anonymous() {
-    # Append PRODUCT info to PR
+    # Append PRODUCT, VARIANT info to PR
     prd = d.getVar('PRODUCT', True)
+    var = d.getVar('VARIANT', True)
     revision = d.getVar('PR', True)
     if prd != "base":
         revision += "_"+prd
+    if var != "":
+        revision += "_"+var
 
     # Update PR value to ensure recipe rebuilds.
     if (d.getVar('PERF_BUILD', True) == '1'):

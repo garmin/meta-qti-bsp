@@ -33,4 +33,4 @@ policy_module(firmware, 1.0)
 #
 
 type firmware_t;
-files_type(firmware_t)
+files_mountpoint(firmware_t)

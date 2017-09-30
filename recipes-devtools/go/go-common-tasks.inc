@@ -29,7 +29,7 @@ do_install() {
     if ! [ -e "${m}" ]; then
       cat > ${m} <<EOT
 #!/bin/sh
-exec ${STAGING_BINDIR_NATIVE}/${TARGET_SYS}.${BBEXTENDVARIANT}-gcc-cross-initial-${TARGET_ARCH}/${TARGET_PREFIX}${t} ${TARGET_CC_ARCH} --sysroot=${STAGING_DIR_TARGET} "\$@"
+exec ${STAGING_BINDIR_NATIVE}/${TARGET_SYS}.${MLPREFIX}gcc-cross-initial-${TARGET_ARCH}/${TARGET_PREFIX}${t} ${TARGET_CC_ARCH} --sysroot=${STAGING_DIR_TARGET} "\$@"
 EOT
     chmod +x ${GOROOT_FINAL}/bin/${TARGET_PREFIX}${t}
     fi

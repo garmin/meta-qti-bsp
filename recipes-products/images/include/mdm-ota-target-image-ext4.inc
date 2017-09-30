@@ -1,9 +1,10 @@
-DEPENDS += "${@["","machine-recovery-image"][(d.getVar('RECOVERY_IMAGE', True) == '1')]}"
+DEPENDS += "${@["","machine-recovery-image releasetools-native"][(d.getVar('RECOVERY_IMAGE', True) == '1')]}"
 
-# Add task to generate recovery image
+# Add tasks to generate recovery image, OTA zip files
 python __anonymous () {
     if d.getVar('RECOVERY_IMAGE', True) == '1' and bb.utils.contains('IMAGE_FSTYPES', 'ext4', True, False, d):
         bb.build.addtask('do_recovery_ext4', 'do_build', 'do_rootfs', d)
+        bb.build.addtask('do_gen_otazip_ext4', 'do_build', 'do_recovery_ext4', d)
 }
 
 OTA_TARGET_IMAGE_ROOTFS_EXT4 = "${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4"
@@ -85,14 +86,7 @@ do_recovery_ext4() {
     #blocksize = BOARD_FLASH_BLOCK_SIZE
     echo blocksize=131072 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
 
-    if [ "${BASEMACHINE}" == "apq8053" ] || [ "${BASEMACHINE}" == "apq8009" ]; then
-       #boot_size: Size of boot partition from partition.xml
-       echo boot_size=0x01900000 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
-
-       #recovery_size : Size of recovery partition from partition.xml
-       echo recovery_size=0x01900000 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
-    elif [ "${BASEMACHINE}" == "apq8017" ]; then
-       #boot_size: Size of boot partition from partition.xml
+    if [ "${BASEMACHINE}" == "apq8053" ] || [ "${BASEMACHINE}" == "apq8009" ] || [ "${BASEMACHINE}" == "apq8017" ]; then
        echo boot_size=0x01E00000 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
 
        #recovery_size : Size of recovery partition from partition.xml
@@ -129,3 +123,18 @@ do_recovery_ext4() {
     #default_system_dev_certificate : Dummy location
     echo default_system_dev_certificate=build/abcd >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
 }
+
+# Task to generate OTA zip files
+python do_gen_otazip_ext4() {
+    import subprocess
+
+    cmd1 = "cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4 && zip -qry ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ext4.zip *"
+    subprocess.call(cmd1, shell=True)
+
+    cmd2 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ext4.zip ${IMAGE_ROOTFS} ext4"
+    subprocess.call(cmd2, shell=True)
+
+    cmd3 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ext4.zip target-files-ext4.zip ${DEPLOY_DIR_IMAGE}"
+    subprocess.call(cmd3, shell=True)
+}
+

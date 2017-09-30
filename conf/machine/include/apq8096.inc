@@ -40,10 +40,13 @@ CACHE_SIZE_EXT4 ?= "65536000"
 # the armv7a tuning (32 bit) instead of 64-bit aarch64.
 require conf/multilib.conf
 MULTILIBS = "multilib:lib32"
-DEFAULTTUNE_virtclass-multilib-lib32 = "armv7a"
+DEFAULTTUNE_virtclass-multilib-lib32 = "armv7a-neon"
 
 #Enable SDK feature
 SDK_IMAGE ?= "1"
 
 #Enable Recovery image generation
 RECOVERY_IMAGE ?= "1"
+
+# Formats of root filesystem images.
+IMAGE_FSTYPES += "ext4"

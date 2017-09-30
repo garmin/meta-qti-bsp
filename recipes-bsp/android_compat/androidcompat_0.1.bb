@@ -20,3 +20,6 @@ PROVIDES += "virtual/androidcompat"
 EXTRA_OECONF = " --with-core-includes=${WORKSPACE}/system/core/include --with-glib"
 CFLAGS += "-I${STAGING_INCDIR}/cutils"
 LDFLAGS += "-lcutils"
+
+#enable hardfloat
+EXTRA_OEMAKE_append = " ${@base_conditional('ARM_FLOAT_ABI', 'hard', 'ENABLE_HARD_FPU=1', '', d)}"

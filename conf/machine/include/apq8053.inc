@@ -31,11 +31,18 @@ EXTRA_IMAGECMD ?= "-N 2048"
 
 # Sizes for EXT4 (in bytes)
 SYSTEM_SIZE_EXT4 ?= "768000000"
+SYSTEMRW_SIZE_EXT4 ?= "8388608"
 USERDATA_SIZE_EXT4 ?= "3000000000"
 CACHE_SIZE_EXT4 ?= "65536000"
+
+# Enable LE Verified Boot
+DISTRO_FEATURES_append = " vble"
 
 #Enable SDK feature
 SDK_IMAGE ?= "1"
 
 #Enable Recovery image generation
 RECOVERY_IMAGE ?= "1"
+
+# Formats of root filesystem images.
+IMAGE_FSTYPES += "ext4"

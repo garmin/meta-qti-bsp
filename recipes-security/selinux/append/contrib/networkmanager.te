@@ -29,12 +29,13 @@
 # in NetworkManger context
 rw_shared_memory_dev(NetworkManager_t)
 #rw_logd_sock(NetworkManager_t)
-r_wifi_data_file(NetworkManager_t)
+manage_wifi_data_file(NetworkManager_t)
 #This need to be removed later
 rw_diag_dev(NetworkManager_t)
 dev_rw_null(NetworkManager_t)
 allow NetworkManager_t var_t:dir { write add_name };
 allow NetworkManager_t var_t:file { read write create open };
+search_data_dir(NetworkManager_t)
 
 manage_sock_files_pattern(NetworkManager_t, device_t, device_t)
 files_search_default(NetworkManager_t)
@@ -45,3 +46,5 @@ init_stream_connect_script(NetworkManager_t)
 # This needs to have its own context
 allow wpa_cli_t var_run_t:dir { write search read remove_name open getattr add_name };
 allow wpa_cli_t var_run_t:sock_file { write create unlink };
+manage_wifi_data_file(wpa_cli_t);
+search_data_dir(wpa_cli_t)

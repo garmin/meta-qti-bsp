@@ -38,4 +38,5 @@
 #/dev/log              -s     gen_context(system_u:object_r:logd_socket_t,s0)
 
 #TODO need to cleanup this
-/data/misc/wifi/*.conf  -- gen_context(system_u:object_r:wifi_data_file_t,s0)
+/data(/.*)?               gen_context(system_u:object_r:data_t,s0)
+/data/misc/wifi(/.*)?     gen_context(system_u:object_r:wifi_data_file_t,s0)

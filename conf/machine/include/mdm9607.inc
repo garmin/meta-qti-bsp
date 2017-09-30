@@ -36,3 +36,7 @@ MKUBIFS_ARGS ?= "-m 4096 -e 253952 -c 2146 -F"
 #Volume sizes
 SYSTEM_VOLUME_SIZE ?= "74MiB"
 CACHE_VOLUME_SIZE ?= "37MiB"
+SYSTEMRW_VOLUME_SIZE ?= "6MiB"
+
+# Formats of root filesystem images.
+IMAGE_FSTYPES += "ubi"

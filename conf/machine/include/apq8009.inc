@@ -32,8 +32,12 @@ EXTRA_IMAGECMD ?= "-N 2048"
 
 # Sizes for EXT4 (in bytes)
 SYSTEM_SIZE_EXT4 ?= "1258292000"
+SYSTEMRW_SIZE_EXT4 ?= "8388608"
 USERDATA_SIZE_EXT4 ?= "2000000000"
 CACHE_SIZE_EXT4 ?= "65536000"
 
 #Enable Recovery image generation
 RECOVERY_IMAGE ?= "1"
+
+# Formats of root filesystem images.
+IMAGE_FSTYPES += "ext4"

@@ -2,8 +2,6 @@
 
 DEPENDS += "lk"
 
-# Formats of root filesystem images.
-IMAGE_FSTYPES += "ubi"
 
 IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${ROOTFS_PKGMANAGE_BOOTSTRAP}"
@@ -45,6 +43,7 @@ IMAGE_INSTALL += "system-core-usb"
 IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "tcpdump"
 IMAGE_INSTALL += "wireless-tools"
+IMAGE_INSTALL += "volatile-binds"
 
 # Below packages are open source packages that depend on proprietary packages
 

@@ -4,8 +4,11 @@
 DEPENDS_append_arm += " lk"
 DEPENDS_append_aarch64 += " lib32-lk"
 
+<<<<<<< HEAD
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4"
+=======
+>>>>>>> yocto.lnx.1.0-00150
 
 IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${ROOTFS_PKGMANAGE_BOOTSTRAP}"
@@ -21,6 +24,10 @@ IMAGE_INSTALL += "start-scripts-misc-daemon"
 
 IMAGE_INSTALL += "base-files"
 IMAGE_INSTALL += "base-passwd"
+<<<<<<< HEAD
+=======
+IMAGE_INSTALL += "dhcpcd"
+>>>>>>> yocto.lnx.1.0-00150
 IMAGE_INSTALL += "native-frameworks"
 
 IMAGE_INSTALL += "glib-2.0"
@@ -46,6 +53,12 @@ IMAGE_INSTALL += "${@base_contains('MULTILIB_VARIANTS', 'lib32', 'lib32-cairo', 
 
 IMAGE_INSTALL += "libpagemap"
 
+<<<<<<< HEAD
+=======
+IMAGE_INSTALL += "libuv"
+IMAGE_INSTALL += "libwebsockets"
+
+>>>>>>> yocto.lnx.1.0-00150
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
 SELINUX_FILE_CONTEXTS = "${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_contexts"
 

@@ -175,3 +175,40 @@ interface(`r_wifi_data_file',`
 
     read_files_pattern($1, unlabeled_t,  wifi_data_file_t)
 ')
+
+########################################
+## <summary>
+##      Read and write wpa_sup file
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+# TODO : need to clean up
+interface(`manage_wifi_data_file',`
+    gen_require(`
+        type wifi_data_file_t;
+    ')
+
+    manage_dirs_pattern($1, wifi_data_file_t,  wifi_data_file_t)
+    manage_files_pattern($1, wifi_data_file_t,  wifi_data_file_t)
+    manage_sock_files_pattern($1, wifi_data_file_t,  wifi_data_file_t)
+')
+
+########################################
+## <summary>
+##       search /data dir
+## </summary>
+## <param name="domain">
+##      <summary>
+##      Domain allowed access.
+##      </summary>
+## </param>
+interface(`search_data_dir',`
+    gen_require(`
+        type data_t;
+    ')
+
+    allow $1 data_t:dir search_dir_perms;
+')

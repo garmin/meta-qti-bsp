@@ -1,9 +1,10 @@
-DEPENDS += "${@["","machine-recovery-image"][(d.getVar('RECOVERY_IMAGE', True) == '1')]}"
+DEPENDS += "${@["","machine-recovery-image releasetools-native"][(d.getVar('RECOVERY_IMAGE', True) == '1')]}"
 
-# Add task to generate recovery image
+# Add tasks to generate recovery image, OTA zip files
 python __anonymous () {
     if d.getVar('RECOVERY_IMAGE', True) == '1' and bb.utils.contains('IMAGE_FSTYPES', 'ubi', True, False, d):
         bb.build.addtask('do_recovery_ubi', 'do_build', 'do_rootfs', d)
+        bb.build.addtask('do_gen_otazip_ubi', 'do_build', 'do_recovery_ubi', d)
 }
 
 OTA_TARGET_IMAGE_ROOTFS_UBI = "${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ubi"
@@ -108,4 +109,18 @@ do_recovery_ubi() {
 
     #default_system_dev_certificate : Dummy location
     echo default_system_dev_certificate=build/abcd >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+}
+
+# Task to generate OTA zip files
+python do_gen_otazip_ubi() {
+    import subprocess
+
+    cmd1 = "cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ubi && zip -qry ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ubi.zip *"
+    subprocess.call(cmd1, shell=True)
+
+    cmd2 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ubi.zip ${IMAGE_ROOTFS} ubi"
+    subprocess.call(cmd2, shell=True)
+
+    cmd3 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ubi.zip target-files-ubi.zip ${DEPLOY_DIR_IMAGE}"
+    subprocess.call(cmd3, shell=True)
 }

@@ -36,7 +36,8 @@ allow init_t initrc_t:binder { transfer call };
 allow init_t self:binder { transfer call set_context_mgr };
 allow init_t self:capability2 { audit_read wake_alarm };
 allow initrc_t power_unit_t:service { start status };
-allow init_t self:system { status reboot halt };
+allow init_t self:system { status reboot halt start reload stop };
+allow initrc_t self:capability2 wake_alarm;
 
 systemd_start_power_units(init_t)
 systemd_status_power_units(init_t)
@@ -45,3 +46,13 @@ init_get_generic_units_status(init_t)
 binder_call_transfer(initrc_t)
 reboot_recovery_start(init_t)
 files_get_etc_unit_status(init_t)
+
+allow init_t systemd_unit_t:service { start status stop reload };
+allow init_t init_var_run_t:service { start status stop reload };
+
+init_reload_generic_units(init_t)
+init_start_generic_units(init_t)
+init_stop_generic_units(init_t)
+init_get_generic_units_status(init_t)
+
+allow init_t bin_t:service { status start stop };

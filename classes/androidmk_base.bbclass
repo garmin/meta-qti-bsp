@@ -25,23 +25,13 @@ androidmk_setenv() {
 
     # Assume lib64 if multilib variant is unknown
     #
-    if [ "${MLPREFIX}" == "lib64-" -o "${MLPREFIX}" == "" ]; then
+    if [ "${MLPREFIX}" == "lib64-" ]; then
+        bbnote "building for lib64-"
 
-	if [ "${BASEMACHINE}" == "apq8009" ]; then
-		bbnote "building for lib32-"
-
-		export TARGET_CPU_ABI=armeabi-v7a
-		export TARGET_ARCH_VARIANT=armv7-a-neon
-		export TARGET_ARCH=arm
-		export TARGET_CPU_VARIANT=cortex-a15
-	else
-		bbnote "building for lib64-"
-
-		export TARGET_CPU_ABI=arm64-v8a
-		export TARGET_ARCH_VARIANT=armv8-a
-		export TARGET_ARCH=arm64
-		export TARGET_CPU_VARIANT=generic
-	fi
+        export TARGET_CPU_ABI=arm64-v8a
+        export TARGET_ARCH_VARIANT=armv8-a
+        export TARGET_ARCH=arm64
+        export TARGET_CPU_VARIANT=generic
     elif [ "${MLPREFIX}" == "lib32-" ] || [ "${MLPREFIX}" == "lib32a7-" ]; then
         bbnote "building for lib32-"
 
@@ -49,6 +39,23 @@ androidmk_setenv() {
         export TARGET_ARCH_VARIANT=armv7-a-neon
         export TARGET_ARCH=arm
         export TARGET_CPU_VARIANT=cortex-a15
+    elif [ "${MLPREFIX}" == "" ]; then
+        if [ "${TUNE_ARCH}" == "arm" ]; then
+            bbnote "building for default TUNE_ARCH (arm)"
+
+            export TARGET_CPU_ABI=armeabi-v7a
+            export TARGET_ARCH_VARIANT=armv7-a-neon
+            export TARGET_ARCH=arm
+            export TARGET_CPU_VARIANT=cortex-a15
+        elif [ "${TUNE_ARCH}" == "aarch64" ]; then
+            bbnote "building for default TUNE_ARCH (aarch64)"
+
+            export TARGET_CPU_ABI=arm64-v8a
+            export TARGET_ARCH_VARIANT=armv8-a
+            export TARGET_ARCH=arm64
+            export TARGET_CPU_VARIANT=generic
+        fi
+
     else
         die "not supported"
     fi
