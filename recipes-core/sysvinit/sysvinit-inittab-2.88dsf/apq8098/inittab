@@ -20,6 +20,7 @@ lprp:2345:respawn:/sbin/leprop-service
 rmts:2345:respawn:/sbin/rmt_storage
 tftp:2345:respawn:/sbin/tftp_server
 scrb:2345:respawn:/sbin/fs-scrub-daemon
+cdmn:2345:respawn:/usr/sbin/cnss_daemon -n
 
 node:2345:wait:mknod -m 660 /dev/media0 c 250 0
 
