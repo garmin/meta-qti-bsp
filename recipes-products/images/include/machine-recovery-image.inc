@@ -46,6 +46,14 @@ UBI_VOLNAME  = "${@bb.utils.contains('IMAGE_FSTYPES', 'ubi', 'rootfs', '', d)}"
 
 SELINUX_FILE_CONTEXTS = "${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_contexts"
 
+do_fsconfig() {
+ if [ "${BASEMACHINE}" = "apq8053" ]; then
+   chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/
+ fi
+}
+
+addtask fsconfig before do_makesystem after do_rootfs
+
 # Below is to generate sparse ext4 recovery image (OE by default supports raw ext4 images)
 do_makesystem() {
     if [ "${MACHINE}" != "mdm9607" ]; then
