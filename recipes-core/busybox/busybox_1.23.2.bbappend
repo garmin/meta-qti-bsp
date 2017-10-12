@@ -45,6 +45,7 @@ do_install_append() {
         install -m 0755 ${WORKDIR}/usb.sh ${D}${sysconfdir}/mdev/
         install -m 0755 ${WORKDIR}/iio.sh ${D}${sysconfdir}/mdev/
     fi
+    chmod -R go-x ${D}${sysconfdir}/mdev/
     mkdir -p ${D}/usr/bin
     ln -s /bin/env ${D}/usr/bin/env
 }
