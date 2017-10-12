@@ -28,6 +28,9 @@ CPPFLAGS += "-I${STAGING_INCDIR}/libunwind"
 CPPFLAGS_append_apq8053 += " -DTARGET_IS_64_BIT"
 CPPFLAGS_append_apq8017 += " -DTARGET_IS_64_BIT"
 CPPFLAGS_append_apq8096 += " -DTARGET_IS_64_BIT"
+CPPFLAGS_append_apq8098 += " -DTARGET_IS_64_BIT"
+CPPFLAGS_remove_apq8053-32 = " -DTARGET_IS_64_BIT"
+
 COMPOSITION         = "9025"
 COMPOSITION_apq8009 = "9091"
 COMPOSITION_apq8053 = "901D"
@@ -122,6 +125,13 @@ do_install_append_apq8017(){
   fi
 }
 
+do_install_append_apq8098(){
+  if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'false', 'true', d)}; then
+   install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/init.d/init_debuggerd
+  else
+   install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/initscripts/init_debuggerd
+  fi
+}
 INITSCRIPT_PACKAGES =+ "${PN}-usb"
 INITSCRIPT_NAME_${PN}-usb = "usb"
 INITSCRIPT_PARAMS_${PN}-usb = "start 30 2 3 4 5 ."

@@ -42,7 +42,6 @@ IMAGE_INSTALL += "system-core-debuggerd"
 IMAGE_INSTALL += "system-core-post-boot"
 IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "system-prop"
-IMAGE_INSTALL += "tcpdump"
 IMAGE_INSTALL += "wireless-tools"
 
 #32-bit only packages

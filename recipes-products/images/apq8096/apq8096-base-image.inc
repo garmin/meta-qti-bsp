@@ -37,7 +37,6 @@ IMAGE_INSTALL += "liblog"
 IMAGE_INSTALL += "libcutils"
 IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "system-prop"
-IMAGE_INSTALL += "tcpdump"
 IMAGE_INSTALL += "wireless-tools"
 
 

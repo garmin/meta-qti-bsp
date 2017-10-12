@@ -23,7 +23,11 @@ FILES_${PN}-dev    = "${libdir}/libcamera_client.so ${libdir}/libcamera_client.l
 CPPFLAGS += "-I${WORKSPACE}/frameworks/system/media/private/camera/include"
 
 do_configure_append() {
+if [ "${MACHINE}" == "apq8098" ]; then
+    install -m 0644 ${WORKSPACE}/kernel/msm-4.4/include/uapi/linux/usb/f_mtp.h ${STAGING_INCDIR}/linux/usb/
+else
     install -m 0644 ${WORKSPACE}/kernel/msm-3.18/include/uapi/linux/usb/f_mtp.h ${STAGING_INCDIR}/linux/usb/
+fi
 }
 
 

@@ -24,6 +24,10 @@ VOLATILE_BINDS = "\
 /systemrw/adb_devid  /etc/adb_devid\n\
 /systemrw/build.prop /etc/build.prop\n\
 "
+VOLATILE_BINDS_append_apq8017 = "\
+/systemrw/AlexaClientSDKConfig.json  /etc/AlexaClientSDKConfig.json \n\
+"
+
 INITSCRIPT_PACKAGES =+ "${PN}"
 INITSCRIPT_NAME_${PN} = "robind"
 INITSCRIPT_PARAMS_${PN} = "start 37 S 2 3 4 5 ."

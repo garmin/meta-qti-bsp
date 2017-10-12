@@ -86,12 +86,12 @@ do_recovery_ext4() {
     #blocksize = BOARD_FLASH_BLOCK_SIZE
     echo blocksize=131072 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
 
-    if [ "${BASEMACHINE}" == "apq8053" ] || [ "${BASEMACHINE}" == "apq8009" ] || [ "${BASEMACHINE}" == "apq8017" ]; then
+    if [ "${BASEMACHINE}" == "apq8053" ] || [ "${BASEMACHINE}" == "apq8009" ]; then
        echo boot_size=0x01E00000 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
 
        #recovery_size : Size of recovery partition from partition.xml
        echo recovery_size=0x01E00000 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
-    elif [ "${BASEMACHINE}" == "apq8096" ]; then
+    elif [ "${BASEMACHINE}" == "apq8096" ] || [ "${BASEMACHINE}" == "apq8017" ]; then
        #boot_size: Size of boot partition from partition.xml
        echo boot_size=0x04000000  >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
 
