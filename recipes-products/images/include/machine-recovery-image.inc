@@ -47,7 +47,7 @@ UBI_VOLNAME  = "${@bb.utils.contains('IMAGE_FSTYPES', 'ubi', 'rootfs', '', d)}"
 SELINUX_FILE_CONTEXTS = "${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_contexts"
 
 do_fsconfig() {
- if [ "${BASEMACHINE}" = "apq8053" ]; then
+ if ${@bb.utils.contains('DISTRO_FEATURES','systemd','false','true',d)}; then
    chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/
  fi
 }
