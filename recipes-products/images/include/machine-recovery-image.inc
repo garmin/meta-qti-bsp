@@ -48,7 +48,12 @@ SELINUX_FILE_CONTEXTS = "${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_con
 
 do_fsconfig() {
  if ${@bb.utils.contains('DISTRO_FEATURES','systemd','false','true',d)}; then
-   chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/
+  if [ "${DISTRO_NAME}" == "msm-user" ]; then
+   if [ -e ${IMAGE_ROOTFS}/etc/init.d/sysfs.sh]; then
+    sed -i '/mount -t debugfs/ d' ${IMAGE_ROOTFS}/etc/init.d/sysfs.sh
+   fi
+  fi
+  chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/
  fi
 }
 

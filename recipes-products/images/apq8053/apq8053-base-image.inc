@@ -55,7 +55,11 @@ SELINUX_FILE_CONTEXTS = "${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_con
 IMAGE_EXT4_SELINUX_OPTIONS = "${@base_contains('DISTRO_FEATURES','selinux',' -a / -S ${SELINUX_FILE_CONTEXTS} ','',d)}"
 
 do_fsconfig() {
-    chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/
+if [ "${DISTRO_NAME}" == "msm-user" ]; then
+sed -i '/mount -t debugfs/ d' ${IMAGE_ROOTFS}/etc/init.d/sysfs.sh
+fi
+ chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/
+
 }
 
 addtask fsconfig before do_makesystem after do_rootfs
