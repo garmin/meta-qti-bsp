@@ -50,11 +50,9 @@ IMAGE_INSTALL += "lib32-gtest"
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
 SELINUX_FILE_CONTEXTS = "${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_contexts"
 
-do_fsconfig() {
+do_fsconfig_append() {
     chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/
 }
-
-addtask fsconfig before do_makesystem after do_rootfs
 
 do_makesystem() {
 
