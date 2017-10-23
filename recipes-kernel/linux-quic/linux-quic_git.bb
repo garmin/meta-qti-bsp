@@ -49,8 +49,8 @@ GITVER    =  "${@base_get_metadata_git_revision('${SRC_DIR}',d)}"
 PV = "git"
 PR = "${@base_conditional('PRODUCT', 'psm', 'r5-psm', 'r5', d)}"
 
-DEPENDS += "dtbtool-native mkbootimg-native"
-DEPENDS_apq8096 += "mkbootimg-native dtc-native"
+DEPENDS += "mkbootimg-native"
+DEPENDS_apq8096 += "dtc-native"
 PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
 RDEPENDS_kernel-base = ""
 

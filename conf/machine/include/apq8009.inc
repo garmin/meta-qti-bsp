@@ -12,6 +12,7 @@ include conf/machine/include/soc-family.inc
 include conf/machine/include/tune-cortexa7.inc
 
 BBMASK = ".*/*/recipes-kernel/linux-msm-4.4"
+BBMASK .= "|.*/*/recipes-kernel/linux-msm-4.9"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
