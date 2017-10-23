@@ -31,3 +31,4 @@ Before=local-fs.target
 [Mount]
 What=/dev/disk/by-partlabel/systemrw
 Where=/systemrw
+Options=relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev

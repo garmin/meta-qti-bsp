@@ -31,3 +31,4 @@ Before=local-fs.target
 [Mount]
 What=/dev/disk/by-partlabel/dsp
 Where=/dsp
+Options=relatime,data=ordered,noauto_da_alloc,discard,ro,noexec,nodev,nosuid

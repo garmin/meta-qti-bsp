@@ -32,3 +32,4 @@ Before=local-fs.target
 [Mount]
 What=/dev/disk/by-partlabel/persist
 Where=/persist
+Options=relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
