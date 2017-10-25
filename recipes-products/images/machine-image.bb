@@ -9,3 +9,9 @@ require include/mdm-bootimg.inc
 inherit core-image
 
 MULTILIBRE_ALLOW_REP =. "/usr/include/python2.7/*|${base_bindir}|${base_sbindir}|${bindir}|${sbindir}|${libexecdir}|${sysconfdir}|${nonarch_base_libdir}/udev|/lib/modules/[^/]*/modules.*|"
+
+do_fsconfig() {
+chmod go-r ${IMAGE_ROOTFS}/etc/passwd
+}
+
+ROOTFS_POSTPROCESS_COMMAND += "do_fsconfig; "
