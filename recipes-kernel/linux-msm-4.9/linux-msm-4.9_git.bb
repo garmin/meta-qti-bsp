@@ -48,7 +48,6 @@ GITVER    =  "${@base_get_metadata_git_revision('${SRC_DIR}',d)}"
 PV = "git"
 PR = "r5-${GITVER}"
 
-DEPENDS += "dtbtool-native mkbootimg-native"
 DEPENDS += "mkbootimg-native dtc-native"
 PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
 RDEPENDS_kernel-base = ""
