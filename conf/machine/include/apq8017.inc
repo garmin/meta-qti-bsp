@@ -12,7 +12,6 @@ include conf/machine/include/soc-family.inc
 require conf/machine/include/arm/arch-armv8.inc
 
 BBMASK = ".*/*/recipes-kernel/linux-msm-4.4"
-BBMASK .= "|.*/*/recipes-security/libselinux/"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"

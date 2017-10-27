@@ -12,7 +12,6 @@ include conf/machine/include/soc-family.inc
 require conf/machine/include/tune-cortexa8.inc
 
 BBMASK = ".*/*/recipes-kernel/linux-msm-4.4"
-BBMASK .= "|.*/*/recipes-security/libselinux/"
 BBMASK .= "|.*/*/recipes-devtools/mtd/"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
