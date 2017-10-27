@@ -3,7 +3,7 @@ DEPENDS_append_arm += " lk"
 
 DEPENDS += "virtual/kernel"
 
-DEPENDS += "pkgconfig-native gtk-doc-native gettext-native mkbootimg-native dtbtool-native"
+DEPENDS += "pkgconfig-native gtk-doc-native gettext-native mkbootimg-native"
 DEPENDS += "bzip2 fsconfig-native applypatch-native bsdiff-native ext4-utils-native"
 
 # The OE-Core minimal boot image files.
