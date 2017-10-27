@@ -19,6 +19,7 @@ FILES_${PN}-dev += "/usr/share/*"
 FILES_${PN}-dev += "/lib/lib*.so"
 
 EXTRA_CFLAGS +="-fPIC"
+EXTRA_CFLAGS_append_sdxpoorwills =" -mfloat-abi=hard"
 
 #enable hardfloat
 EXTRA_CFLAGS +="${@base_conditional('ARM_FLOAT_ABI', 'hard', '-march=armv7-a -mfloat-abi=hard -mfpu=neon -mtune=cortex-a8', '', d)}"
