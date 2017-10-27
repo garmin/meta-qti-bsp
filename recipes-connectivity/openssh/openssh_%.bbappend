@@ -1,5 +1,9 @@
 EXTRA_OECONF_append=" ${@bb.utils.contains('DISTRO_FEATURES', 'selinux', '--with-selinux', '', d)}"
 BASEPRODUCT = "${@d.getVar('PRODUCT', False)}"
+
+FILESEXTRAPATHS_prepend := "${THISDIR}/openssh:"
+SRC_URI += "file://sshd_config"
+
 do_install_append () {
     if [ "${BASEPRODUCT}" == "drone" ]; then
         sed -i -e 's:#PermitRootLogin yes:PermitRootLogin yes:' ${WORKDIR}/sshd_config ${D}${sysconfdir}/ssh/sshd_config
