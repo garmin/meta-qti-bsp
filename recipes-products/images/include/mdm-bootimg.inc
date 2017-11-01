@@ -13,6 +13,9 @@ DEPENDS += " \
 
 IMAGE_LINGUAS = ""
 
+#Exclude packages
+PACKAGE_EXCLUDE += "readline"
+
 # Default image output types
 IMAGE_FSTYPES ?= "tar.gz ${INITRAMFS_FSTYPES}"
 
