@@ -132,6 +132,10 @@ python do_gen_otazip_ext4() {
     subprocess.call(cmd1, shell=True)
 
     cmd2 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ext4.zip ${IMAGE_ROOTFS} ext4"
+
+    if (d.getVar('OTA_EXTRA_OPTS', True) == '1'):
+        cmd2 += " -p system/ -c ${WORKDIR}/rootfs-fsconfig.conf"
+
     subprocess.call(cmd2, shell=True)
 
     cmd3 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ext4.zip target-files-ext4.zip ${DEPLOY_DIR_IMAGE}"
