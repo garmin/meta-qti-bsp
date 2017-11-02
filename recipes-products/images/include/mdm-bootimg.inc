@@ -34,8 +34,7 @@ gen_buildprop() {
    echo ${MACHINE} >> ${IMAGE_ROOTFS}/target
 }
 
-
-do_rootfs_append() {
+# Generate ramdisk for sdxpoorwills
+do_rootfs_append_sdxpoorwills() {
     bb.build.exec_func('do_ramdisk_create',d)
 }
-
