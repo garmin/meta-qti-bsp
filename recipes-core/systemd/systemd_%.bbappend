@@ -1,4 +1,4 @@
-FILESEXTRAPATHS_prepend := "${THISDIR}/systemd:"
+FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 
 SRC_URI += "file://1001-systemd-Disable-unused-mount-points.patch"
 SRC_URI += "file://mountpartitions.rules"
