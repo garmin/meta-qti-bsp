@@ -33,6 +33,7 @@ do_install_append(){
       install -m 0644 ${WORKDIR}/fstab ${D}${sysconfdir}/fstab
     fi
     if ${@base_contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+     if ${@base_contains('DISTRO_FEATURES','nand-boot','false','true',d)};then
       install -d 0644 ${D}${sysconfdir}/systemd/system
       install -m 0644 ${WORKDIR}/systemd/cache.mount ${D}${sysconfdir}/systemd/system/cache.mount
       install -m 0644 ${WORKDIR}/systemd/firmware.mount ${D}${sysconfdir}/systemd/system/firmware.mount
@@ -53,6 +54,7 @@ do_install_append(){
        rm -rf  ${D}${sysconfdir}/systemd/system/dsp.mount
       fi
     fi
+     fi
     ln -s /mnt/sdcard ${D}/sdcard
     rmdir ${D}/tmp
     ln -s /var/tmp ${D}/tmp
