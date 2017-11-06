@@ -18,11 +18,11 @@ FILES_${PN} += "/lib/pkgconfig/*"
 FILES_${PN}-dev += "/usr/share/*"
 FILES_${PN}-dev += "/lib/lib*.so"
 
-EXTRA_CFLAGS +="-fPIC"
-EXTRA_CFLAGS_append_sdxpoorwills =" -mfloat-abi=hard"
-
-#enable hardfloat
-EXTRA_CFLAGS +="${@base_conditional('ARM_FLOAT_ABI', 'hard', '-march=armv7-a -mfloat-abi=hard -mfpu=neon -mtune=cortex-a8', '', d)}"
+EXTRA_CFLAGS_append += " -fPIC"
+EXTRA_CFLAGS_append += " ${@ bb.utils.contains('TUNE_FEATURES', 'callconvention-hard', '-mfloat-abi=hard', '', d)}"
+EXTRA_CFLAGS_append += " ${@ bb.utils.contains('TUNE_FEATURES', 'neon', '-mfpu=neon', '', d)}"
+EXTRA_CFLAGS_append += " ${@ bb.utils.contains('TUNE_FEATURES', 'armv7a', '-march=armv7-a', '', d)}"
+EXTRA_CFLAGS_append += " ${@ bb.utils.contains('TUNE_FEATURES', 'cortexa8', '-mtune=cortex-a8', '', d)}"
 
 do_configure () {
     ./configure --enable-cross-compile --cross-prefix=${TARGET_PREFIX} \

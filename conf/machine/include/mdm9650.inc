@@ -10,14 +10,6 @@ require ${COREBASE}/meta-qti-bsp/conf/distro/include/security_flags.inc
 # Enable floating-point ABI to Hard-float
 DEFAULTTUNE = "cortexa8hf-neon"
 
-# Defines floating-point ABI value suitable to pass to gcc compile flag
-# permissable values:hard & softfp.hard allows generation of floating-point
-# instructions and uses FPU-specific calling conventions.softfp allows the
-# generation of code using hardware floating-point instructions, but still
-# uses the soft-float calling conventions. if below line is commented out
-# the build defaults to use softfp floating-point ABI.
-ARM_FLOAT_ABI = "hard"
-
 include conf/machine/include/tune-cortexa8.inc
 
 BBMASK = ".*/*/recipes-kernel/linux-msm-4.4"
