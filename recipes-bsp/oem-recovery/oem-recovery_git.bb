@@ -8,13 +8,13 @@ ${LICENSE};md5=3775480a712fc46a69647678acb234cb"
 HOMEPAGE = "https://www.codeaurora.org/gitweb/quic/la?p=device/qcom/common.git"
 
 FILESPATH =+ "${WORKSPACE}:"
-SRC_URI = "file://android_compat/device/qcom/common/recovery/oem-recovery/"
+SRC_URI = "file://OTA/device/qcom/common/recovery/oem-recovery/"
 
-S = "${WORKDIR}/android_compat/device/qcom/common/recovery/oem-recovery/"
+S = "${WORKDIR}/OTA/device/qcom/common/recovery/oem-recovery/"
 
-DEPENDS += "virtual/kernel"
+DEPENDS += "glib-2.0 virtual/kernel"
 
-EXTRA_OECONF = "--with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include \
+EXTRA_OECONF = "--with-glib --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include \
                 --with-core-headers=${STAGING_INCDIR_NATIVE}"
 
 PARALLEL_MAKE = ""

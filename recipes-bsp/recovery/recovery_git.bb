@@ -6,16 +6,16 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
 ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 HOMEPAGE = "https://www.codeaurora.org/gitweb/quic/la?p=platform/bootable/recovery.git"
-DEPENDS = "libmincrypt-native system-core oem-recovery libsparse"
+DEPENDS = "glib-2.0 libmincrypt-native system-core oem-recovery libsparse"
 RDEPENDS_${PN} = "zlib bzip2"
 
 FILESPATH =+ "${WORKSPACE}:"
-SRC_URI = "file://bootable/recovery/"
+SRC_URI = "file://OTA/recovery/"
 SRC_URI += "file://poky/meta-qti-bsp/recipes-bsp/recovery/files/recovery.service"
 
-S = "${WORKDIR}/bootable/recovery/"
+S = "${WORKDIR}/OTA/recovery/"
 
-EXTRA_OECONF = "--with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include \
+EXTRA_OECONF = "--with-glib --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include \
                 --with-core-headers=${STAGING_INCDIR}"
 CFLAGS += "-lsparse -lfs_mgr -llog"
 
