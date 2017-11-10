@@ -39,11 +39,13 @@ do_install_append(){
       install -m 0644 ${WORKDIR}/systemd/firmware.mount ${D}${sysconfdir}/systemd/system/firmware.mount
       install -m 0644 ${WORKDIR}/systemd/dsp.mount ${D}${sysconfdir}/systemd/system/dsp.mount
       install -m 0644 ${WORKDIR}/systemd/persist.mount ${D}${sysconfdir}/systemd/system/persist.mount
+      install -m 0644 ${WORKDIR}/systemd/var-volatile.mount  ${D}${sysconfdir}/systemd/system/var-volatile.mount
       install -d 0644 ${D}${sysconfdir}/systemd/system/local-fs.target.requires
       ln -sf  ../cache.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/cache.mount
       ln -sf  ../firmware.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware.mount
       ln -sf  ../dsp.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp.mount
       ln -sf  ../persist.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/persist.mount
+      ln -sf  ../var-volatile.mount ${D}${sysconfdir}/systemd/system/local-fs.target.requires/var-volatile.mount
       if ${@base_contains('DISTRO_FEATURES','ro-rootfs','true','false',d)}; then
         install -m 0644 ${WORKDIR}/systemd/systemrw.mount ${D}${sysconfdir}/systemd/system/systemrw.mount
         ln -sf  ../systemrw.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/systemrw.mount
