@@ -42,3 +42,13 @@ DEFAULTTUNE_virtclass-multilib-lib32 = "armv7a-neon"
 
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4"
+python __anonymous () {
+    if (d.getVar('DEBUG', True) == '1'):
+        d.setVar('DEBUG_BUILD', '1')
+        d.setVar('INHIBIT_SYSROOT_STRIP', '1')
+        d.appendVar('EXTRA_IMAGE_FEATURES', 'dbg-pkgs')
+
+    if (d.getVar('NOPTMZ', True) == '1'):
+        d.setVar('DEBUG_BUILD', '1')
+        d.setVar('DEBUG_FLAGS', '-feliminate-unused-debug-types')
+}
