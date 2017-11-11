@@ -46,23 +46,58 @@ UpdateRecoveryVolume () {
 
 FindAndAttachUBI() {
    partition=$1
+   num_volumes=$2
 
    mtd_block_number=`cat $mtd_file | grep -i $partition | sed 's/^mtd//' | awk -F ':' '{print $1}'`
    if [ -z "$mtd_block_number" ]; then
-      echo "MTD : Partition $partition not found"
+      echo "MTD : Partition $partition not found" > /dev/kmsg
    else
-      echo "MTD : Attaching UBI device /dev/mtdblock$mtd_bloc_number for $partition @$ubi_device_number"
+      echo "MTD : Attaching UBI device /dev/mtdblock$mtd_block_number for $partition @$ubi_device_number" > /dev/kmsg
 
       ubiattach -m $mtd_block_number -d $ubi_device_number /dev/ubi_ctrl
+      count=1000 # wait for the ubi-device node to be created for a max of (1000 * 0.010 = ) 10 seconds
       while [ 1 ]; do
-         if [ -c /dev/ubi$ubi_device_number ]; then
+         if [ -c /dev/ubi${ubi_device_number} ]; then
+            echo "/dev/ubi${ubi_device_number} created" > /dev/kmsg
             break
          else
-            sleep 0.010
+            count=$(($count - 1))
+            if [ $count -lt 1 ]; then
+               echo "/dev/ubi${ubi_device_number} not yet created, rebooting" > /dev/kmsg
+               /sbin/reboot
+               break
+            else
+               sleep 0.010
+            fi
          fi
+      done
+
+      i=0
+      while [ "$i" -lt "$num_volumes" ]; do
+         count=500 # wait for the ubi volume node to be created, for max 5 seconds
+         volume_node="/dev/ubi${ubi_device_number}_${i}"
+         while [ 1 ]; do
+            if [ -c $volume_node ]; then
+               echo "$volume_node created, proceeding" > /dev/kmsg
+               break
+            else
+               count=$(($count - 1))
+               if [ $count -lt 1 ]; then
+                  echo "$volume_node not yet created, rebooting .." > /dev/kmsg
+                  /sbin/reboot
+                  break
+               else
+                  echo "$volume_node not yet created, checking again .." > /dev/kmsg
+                  sleep 0.010
+               fi
+            fi
+         done
+         i=$(($i + 1))
       done
       ubi_device_number=$(($ubi_device_number + 1))
    fi
+
+   ls -al /dev | grep -i "ubi" > /dev/kmsg
 }
 
 FindAndMountUBI () {
@@ -70,16 +105,17 @@ FindAndMountUBI () {
    dir=$2
    fstab_only="$3"
 
-   echo "MTD : Looking for UBI volume : $dir for $volume"
+   echo "MTD : Looking for UBI volume : $dir for $volume" > /dev/kmsg
    mkdir -p $dir
 
    # Skip ubi0 for recoveryfs
    for ubidev in /dev/ubi[1-99]_*; do
       volname=`ubinfo $ubidev | grep Name\: | awk '{print $2}'`
       if [ "$volname" == "$volume" ]; then
+         echo "Found Volume: $volname" > /dev/kmsg
          if [ "$fstab_only" != "1" ]; then
             mount -t ubifs $ubidev $dir -o bulk_read
-            echo "MTD : Mounting of $ubidev on $dir done"
+            echo "MTD : Mounting of $ubidev on $dir done" > /dev/kmsg
          fi
          UpdateRecoveryVolume $volume $dir "ubifs" $ubidev
          break
@@ -108,10 +144,10 @@ FindAndMountMTD () {
    dir=$2
 
    mtd_block_device=`cat /proc/mtd | grep -i $partition | sed 's/^mtd/mtdblock/' | awk -F ':' '{print $1}'`
-   echo "Detected block device : $dir for $partition"
+   echo "Detected block device : $dir for $partition" > /dev/kmsg
    mkdir -p $dir
    mount -t mtd /dev/$mtd_block_device $dir
-   echo "Mounting of /dev/$mmc_block_device on $dir done"
+   echo "Mounting of /dev/$mmc_block_device on $dir done" > /dev/kmsg
 
    UpdateRecoveryVolume $1 $2 "mtd" /dev/$mtd_block_device
 }
@@ -128,7 +164,7 @@ then
 else
     fstype="UBI"
     eval FindAndAttachUBI modem
-    eval FindAndAttachUBI system
+    eval FindAndAttachUBI system 4
     eval FindAndMountUBI rootfs  /system  1
     eval FindAndMountUBI usrfs   /data    1
     eval FindAndMountUBI cachefs /cache
