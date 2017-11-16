@@ -1,22 +1,23 @@
-inherit autotools pkgconfig sdllvm
+inherit autotools pkgconfig
 
-DESCRIPTION = "Android IPC utilities"
+DESCRIPTION = "Android Binder support"
 HOMEPAGE = "http://developer.android.com/"
 LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
 ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
-PR = "r1"
+PR = "r0"
 
 DEPENDS = "liblog libcutils libhardware libselinux system-core glib-2.0"
 
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI   = "file://frameworks/native"
+FILESPATH =+ "${WORKSPACE}/frameworks/:"
+
+SRC_URI  = "file://binder"
 SRC_URI += "file://servicemanager.service"
 
-S = "${WORKDIR}/native"
+S = "${WORKDIR}/binder"
 
-EXTRA_OECONF += " --with-core-includes=${WORKSPACE}/system/core/include --with-glib"
+EXTRA_OECONF += " --with-glib"
 
 # Following machines compile kernel in 32bit. So enable binder IPC also in 32bit mode.
 EXTRA_OECONF_append_apq8009    += " --enable-32bit-binder-ipc"
@@ -25,17 +26,11 @@ EXTRA_OECONF_append_mdm9650    += " --enable-32bit-binder-ipc"
 
 CFLAGS += "-I${STAGING_INCDIR}/libselinux"
 
-FILES_${PN}-servicemanager-dbg = "${bindir}/.debug/servicemanager"
-FILES_${PN}-servicemanager     = "${bindir}/servicemanager"
 
-FILES_${PN}-libbinder-dbg    = "${libdir}/.debug/libbinder.*"
-FILES_${PN}-libbinder        = "${libdir}/libbinder.so.*"
-FILES_${PN}-libbinder-dev    = "${libdir}/libbinder.so ${libdir}/libbinder.la ${includedir}"
-FILES_${PN}-libbinder-static = "${libdir}/libbinder.a"
-
-FILES_${PN}-libui-dbg    = "${libdir}/.debug/libui.*"
-FILES_${PN}-libui        = "${libdir}/libui.so.*"
-FILES_${PN}-libbui-dev    = "${libdir}/libui.so ${libdir}/libui.la ${includedir}"
+FILES_${PN}-dbg    = "${libdir}/.debug/libbinder.* ${bindir}/.debug/servicemanager ${bindir}/test_binder"
+FILES_${PN}        = "${libdir}/libbinder.so.* ${libdir}/pkgconfig/* ${bindir}/servicemanager"
+FILES_${PN}-dev    = "${libdir}/libbinder.so ${libdir}/libbinder.la ${includedir}"
+FILES_${PN}-static = "${libdir}/libbinder.a"
 
 do_install_append() {
    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then

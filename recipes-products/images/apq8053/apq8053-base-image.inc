@@ -20,7 +20,7 @@ IMAGE_INSTALL += "start-scripts-update-perms"
 
 IMAGE_INSTALL += "base-files"
 IMAGE_INSTALL += "base-passwd"
-IMAGE_INSTALL += "native-frameworks"
+IMAGE_INSTALL += "binder"
 
 DEPENDS_append_aarch64 += " gdb-cross-aarch64"
 

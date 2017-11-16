@@ -25,7 +25,7 @@ SECURITY_CFLAGS_pn-liblog  = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-system-core = "${SECURITY_PIC_CFLAGS}"
 
 # libbinder to use -fPIC in security flags instead of -fpie
-SECURITY_CFLAGS_pn-native-frameworks  = "${SECURITY_PIC_CFLAGS}"
+SECURITY_CFLAGS_pn-binder  = "${SECURITY_PIC_CFLAGS}"
 
 # BT OSS packages to use -fPIC in security flags instead of -fpie
 SECURITY_CFLAGS_pn-bt-property = "${SECURITY_PIC_CFLAGS}"

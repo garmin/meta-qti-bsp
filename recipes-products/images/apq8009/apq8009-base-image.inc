@@ -22,7 +22,7 @@ IMAGE_INSTALL += "base-files"
 IMAGE_INSTALL += "base-passwd"
 #IMAGE_INSTALL += "bluez5"
 
-#IMAGE_INSTALL += "native-frameworks"
+IMAGE_INSTALL += "binder"
 
 IMAGE_INSTALL += "glib-2.0"
 
@@ -40,7 +40,7 @@ IMAGE_INSTALL += "system-core-leprop"
 IMAGE_INSTALL += "system-core-usb"
 IMAGE_INSTALL += "system-core-post-boot"
 IMAGE_INSTALL += "system-conf"
-IMAGE_INSTALL += "system-prop"
+#IMAGE_INSTALL += "system-prop"
 IMAGE_INSTALL += "wireless-tools"
 IMAGE_INSTALL += "volatile-binds"
 
