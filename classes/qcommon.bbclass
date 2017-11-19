@@ -8,4 +8,4 @@ FILESPATH        =+ "${WORKSPACE}:"
 
 SRC_URI          = "file://${@d.getVar('SRC_DIR', True).replace('${WORKSPACE}/', '')}"
 
-PACKAGE_ARCH    ?= "${BASEMACHINE_ARCH}"
+PACKAGE_ARCH    ?= "${MACHINE_ARCH}"
