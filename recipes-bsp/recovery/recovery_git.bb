@@ -27,13 +27,13 @@ INITSCRIPT_PARAMS = "start 99 5 . stop 80 0 1 6 ."
 
 FILES_${PN} += "/cache"
 FILES_${PN} += "/system"
-FILES_${PN} += "/tmp"
+#FILES_${PN} += "/tmp"
 FILES_${PN} += "/res"
 FILES_${PN} += "/data"
 FILES_${PN} += "/lib"
 do_install_append() {
         install -d ${D}/cache/
-        install -d ${D}/tmp/
+#        install -d ${D}/tmp/
         install -d ${D}/res/
         install -d ${D}/data/
         install -d ${D}/system/
