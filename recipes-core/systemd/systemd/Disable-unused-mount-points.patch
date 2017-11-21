@@ -1,5 +1,5 @@
 From 60e740fe90d7e376019761c415c9dc96662b81fe Mon Sep 17 00:00:00 2001
-From: Viswanath Kraleti <vkraleti@qti.qualcomm.com>
+From: Viswanath Kraleti <vkraleti@codeaurora.org>
 Date: Mon, 13 Nov 2017 18:28:31 +0530
 Subject: [PATCH] systemd: Disable unused mount points
 
