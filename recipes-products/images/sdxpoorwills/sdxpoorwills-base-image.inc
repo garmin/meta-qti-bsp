@@ -27,4 +27,4 @@ IMAGE_INSTALL += "start-scripts-firmware-links"
 IMAGE_INSTALL += "system-core-adbd"
 IMAGE_INSTALL += "system-core-usb"
 IMAGE_INSTALL += "volatile-binds"
-
+IMAGE_INSTALL += "edk2"
