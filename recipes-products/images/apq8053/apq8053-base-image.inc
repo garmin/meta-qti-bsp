@@ -4,6 +4,9 @@
 DEPENDS_append_arm += " lk"
 DEPENDS_append_aarch64 += " lib32-lk"
 
+# Compute sha1sum of unsparsed recovery&recoveryfs images
+# only after recoveryfs.ext4 image creation has already happened.
+do_rootfs[depends] += "machine-recovery-image:do_makesystem"
 
 IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${ROOTFS_PKGMANAGE_BOOTSTRAP}"
@@ -61,7 +64,35 @@ if [ "${DISTRO_NAME}" == "msm-user" ]; then
 sed -i '/mount -t debugfs/ d' ${IMAGE_ROOTFS}/etc/init.d/sysfs.sh
 fi
  chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/
+}
 
+UNSPARSED_RECOVERYFS_DEST = "${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/BOOTABLE_IMAGES"
+
+# Compute sha1 of recovery(fs) images
+# as an extension of the do_rootfs() task.
+python do_rootfs_append() {
+    import subprocess
+
+    # Create a "recoveryupgrade" directory which will house the
+    # data needed by the recovery/recoveryfs upgrade mechanism.
+    cmd1 = "mkdir -p ${IMAGE_ROOTFS}/recoveryupgrade"
+    subprocess.call(cmd1, shell=True)
+
+    # first compute sha1 of boot.img, which is same as recovery partition's content
+    cmd2 = "sha1sum ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img | awk '{ print $1 }'" \
+           " > ${IMAGE_ROOTFS}/recoveryupgrade/recoveryimg_sha1"
+    subprocess.call(cmd2, shell=True)
+    cmd3 = "stat --printf=\"%s\" ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img" \
+           " > ${IMAGE_ROOTFS}/recoveryupgrade/recoveryimg_length"
+    subprocess.call(cmd3, shell=True)
+
+    # now compute sha1 of the unsparsed recoveryfs image
+    cmd4 = "sha1sum ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4 | " \
+           " awk '{ print $1 }' > ${IMAGE_ROOTFS}/recoveryupgrade/recoveryfsimg_sha1"
+    subprocess.call(cmd4, shell=True)
+    cmd5 = "stat --printf=\"%s\" ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4" \
+           " > ${IMAGE_ROOTFS}/recoveryupgrade/recoveryfsimg_length"
+    subprocess.call(cmd5, shell=True)
 }
 
 do_makesystem() {
