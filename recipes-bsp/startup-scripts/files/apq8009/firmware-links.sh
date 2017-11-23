@@ -33,8 +33,7 @@
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 export PATH
 
-mkdir -p /firmware
-mount -t vfat /dev/mmcblk0p1 /firmware -o context=system_u:object_r:firmware_t:s0
+mount -t vfat /dev/mmcblk0p1 /firmware -o context=system_u:object_r:firmware_t:s0,noexec,nodev,ro
 
 # Check for images and set up symlinks
 cd /firmware/image
