@@ -9,3 +9,6 @@ def fix_optimization(d):
     return selected_opt
 
 SELECTED_OPTIMIZATION := "${@fix_optimization(d)}"
+
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+SRC_URI += " file://0001-Adding-support-to-dlopen-library-from-memory.patch "
