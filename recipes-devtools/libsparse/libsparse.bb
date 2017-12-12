@@ -14,3 +14,7 @@ FILESPATH =+ "${WORKSPACE}/system/core/:"
 SRC_URI   = "file://libsparse"
 
 S = "${WORKDIR}/libsparse"
+
+BBCLASSEXTEND = "native"
+
+EXTRA_OECONF_append_class-native = "  --enable-img-convert-utils"
