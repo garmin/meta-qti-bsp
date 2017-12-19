@@ -37,11 +37,16 @@ FindAndMountEXT4 () {
    mkdir -p $dir
    mount -t ext4 $mmc_block_device $dir -o $flags
    /sbin/restorecon -R $2
+
+   if [ $1 == "dsp" ]; then
+      chown -R system:system $2
+      mount -o ro,remount /dsp
+   fi
 }
 
 
 FindAndMountEXT4 userdata /data relatime,data=ordered,noauto_da_alloc,discard,nodev,nosuid
-FindAndMountEXT4 dsp /dsp relatime,data=ordered,noauto_da_alloc,discard,ro,noexec,nodev,nosuid
+FindAndMountEXT4 dsp /dsp relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
 FindAndMountEXT4 persist /persist relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
 FindAndMountEXT4 cache  /cache relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
 
