@@ -8,8 +8,6 @@ PROVIDES = "virtual/bootloader"
 PV       = "3.0"
 PR       = "r1"
 
-LLVM_PREBUILTS_BASE = "vendor/qcom/proprietary/llvm-arm-toolchain-ship"
-LLVM_PREBUILTS_VERSION = "4.0"
 BUILD_OS = "linux"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -22,7 +20,7 @@ INSANE_SKIP_${PN} = "arch"
 
 EXTRA_OEMAKE = "'ANDROID_BUILD_TOP=${WORKSPACE}'\
                 'TARGET_GCC_VERSION=4.9'\
-                'CLANG_BIN=${WORKSPACE}/${LLVM_PREBUILTS_BASE}/${LLVM_PREBUILTS_VERSION}/bin/' \
+                'CLANG_BIN=${WORKSPACE}/${SDCLANG_PATH}/' \
                 'CLANG_PREFIX=${STAGING_BINDIR_NATIVE}/arm-oe-linux-gnueabi/arm-oe-linux-gnueabi-' \
                 'TARGET_ARCHITECTURE=MACHINE_ARCH'\
                 'BUILDDIR=${S}'\
