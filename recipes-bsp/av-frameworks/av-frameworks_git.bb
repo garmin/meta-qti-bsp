@@ -16,20 +16,13 @@ SRC_URI += "file://automtp.sh"
 
 S = "${WORKDIR}/frameworks/av"
 
-FILES_${PN}-dbg    = "${libdir}/.debug/libcamera_client.* ${bindir}/.debug/mtpserver"
+EXTRA_OECONF += " --with-kernel-headers=${STAGING_KERNEL_DIR}/include/uapi"
+
+FILES_${PN}-dbg    = "${libdir}/.debug/libcamera_client.* ${bindir}/.debug/*"
 FILES_${PN}        = "${libdir}/libcamera_client.so.* ${libdir}/pkgconfig/* ${bindir}/mtpserver ${sysconfdir}/udev/scripts/automtp.sh"
 FILES_${PN}-dev    = "${libdir}/libcamera_client.so ${libdir}/libcamera_client.la ${includedir}"
 
-CPPFLAGS += "-I${WORKSPACE}/frameworks/system/media/private/camera/include"
-
-do_configure_append() {
-if [ "${MACHINE}" == "apq8098" ]; then
-    install -m 0644 ${WORKSPACE}/kernel/msm-4.4/include/uapi/linux/usb/f_mtp.h ${STAGING_INCDIR}/linux/usb/
-else
-    install -m 0644 ${WORKSPACE}/kernel/msm-3.18/include/uapi/linux/usb/f_mtp.h ${STAGING_INCDIR}/linux/usb/
-fi
-}
-
+CPPFLAGS += "-I${STAGING_INCDIR}/camera"
 
 do_install_append() {
    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
