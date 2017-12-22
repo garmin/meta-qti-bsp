@@ -13,6 +13,10 @@ FULL_OPTIMIZATION = "${@bb.utils.contains('USE_CLANG', 'true',\
     -Wno-error=unused-private-field -Wno-error=undefined-optimized -Wno-error=format -Wno-error=inconsistent-missing-override', \
   '-O2 -fexpensive-optimizations -frename-registers -fomit-frame-pointer -ftree-vectorize   -Wno-error=maybe-uninitialized -finline-functions -finline-limit=64', d)}"
 
+DEBUG_OPTIMIZATION += "${@bb.utils.contains('USE_CLANG', 'true',\
+  '-Wno-error=maybe-uninitialized  -Wno-error=unused-result -Wno-error=unknown-warning-option -Wno-error=unused-comparison \
+    -Wno-error=unused-private-field -Wno-error=undefined-optimized -Wno-error=format -Wno-error=inconsistent-missing-override', ' ', d)}"
+
 NEON_FLAGS = "${@bb.utils.contains('TARGET_ARCH', 'arm', '-march=armv7-a -mfloat-abi=softfp -mfpu=neon -ftree-vectorize ', ' ',d)}"
 
 CLANG_CPP   = "${@bb.utils.contains_any('TARGET_ARCH', 'arm aarch64', 'CPP="${STAGING_BINDIR_TOOLCHAIN}/../llvm-arm-toolchain/bin/clang -E  \

@@ -17,6 +17,9 @@ DEPENDS = "virtual/kernel openssl glib-2.0 libselinux safe-iop ext4-utils libunw
 
 EXTRA_OECONF = " --with-host-os=${HOST_OS} --with-glib"
 EXTRA_OECONF_append = " --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
+EXTRA_OECONF_append = " --with-logd-logging"
+EXTRA_OECONF_append = "${@base_conditional('USER_BUILD','1',' --disable-debuggerd','',d)}"
+EXTRA_OECONF_append_apq8053 = " --enable-logd-privs"
 
 # Disable adb root privileges in USER builds for msm targets
 EXTRA_OECONF_append_msm = "${@base_conditional('USER_BUILD','1',' --disable-adb-root','',d)}"
@@ -55,6 +58,7 @@ do_install_append() {
    install -m 0755 ${S}/usb/debuger/help -D ${D}${base_sbindir}/usb/debuger/
    install -m 0755 ${S}/usb/debuger/usb_debug -D ${D}${base_sbindir}/
    install -b -m 0644 /dev/null -D ${D}${sysconfdir}/build.prop
+   chown 5002:5002 ${D}${sysconfdir}/build.prop
    ln -s  /sbin/usb/compositions/${COMPOSITION} ${D}${userfsdatadir}/usb/boot_hsusb_composition
    ln -s  /sbin/usb/compositions/empty ${D}${userfsdatadir}/usb/boot_hsic_composition
    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
@@ -91,7 +95,9 @@ do_install_append() {
           ${D}${systemd_unitdir}/system/ffbm.target.wants/leprop.service
    else
       install -m 0755 ${S}/adb/start_adbd -D ${D}${sysconfdir}/init.d/adbd
-      install -m 0755 ${S}/logd/start_logd -D ${D}${sysconfdir}/init.d/logd
+      if [ ${BASEMACHINE} != "apq8053" ]; then
+          install -m 0755 ${S}/logd/start_logd -D ${D}${sysconfdir}/init.d/logd
+      fi
       install -m 0755 ${S}/usb/start_usb -D ${D}${sysconfdir}/init.d/usb
       install -m 0755 ${S}/rootdir/etc/init.qcom.post_boot.sh -D ${D}${sysconfdir}/init.d/init_post_boot
    fi
@@ -104,13 +110,20 @@ do_install_append_apq8009() {
     install -m 0755 ${S}/debuggerd/start_debuggerd -D ${D}${sysconfdir}/initscripts/init_debuggerd
    fi
 }
+
+#Install rules specific to apq8053 target
 do_install_append_apq8053(){
-  if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'false', 'true', d)}; then
-   install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/init.d/init_debuggerd
-  else
-   install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/initscripts/init_debuggerd
+
+  DEBUGGERD_NO_INSTALL=${@base_conditional('USER_BUILD','1','no-debuggerd','',d)}
+  if [ "x$DEBUGGERD_NO_INSTALL" == "x" ]; then
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'false', 'true', d)}; then
+      install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/init.d/init_debuggerd
+    else
+      install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/initscripts/init_debuggerd
+    fi
   fi
 }
+
 do_install_append_apq8096() {
   if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'false', 'true', d)}; then
     install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/init.d/init_debuggerd
@@ -147,6 +160,9 @@ INITSCRIPT_PACKAGES =+ "${PN}-logd"
 INITSCRIPT_NAME_${PN}-logd = "logd"
 INITSCRIPT_PARAMS_${PN}-logd = "start 10  2 3 4 5 ."
 INITSCRIPT_PARAMS_${PN}-logd += "stop 39  6 ."
+
+INITSCRIPT_PACKAGES_remove_apq8053 = "${PN}-logd"
+INITSCRIPT_PACKAGES_remove_apq8053-32 = "${PN}-logd"
 
 INITSCRIPT_PACKAGES =+ "${PN}-post-boot"
 INITSCRIPT_NAME_${PN}-post-boot = "init_post_boot"

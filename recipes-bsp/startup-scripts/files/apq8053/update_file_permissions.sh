@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+# Copyright (c) 2017 The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -26,30 +26,23 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# find_partitions        init.d script to dynamically find partitions
+# update_file_permissions    init.d script to update file permissions post OTA
 #
 
-FindAndMountEXT4 () {
-   partition=$1
-   dir=$2
-   flags=$3
-   mmc_block_device=/dev/block/bootdevice/by-name/$partition
-   mkdir -p $dir
-   mount -t ext4 $mmc_block_device $dir -o $flags
-   /sbin/restorecon -R $2
+set_mode() {
+    if [ -e $1 ]; then
+        chmod $4 $1
+        chown $2:$3 $1
+    fi
 }
 
-FindAndMountVFAT () {
-   partition=$1
-   dir=$2
-   mmc_block_device=/dev/block/bootdevice/by-name/$partition
-   mkdir -p $dir
-   mount -t vfat $mmc_block_device $dir -o context=$3
-}
-FindAndMountEXT4 userdata /data relatime,data=ordered,noauto_da_alloc,discard,nodev,nosuid
-FindAndMountVFAT modem /firmware system_u:object_r:firmware_t:s0
-FindAndMountEXT4 persist /persist relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
-FindAndMountEXT4 dsp /dsp relatime,data=ordered,noauto_da_alloc,discard,ro,noexec,nodev,nosuid
-FindAndMountVFAT bluetooth /bt_firmware system_u:object_r:firmware_t:s0
-
-exit 0
+if [ -e "/cache/recovery/ota_status" ]; then
+    ota_status=$(cat /cache/recovery/ota_status)
+    if [ $ota_status == "OTA_DONE" ]; then
+        set_mode "/data/misc/camera" 1006 1000 775
+        set_mode "/data/misc/qmmf" 1000 1000 775
+        set_mode "/persist/sensors" 3011 0 755
+        set_mode "/persist/sensors/sensors_settings" 3011 0 640
+        set_mode "/persist/sensors/sns.reg" 3011 0 660
+    fi
+fi
