@@ -17,7 +17,7 @@ INHERIT += "recipe_sanity"
 PREFERRED_VERSION_autoconf = "2.68"
 ARM_INSTRUCTION_SET       ?= "arm"
 
-FULL_OPTIMIZATION          = "-O2 -Wa,--noexecstack -fstack-protector -fexpensive-optimizations -frename-registers -fomit-frame-pointer -ftree-vectorize "
+FULL_OPTIMIZATION          = "-O2 -Wa,--noexecstack -fexpensive-optimizations -frename-registers -fomit-frame-pointer -ftree-vectorize "
 FULL_OPTIMIZATION         += " -finline-functions -finline-limit=64 "
 # Ignore a few common warnings
 FULL_OPTIMIZATION         += " -Wno-error=maybe-uninitialized -Wno-error=unused-result "
