@@ -91,9 +91,7 @@ do_install_append() {
           ${D}${systemd_unitdir}/system/ffbm.target.wants/leprop.service
    else
       install -m 0755 ${S}/adb/start_adbd -D ${D}${sysconfdir}/init.d/adbd
-      if [ ${BASEMACHINE} != "apq8053" ]; then
-          install -m 0755 ${S}/logd/start_logd -D ${D}${sysconfdir}/init.d/logd
-      fi
+      install -m 0755 ${S}/logd/start_logd -D ${D}${sysconfdir}/init.d/logd
       install -m 0755 ${S}/usb/start_usb -D ${D}${sysconfdir}/init.d/usb
       install -m 0755 ${S}/rootdir/etc/init.qcom.post_boot.sh -D ${D}${sysconfdir}/init.d/init_post_boot
    fi
@@ -156,9 +154,6 @@ INITSCRIPT_PACKAGES =+ "${PN}-logd"
 INITSCRIPT_NAME_${PN}-logd = "logd"
 INITSCRIPT_PARAMS_${PN}-logd = "start 10  2 3 4 5 ."
 INITSCRIPT_PARAMS_${PN}-logd += "stop 39  6 ."
-
-INITSCRIPT_PACKAGES_remove_apq8053 = "${PN}-logd"
-INITSCRIPT_PACKAGES_remove_apq8053-32 = "${PN}-logd"
 
 INITSCRIPT_PACKAGES =+ "${PN}-post-boot"
 INITSCRIPT_NAME_${PN}-post-boot = "init_post_boot"
