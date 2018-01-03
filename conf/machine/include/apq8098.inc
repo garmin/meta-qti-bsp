@@ -10,13 +10,14 @@ require ${COREBASE}/meta-qti-bsp/conf/distro/include/security_flags.inc
 require conf/machine/include/arm/arch-armv8.inc
 
 BBMASK = ".*/*/recipes-kernel/linux-quic"
+
 BBMASK .= "|.*/*/recipes-kernel/linux-msm-4.9"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
 
 SERIAL_CONSOLE = "115200 ttyMSM0"
-
+PREFERRED_VERSION_weston ?= "1.1.9%"
 DISTRO ?= "msm"
 
 MACHINE_FEATURES += "kernel26 keyboard"

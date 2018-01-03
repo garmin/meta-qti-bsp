@@ -7,7 +7,6 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 COMPATIBLE_MACHINE = "(apq8098)"
 
 # Default image type is zImage, change it in machine conf if needed.
-KERNEL_IMAGETYPE ?= "zImage"
 
 python __anonymous () {
   if (d.getVar('PERF_BUILD', True) == '1'):
@@ -51,7 +50,7 @@ GITVER    =  "${@base_get_metadata_git_revision('${SRC_DIR}',d)}"
 PV = "git"
 PR = "r6"
 
-DEPENDS += "dtbtool-native mkbootimg-native"
+
 DEPENDS += "mkbootimg-native dtc-native"
 DEPENDS += "bouncycastle"
 PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
@@ -63,47 +62,15 @@ FILES_kernel-dev += "/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}"
 do_configure () {
     oe_runmake_call -C ${S} ARCH=${ARCH} ${KERNEL_EXTRA_ARGS} ${KERNEL_CONFIG}
 }
-
-do_shared_workdir () {
-        cd ${B}
-
-        kerneldir=${STAGING_KERNEL_BUILDDIR}
-        install -d $kerneldir
-
-        #
-        # Store the kernel version in sysroots for module-base.bbclass
-        #
-
-        echo "${KERNEL_VERSION}" > $kerneldir/kernel-abiversion
-
-        # Copy files required for module builds
-        cp System.map $kerneldir/System.map-${KERNEL_VERSION}
-        cp Module.symvers $kerneldir/Module.symvers
+do_compile () {
+    unset LDFLAGS
+    oe_runmake CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS} $use_alternate_initrd
+}
+do_shared_workdir_append () {
         cp Makefile $kerneldir/
-        cp .config $kerneldir/
         cp -fR usr $kerneldir/
 
-        mkdir -p $kerneldir/certs
-
-        # Signing keys may not be present
-        [ -f certs/signing_key.pem ] && cp certs/signing_key.pem $kerneldir/certs
-        [ -f certs/signing_key.x509 ] && cp certs/signing_key.x509 $kerneldir/certs
-
-        # include/config
-        mkdir -p $kerneldir/include/config
-        cp include/config/kernel.release $kerneldir/include/config/kernel.release
         cp include/config/auto.conf $kerneldir/include/config/auto.conf
-
-        # We can also copy over all the generated files and avoid special cases
-        # like version.h, but we've opted to keep this small until file creep starts
-        # to happen
-        if [ -e include/linux/version.h ]; then
-                mkdir -p $kerneldir/include/linux
-                cp include/linux/version.h $kerneldir/include/linux/version.h
-        fi
-
-        mkdir -p $kerneldir/include/generated/
-        cp -fR include/generated/* $kerneldir/include/generated/
 
         if [ -d arch/${ARCH}/include ]; then
                 mkdir -p $kerneldir/arch/${ARCH}/include/
@@ -139,10 +106,17 @@ do_shared_workdir () {
         cp ${STAGING_KERNEL_DIR}/scripts/gen_initramfs_list.sh $kerneldir/scripts/
 
         # Make vmlinux available as soon as possible
-        install -d ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}
-        install -m 0644 ${KERNEL_OUTPUT} ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}
-        install -m 0644 vmlinux ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}/vmlinux-${KERNEL_VERSION}
-        install -m 0644 vmlinux ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}/vmlinux
+        if [[ ${PERF_BUILD} == "1" ]]; then
+		install -d ${STAGING_DIR_TARGET}-perf/${KERNEL_IMAGEDEST}
+	        install -m 0644 ${KERNEL_OUTPUT_DIR}/${KERNEL_IMAGETYPE} ${STAGING_DIR_TARGET}-perf/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}
+	        install -m 0644 vmlinux ${STAGING_DIR_TARGET}-perf/${KERNEL_IMAGEDEST}/vmlinux-${KERNEL_VERSION}
+	        install -m 0644 vmlinux ${STAGING_DIR_TARGET}-perf/${KERNEL_IMAGEDEST}/vmlinux
+	else
+	        install -d ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}
+	        install -m 0644 ${KERNEL_OUTPUT_DIR}/${KERNEL_IMAGETYPE} ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}
+	        install -m 0644 vmlinux ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}/vmlinux-${KERNEL_VERSION}
+	        install -m 0644 vmlinux ${STAGING_DIR_TARGET}/${KERNEL_IMAGEDEST}/vmlinux
+	fi
 }
 
 do_install_append() {
