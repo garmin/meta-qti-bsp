@@ -1,9 +1,10 @@
-inherit autotools-brokensep systemd
+inherit autotools systemd
 
 PR = "r0"
 
-FILESPATH =+ "${WORKSPACE}/android_compat/device/qcom/:"
-SRC_URI   = "file://${SOC_FAMILY}"
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+
+SRC_URI   = "file://${BASEMACHINE}/system.prop"
 SRC_URI  += "file://persist-prop.sh"
 SRC_URI  += "file://persist-prop.service"
 
@@ -18,7 +19,7 @@ SYSTEMD_SERVICE_${PN} = "${@bb.utils.contains('DISTRO_FEATURES','systemd','persi
 
 do_compile() {
     # Remove empty lines and lines starting with '#'
-    sed -e 's/#.*$//' -e '/^$/d' ${WORKDIR}/${SOC_FAMILY}/system.prop >> ${S}/build.prop
+    sed -e 's/#.*$//' -e '/^$/d' ${WORKDIR}/${BASEMACHINE}/system.prop >> ${S}/build.prop
 }
 
 inherit update-rc.d
