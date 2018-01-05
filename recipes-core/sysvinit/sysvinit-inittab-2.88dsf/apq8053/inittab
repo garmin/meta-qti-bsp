@@ -31,8 +31,8 @@ qmfs:2345:respawn:start-stop-daemon -c camera:system -S -b -a /usr/bin/qmmf-serv
 qmfw:2345:respawn:start-stop-daemon -c qmmfwebsvr:system -S -b -a /usr/bin/qmmf-webserver
 
 #Set the storage daemons to respawn
-rmlk:2345:wait:chown -R nobody /sys/power/wake_lock /sys/power/wake_unlock
-rmts:2345:respawn:start-stop-daemon -c nobody -S -b -a /sbin/rmt_storage
+rmlk:2345:wait:chown -R -c nobody:system /sys/power/wake_lock /sys/power/wake_unlock
+rmts:2345:respawn:start-stop-daemon -c nobody:system -S -b -a /sbin/rmt_storage
 
 # /etc/init.d executes the S and K scripts upon change
 # of runlevel.
