@@ -10,6 +10,8 @@ PR = "r1"
 
 DEPENDS = "liblog libcutils libhardware libselinux system-core glib-2.0"
 
+PROVIDES += "binder libui"
+
 FILESPATH =+ "${WORKSPACE}:"
 SRC_URI   = "file://frameworks/native"
 SRC_URI += "file://servicemanager.service"
