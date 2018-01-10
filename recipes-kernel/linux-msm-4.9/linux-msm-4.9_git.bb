@@ -46,7 +46,7 @@ SRC_DIR   =  "${WORKSPACE}/kernel/msm-4.9"
 S         =  "${WORKDIR}/kernel/msm-4.9"
 GITVER    =  "${@base_get_metadata_git_revision('${SRC_DIR}',d)}"
 PV = "git"
-PR = "r5-${GITVER}"
+PR = "r5"
 
 DEPENDS += "mkbootimg-native dtc-native"
 PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
