@@ -11,7 +11,7 @@ inherit core-image
 MULTILIBRE_ALLOW_REP =. "/usr/include/python2.7/*|"
 
 do_fsconfig() {
-chmod go-r ${IMAGE_ROOTFS}/etc/passwd
+   mkdir -p ${IMAGE_ROOTFS}/data/
 }
 
 ROOTFS_POSTPROCESS_COMMAND += "do_fsconfig; "
