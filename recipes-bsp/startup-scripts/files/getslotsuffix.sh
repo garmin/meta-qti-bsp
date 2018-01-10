@@ -1,5 +1,6 @@
 #!/bin/sh
-# Copyright (c) 2016-2017 The Linux Foundation. All rights reserved.
+
+# Copyright (c) 2018 The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -26,29 +27,20 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# find_partitions        init.d script to dynamically find partitions
-#
 
-FindAndMountEXT4 () {
-   partition=$1
-   dir=$2
-   flags=$3
-   mmc_block_device=/dev/block/bootdevice/by-name/$partition
-   mkdir -p $dir
-   mount -t ext4 $mmc_block_device $dir -o $flags
-   /sbin/restorecon -R $2
+slot_suffix=""
+kernel_args=$(cat /proc/cmdline)
 
-   if [ $1 == "dsp" ]; then
-      chown -R system:system $2
-      mount -o ro,remount /dsp
-   fi
-}
-
-slot_suffix=$(getslotsuffix)
-
-FindAndMountEXT4 userdata /data relatime,data=ordered,noauto_da_alloc,discard,nodev,nosuid,noexec
-FindAndMountEXT4 dsp${slot_suffix} /dsp relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
-FindAndMountEXT4 persist /persist relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
-FindAndMountEXT4 cache  /cache relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
-
-exit 0
+ret=$(echo $kernel_args | grep -o androidboot.slot_suffix)
+if [ "$ret" = "androidboot.slot_suffix" ]; then
+   for arg in $kernel_args; do
+      key=$(echo $arg|cut -d '=' -f1)
+      value=$(echo $arg|cut -d '=' -f2)
+      if [ "$key" = "androidboot.slot_suffix" ]; then
+         slot_suffix=$value
+         echo $slot_suffix
+         exit 0
+      fi
+   done
+fi
+exit 1
