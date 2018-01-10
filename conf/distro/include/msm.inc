@@ -6,7 +6,8 @@
 #############################################################################
 
 # DISTRO FEATURE SELECTION
-MICRO_GOLD = "ld-is-gold"
+MICRO_GOLD ?= "ld-is-gold"
+MICRO_GOLD_apq8017 = ""
 
 USE_DEVFS = "0"
 
