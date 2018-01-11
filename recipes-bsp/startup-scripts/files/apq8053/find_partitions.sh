@@ -45,7 +45,7 @@ FindAndMountEXT4 () {
 }
 
 
-FindAndMountEXT4 userdata /data relatime,data=ordered,noauto_da_alloc,discard,nodev,nosuid
+FindAndMountEXT4 userdata /data relatime,data=ordered,noauto_da_alloc,discard,nodev,nosuid,noexec
 FindAndMountEXT4 dsp /dsp relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
 FindAndMountEXT4 persist /persist relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
 FindAndMountEXT4 cache  /cache relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
