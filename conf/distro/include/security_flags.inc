@@ -7,11 +7,13 @@ SECURITY_PIC_CFLAGS = "-fstack-protector-strong -fPIC -Wa,--noexecstack"
 SECURITY_LDFLAGS = "-Wl,-z,relro,-z,now,-z,noexecstack"
 
 # GPS OSS packages to use -fPIC in security flags instead of -fpie
-SECURITY_CFLAGS_pn-loc-hal = "${SECURITY_PIC_CFLAGS}"
-SECURITY_CFLAGS_pn-loc-pla = "${SECURITY_PIC_CFLAGS}"
-SECURITY_CFLAGS_pn-loc-stub = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-gps-utils = "${SECURITY_PIC_CFLAGS}"
+SECURITY_CFLAGS_pn-loc-hal = "${SECURITY_PIC_CFLAGS}"
+SECURITY_CFLAGS_pn-loc-core = "${SECURITY_PIC_CFLAGS}"
+SECURITY_CFLAGS_pn-loc-api-v02 = "${SECURITY_PIC_CFLAGS}"
+SECURITY_CFLAGS_pn-loc-ds = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-loc-net-iface = "${SECURITY_PIC_CFLAGS}"
+SECURITY_CFLAGS_pn-location-api = "${SECURITY_PIC_CFLAGS}"
 
 # edk2 packages to use -pie in security flags instead of -fP
 SECURITY_CFLAGS_pn-edk2 = "-pie -fpie -Wa,--noexecstack"
