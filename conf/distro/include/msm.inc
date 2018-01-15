@@ -63,6 +63,8 @@ EXTRA_USERS_PARAMS = "\
  useradd -u 1004 -g input input; \
  useradd -u 1005 -g audio audio; \
  useradd -u 1006 -U camera;\
+ useradd -u 1010 -U wifi; \
+ useradd -u 1013 -U media; \
  useradd -u 1036 -U logd;\
  useradd -u 2000 -U adb; \
  useradd -u 3011 -U sensors; \
@@ -78,9 +80,11 @@ EXTRA_USERS_PARAMS = "\
  usermod -L -e 1 input; \
  usermod -L -e 1 audio; \
  usermod -L -e 1 camera; \
+ usermod -L -e 1 wifi; \
+ usermod -L -e 1 media; \
  usermod -L -e 1 adb; \
  usermod -L -e 1 sensors; \
- usermod -L -e 1 Apps; \
+ usermod -L -e 1 apps; \
  usermod -L -e 1 nobody; \
  usermod -L -e 1 qmmfsvr; \
  usermod -L -e 1 qmmfwebsvr; \
@@ -91,4 +95,7 @@ EXTRA_USERS_PARAMS = "\
  usermod -a -G diag,inet,system,leprop sensors; \
  usermod -a -G inet,system,leprop camera; \
  usermod -a -G leprop bluetooth; \
+ groupadd -g 3005 net_admin; \
+ groupadd -g 3009 readproc; \
+ groupadd -g 3010 wakelock; \
 "
