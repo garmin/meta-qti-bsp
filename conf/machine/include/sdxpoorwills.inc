@@ -41,6 +41,8 @@ SYSTEMRW_SIZE_EXT4 ?= "8388608"
 USERDATA_SIZE_EXT4 ?= "2000000000"
 CACHE_SIZE_EXT4 ?= "80000000"
 
+# Enable LE Verified Boot
+DISTRO_FEATURES_append = " vble"
 
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4 ubi"

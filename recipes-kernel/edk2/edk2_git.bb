@@ -25,6 +25,7 @@ EXTRA_OEMAKE = "'CLANG_BIN=${STAGING_BINDIR_NATIVE}/llvm-arm-toolchain/bin/' \
                 'BOOTLOADER_OUT=${S}/out'\
                 'ENABLE_LE_VARIANT=true'\
                 'EDK_TOOLS_PATH=${S}/BaseTools'"
+EXTRA_OEMAKE_append = " ${@base_contains('DISTRO_FEATURES', 'vble','VERIFIED_BOOT_LE=1', '', d)}"
 
 do_compile () {
     export CC=${BUILD_CC}
@@ -33,6 +34,7 @@ do_compile () {
     export AR=${BUILD_AR}
     oe_runmake -f makefile all
 }
+
 do_install() {
         install -d ${D}/boot
 }
