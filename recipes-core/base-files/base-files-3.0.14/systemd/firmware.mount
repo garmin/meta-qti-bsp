@@ -31,4 +31,4 @@ Before=local-fs.target
 [Mount]
 What=/dev/disk/by-partlabel/modem
 Where=/firmware
-Options=noexec,nodev,ro
+Options=noexec,nodev,ro,context=system_u:object_r:firmware_t:s0

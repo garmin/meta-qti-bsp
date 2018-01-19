@@ -34,3 +34,4 @@ Before=local-fs.target
 What=tmpfs
 Where=/var/volatile
 Type=tmpfs
+Options=defaults,rootcontext=system_u:object_r:var_t:s0
