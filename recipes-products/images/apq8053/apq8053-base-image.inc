@@ -17,6 +17,7 @@ IMAGE_INSTALL += "start-scripts-firmware-links"
 IMAGE_INSTALL += "start-scripts-find-partitions"
 IMAGE_INSTALL += "start-scripts-misc-daemon"
 IMAGE_INSTALL += "start-scripts-update-perms"
+IMAGE_INSTALL += "start-script-ab-slot-util"
 
 IMAGE_INSTALL += "base-files"
 IMAGE_INSTALL += "base-passwd"
