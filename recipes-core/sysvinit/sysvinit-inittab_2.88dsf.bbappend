@@ -12,19 +12,21 @@ SYSVINIT_ENABLED_GETTYS = ""
 do_install() {
     install -d ${D}${sysconfdir}
     install -m 0644 ${WORKDIR}/${BASEMACHINE}/inittab ${D}${sysconfdir}/inittab
-    if [ ! -z "${SERIAL_CONSOLE}" ]; then
-        echo "S:023456:respawn:${base_sbindir}/getty -L ${TERMINAL} ${SERIAL_CONSOLE}" >> ${D}${sysconfdir}/inittab
-    fi
 
-    idx=0
-#   tmp="${SERIAL_CONSOLES}"
-    tmp=""
-    for i in $tmp
-    do
+   if [ "${DISTRO_NAME}" != "msm-user" ]; then
+     if [ ! -z "${SERIAL_CONSOLE}" ]; then
+        echo "S:023456:respawn:${base_sbindir}/getty -L ${TERMINAL} ${SERIAL_CONSOLE}" >> ${D}${sysconfdir}/inittab
+     fi
+
+     idx=0
+#    tmp="${SERIAL_CONSOLES}"
+     tmp=""
+     for i in $tmp
+     do
         j=`echo ${i} | sed s/\;/\ /g`
         echo "${idx}:2345:respawn:${base_sbindir}/getty ${j}" >> ${D}${sysconfdir}/inittab
         idx=`expr $idx + 1`
-    done
+     done
 
     if [ "${USE_VT}" = "1" ]; then
         cat <<EOF >>${D}${sysconfdir}/inittab
@@ -45,4 +47,5 @@ EOF
         done
         echo "" >> ${D}${sysconfdir}/inittab
     fi
+   fi
 }
