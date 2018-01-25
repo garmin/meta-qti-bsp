@@ -42,8 +42,10 @@ do_recovery_ext4() {
     cp ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/BOOTABLE_IMAGES/recovery.img
     cp ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/IMAGES/recovery.img
     cp ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/IMAGES/boot.img
-    cp ${DEPLOY_DIR_IMAGE}/${MACHINE}-sysfs.ext4 ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/IMAGES/system.img
-    cp ${DEPLOY_DIR_IMAGE}/system.map ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/IMAGES/system.map
+    cp ${DEPLOY_DIR_IMAGE}/${MACHINE}*-sysfs.ext4 ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/IMAGES/system.img
+    if [ -e ${DEPLOY_DIR_IMAGE}/system.map ]; then
+       cp ${DEPLOY_DIR_IMAGE}/system.map ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/IMAGES/system.map
+    fi
 
     # copy the contents of system rootfs
     cp -r ${IMAGE_ROOTFS}/. ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/SYSTEM/.
