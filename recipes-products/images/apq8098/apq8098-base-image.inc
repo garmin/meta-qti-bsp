@@ -1,10 +1,9 @@
 # Rootfs creation.
 
-DEPENDS += "edk2"
+#DEPENDS += "edk2"
 
 
 IMAGE_INSTALL += "packagegroup-core-boot"
-IMAGE_INSTALL += "${ROOTFS_PKGMANAGE_BOOTSTRAP}"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
 
 # The MSM Linux minimal boot image files.
