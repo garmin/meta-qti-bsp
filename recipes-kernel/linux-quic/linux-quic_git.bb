@@ -49,10 +49,13 @@ GITVER    =  "${@base_get_metadata_git_revision('${SRC_DIR}',d)}"
 PV = "git"
 PR = "${@base_conditional('PRODUCT', 'psm', 'r5-psm', 'r5', d)}"
 
-DEPENDS += "mkbootimg-native"
+DEPENDS += "mkbootimg-native openssl-native"
 DEPENDS_apq8096 += "dtc-native"
-PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
 RDEPENDS_kernel-base = ""
+
+PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
+
+LDFLAGS_aarch64 = "-O1 --hash-style=gnu --as-needed"
 
 # Put the zImage in the kernel-dev pkg
 FILES_kernel-dev += "/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}"
