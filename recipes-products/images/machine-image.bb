@@ -11,8 +11,8 @@ inherit core-image
 MULTILIBRE_ALLOW_REP =. "/usr/include/python2.7/*|${base_bindir}|${base_sbindir}|${bindir}|${sbindir}|${libexecdir}|${sysconfdir}|${nonarch_base_libdir}/udev|/lib/modules/[^/]*/modules.*|"
 
 do_fsconfig() {
- chmod go-r ${IMAGE_ROOTFS}/etc/passwd
- chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/
+ chmod go-r ${IMAGE_ROOTFS}/etc/passwd || :
+ chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/ || :
  if [ "${DISTRO_NAME}" == "msm-user" ]; then
   if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
     rm ${IMAGE_ROOTFS}/lib/systemd/system/sys-kernel-debug.mount
