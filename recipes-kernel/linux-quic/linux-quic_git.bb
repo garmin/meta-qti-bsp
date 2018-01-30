@@ -53,8 +53,11 @@ PR = "${@base_conditional('PRODUCT', 'psm', 'r5-psm', 'r5', d)}"
 
 DEPENDS += "dtbtool-native mkbootimg-native"
 DEPENDS_apq8096 += "mkbootimg-native dtc-native"
-PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
+DEPENDS += " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'bouncycastle-native', '', d)}"
+
 RDEPENDS_kernel-base = ""
+
+PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
 
 # Put the zImage in the kernel-dev pkg
 FILES_kernel-dev += "/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}"
@@ -206,3 +209,32 @@ do_deploy () {
         ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img
 }
 
+# keep this path in-sync with bouncycastle recipe.
+SECURITY_TOOLS_DIR = "${TMPDIR}/work-shared/security_tools"
+
+# Copy verity certificate into ${S} to generate verity signed boot image
+do_configure_append () {
+    if [ "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'dm-verity', '', d)}" = "dm-verity" ] ; then
+        openssl x509 -in ${SECURITY_TOOLS_DIR}/verity.x509.pem -outform der -out ${S}/verity.x509
+    fi
+}
+
+# Update kernel cmdline for dm-verity.
+do_deploy[prefuncs] += "update_cmdline"
+
+python update_cmdline () {
+    if bb.utils.contains('DISTRO_FEATURES', 'dm-verity', True, False, d):
+        import subprocess
+
+        cmdline = d.getVar('KERNEL_CMD_PARAMS', True)
+        cmdline += " androidboot.veritymode=enforcing"
+        # add "buildvariant=userdebug" for non-user builds.
+        cmdline += " ${@["buildvariant=userdebug", ""][(d.getVar('VARIANT', True) == 'user')]}"
+        # generate and add verity key id.
+        keycmd = "openssl x509 -in ${SECURITY_TOOLS_DIR}/verity.x509.pem -text \
+                         | grep keyid | sed 's/://g' | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]' | sed 's/keyid//g'"
+        keyid = subprocess.check_output(keycmd, shell=True).strip()
+        cmdline += " veritykeyid=id:" + keyid
+
+        d.setVar('KERNEL_CMD_PARAMS', ''.join(cmdline))
+}
