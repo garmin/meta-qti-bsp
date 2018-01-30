@@ -49,6 +49,8 @@ EXTRA_OEMAKE_append = " ${@base_contains('DISTRO_FEATURES', 'systemd', 'USE_LE_S
 
 EXTRA_OEMAKE_append = " ${@base_contains('DISTRO_FEATURES', 'vble', 'VERIFIED_BOOT_LE=1', '', d)}"
 
+EXTRA_OEMAKE_append = " ${@base_contains('DISTRO_FEATURES', 'dm-verity', 'VERITY_LE=1', '', d)}"
+
 #enable hardfloat
 EXTRA_OEMAKE_append = " ${@base_conditional('ARM_FLOAT_ABI', 'hard', 'ENABLE_HARD_FPU=1', '', d)}"
 
