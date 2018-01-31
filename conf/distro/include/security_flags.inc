@@ -1,12 +1,18 @@
 # Pull in the default security flags
 require ${COREBASE}/meta/conf/distro/include/security_flags.inc
 
-# Modify the primary security flag definitions
-SECURITY_CFLAGS = "-fstack-protector-strong -pie -fpie -Wa,--noexecstack"
-SECURITY_PIC_CFLAGS = "-fstack-protector-strong -fPIC -Wa,--noexecstack"
+# Modify the primary security flag definitions of yocto
+# _FORTIFY_SOURCE requires -O1 or higher, otherwise results in a compiler warning.
+SECURITY_PIE_CFLAGS = "-fstack-protector-strong -pie -fPIE -D_FORTIFY_SOURCE=2 -Wa,--noexecstack ${SECURITY_STRINGFORMAT}"
+
+# For usage by packages which needs position independent code that can be linked into shared libraires.
+SECURITY_PIC_CFLAGS = "-fstack-protector-strong -fPIC -D_FORTIFY_SOURCE=2 -Wa,--noexecstack ${SECURITY_STRINGFORMAT}"
+
+SECURITY_CFLAGS = "${SECURITY_PIE_CFLAGS}"
 SECURITY_LDFLAGS = "-Wl,-z,relro,-z,now,-z,noexecstack"
 
-# GPS OSS packages to use -fPIC in security flags instead of -fpie
+# PACKAGES to use -fPIC in security flags instead of -fPIE
+# GPS OSS packages
 SECURITY_CFLAGS_pn-gps-utils = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-loc-hal = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-loc-core = "${SECURITY_PIC_CFLAGS}"
@@ -15,22 +21,26 @@ SECURITY_CFLAGS_pn-loc-ds = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-loc-net-iface = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-location-api = "${SECURITY_PIC_CFLAGS}"
 
-# edk2 packages to use -pie in security flags instead of -fP
+# edk2
 SECURITY_CFLAGS_pn-edk2 = "-pie -fpie -Wa,--noexecstack"
 
-# packages to use -fPIC in security flags instead of -fpie
 SECURITY_CFLAGS_pn-gtest = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-libcutils  = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-liblog  = "${SECURITY_PIC_CFLAGS}"
-
-# libutils to use -fPIC in security flags instead of -fpie
-SECURITY_CFLAGS_pn-system-core = "${SECURITY_PIC_CFLAGS}"
-
-# libbinder to use -fPIC in security flags instead of -fpie
 SECURITY_CFLAGS_pn-binder  = "${SECURITY_PIC_CFLAGS}"
 
-# BT OSS packages to use -fPIC in security flags instead of -fpie
+# libutils need to use -fPIC instead of -fPIE
+SECURITY_CFLAGS_pn-system-core = "${SECURITY_PIC_CFLAGS}"
+
+# BT OSS packages
 SECURITY_CFLAGS_pn-bt-property = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-bt-app = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-libbt-vendor = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-fluoride = "${SECURITY_PIC_CFLAGS}"
+
+# PACKAGES which can't compile with _FORTIFY_SOURCE
+SECURITY_CFLAGS_remove_pn-ebtables = "-D_FORTIFY_SOURCE=2"
+
+# PACKAGES which can't compile with security format strings check
+SECURITY_CFLAGS_remove_pn-audiohal = "${SECURITY_STRINGFORMAT}"
+SECURITY_CFLAGS_remove_pn-setools = "${SECURITY_STRINGFORMAT}"
