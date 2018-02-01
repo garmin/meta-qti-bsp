@@ -22,6 +22,7 @@ IMAGE_INSTALL += "start-scripts-misc-daemon"
 IMAGE_INSTALL += "start-scripts-update-perms"
 IMAGE_INSTALL += "start-script-ab-slot-util"
 IMAGE_INSTALL += "start-scripts-recovery-updater"
+IMAGE_INSTALL += "sec-config"
 
 IMAGE_INSTALL += "base-files"
 IMAGE_INSTALL += "base-passwd"

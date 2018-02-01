@@ -25,7 +25,7 @@ node:2345:wait:mknod -m 660 /dev/media0 c 251 0
 chug:2345:wait:chown camera:system /dev/media0
 sys1:2345:wait:chmod 0222 /sys/kernel/debug/tracing/trace_marker
 
-qcam:2345:respawn:start-stop-daemon -c camera -S -a /system/bin/mm-qcamera-daemon
+qcam:2345:respawn:start-stop-daemon -c camera:sensors -S -a /system/bin/mm-qcamera-daemon
 srvm:2345:respawn:start-stop-daemon -c system -S -a /usr/bin/servicemanager
 qmfs:2345:respawn:start-stop-daemon -c camera:system -S -a /usr/bin/qmmf-server
 qmfw:2345:respawn:start-stop-daemon -c qmmfwebsvr:system -S -a /usr/bin/qmmf-webserver
