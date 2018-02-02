@@ -65,10 +65,12 @@ EXTRA_USERS_PARAMS = "\
  useradd -u 1006 -U camera;\
  useradd -u 1010 -U wifi; \
  useradd -u 1013 -U media; \
+ useradd -u 1021 -U gps; \
  useradd -u 1036 -U logd;\
  useradd -u 2000 -U adb; \
  useradd -u 3011 -U sensors; \
  useradd -u 4000 -U apps; \
+ useradd -u 4021 -U locclient; \
  useradd -u 9999 -U nobody; \
  useradd -u 5000 -U qmmfsvr; \
  useradd -u 5001 -U qmmfwebsvr; \
@@ -98,4 +100,5 @@ EXTRA_USERS_PARAMS = "\
  groupadd -g 3005 net_admin; \
  groupadd -g 3009 readproc; \
  groupadd -g 3010 wakelock; \
+ usermod -a -G system,gps,locclient gps; \
 "

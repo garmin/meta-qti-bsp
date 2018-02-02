@@ -45,4 +45,4 @@ z6:6:respawn:/sbin/sulogin
 #rb:5:respawn:/sbin/reboot-daemon
 
 m1:5:respawn:/usr/bin/diagrebootapp
-
+m4:5:respawn:/usr/bin/loc_launcher
