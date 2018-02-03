@@ -11,7 +11,7 @@ SRC_URI   = "file://system/core/"
 S = "${WORKDIR}/system/core"
 PR = "r19"
 
-DEPENDS = "virtual/kernel openssl glib-2.0 libselinux safe-iop ext4-utils libunwind libcutils libmincrypt"
+DEPENDS = "virtual/kernel openssl glib-2.0 libselinux safe-iop ext4-utils libunwind libcutils libmincrypt libbase"
 
 EXTRA_OECONF = " --with-host-os=${HOST_OS} --with-glib"
 EXTRA_OECONF_append = " --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
