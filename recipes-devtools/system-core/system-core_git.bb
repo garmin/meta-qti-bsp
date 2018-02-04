@@ -22,6 +22,9 @@ EXTRA_OECONF_append_apq8053 = " --enable-logd-privs"
 # Disable adb root privileges in USER builds for msm targets
 EXTRA_OECONF_append_msm = "${@base_conditional('USER_BUILD','1',' --disable-adb-root','',d)}"
 
+# Pass on system partition size to adb
+EXTRA_OECONF_append = " --with-system-size=${SYSTEM_SIZE_EXT4}"
+
 CPPFLAGS += "-I${STAGING_INCDIR}/ext4_utils"
 CPPFLAGS += "-I${STAGING_INCDIR}/libselinux"
 CPPFLAGS += "-I${STAGING_INCDIR}/libunwind"
