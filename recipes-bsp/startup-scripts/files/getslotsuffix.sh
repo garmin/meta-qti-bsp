@@ -28,19 +28,4 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-slot_suffix=""
-kernel_args=$(cat /proc/cmdline)
-
-ret=$(echo $kernel_args | grep -o androidboot.slot_suffix)
-if [ "$ret" = "androidboot.slot_suffix" ]; then
-   for arg in $kernel_args; do
-      key=$(echo $arg|cut -d '=' -f1)
-      value=$(echo $arg|cut -d '=' -f2)
-      if [ "$key" = "androidboot.slot_suffix" ]; then
-         slot_suffix=$value
-         echo $slot_suffix
-         exit 0
-      fi
-   done
-fi
-exit 1
+abctl --boot_slot
