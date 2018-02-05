@@ -43,10 +43,10 @@ CACHE_SIZE_EXT4 ?= "65536000"
 DISTRO_FEATURES_append = " vble"
 
 #Enable SDK feature
-SDK_IMAGE ?= "1"
+SDK_IMAGE ?= "0"
 
 #Enable Recovery image generation
-RECOVERY_IMAGE ?= "1"
+RECOVERY_IMAGE ?= "0"
 
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4"

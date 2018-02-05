@@ -1,12 +1,12 @@
 # The MSM Linux image rootfs creation files.
 
 # lk supports only 32-bit compilation.
-DEPENDS_append_arm += " lk"
-DEPENDS_append_aarch64 += " lib32-lk"
+# DEPENDS_append_arm += " lk"
+# DEPENDS_append_aarch64 += " lib32-lk"
 
 
 IMAGE_INSTALL += "packagegroup-core-boot"
-IMAGE_INSTALL += "${ROOTFS_PKGMANAGE_BOOTSTRAP}"
+#IMAGE_INSTALL += "${ROOTFS_PKGMANAGE_BOOTSTRAP}"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
 
 IMAGE_INSTALL += "start-scripts-firmware-links"
@@ -29,15 +29,15 @@ IMAGE_INSTALL += "system-core-logd"
 IMAGE_INSTALL += "system-core-leprop"
 IMAGE_INSTALL += "system-core-usb"
 IMAGE_INSTALL += "system-core-post-boot"
-IMAGE_INSTALL += "system-conf"
+#IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "system-prop"
 IMAGE_INSTALL += "wireless-tools"
 IMAGE_INSTALL += "volatile-binds"
 
 #32-bit only packages
 IMAGE_INSTALL += "${@base_contains('MULTILIB_VARIANTS', 'lib32', 'lib32-libnl', 'libnl', d)}"
-IMAGE_INSTALL += "${@base_contains('MULTILIB_VARIANTS', 'lib32', 'lib32-live555-qti', 'live555-qti', d)}"
-IMAGE_INSTALL += "${@base_contains('MULTILIB_VARIANTS', 'lib32', 'lib32-gtest', 'gtest', d)}"
+#IMAGE_INSTALL += "${@base_contains('MULTILIB_VARIANTS', 'lib32', 'lib32-live555-qti', 'live555-qti', d)}"
+#IMAGE_INSTALL += "${@base_contains('MULTILIB_VARIANTS', 'lib32', 'lib32-gtest', 'gtest', d)}"
 IMAGE_INSTALL += "${@base_contains('MULTILIB_VARIANTS', 'lib32', 'lib32-cairo', 'cairo', d)}"
 
 IMAGE_INSTALL += "libpagemap"
