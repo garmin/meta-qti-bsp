@@ -54,6 +54,7 @@ EXTRA_OECONF += "${@base_conditional('BASEPRODUCT', 'qsap', '--enable-snap-wlan=
 EXTRA_OECONF += "${@base_conditional('BASEPRODUCT', 'qsap', '--enable-qsap-wlan=yes', '', d)}"
 EXTRA_OECONF_remove = "${@base_conditional('PRODUCT', 'robot-rome', '--enable-pronto-wlan=yes', '', d)}"
 EXTRA_OECONF += "${@base_conditional('PRODUCT', 'robot-rome', '--enable-robot-wlan=yes', '', d)}"
+EXTRA_OECONF += "${@base_conditional('BASEPRODUCT', 'qsap', '--enable-naples-wlan=yes', '', d)}"
 
 INITSCRIPT_NAME   = "wlan_daemon"
 INITSCRIPT_PARAMS = "remove"
