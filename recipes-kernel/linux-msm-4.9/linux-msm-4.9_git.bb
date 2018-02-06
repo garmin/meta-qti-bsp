@@ -27,6 +27,20 @@ python __anonymous () {
       d.setVar("KERNEL_IMAGETYPE_FOR_MAKE", "")
 }
 
+# Additional defconfigs for systemd
+do_defconfig_patch () {
+cat >> ${S}/arch/${ARCH}/configs/${KERNEL_CONFIG} <<KERNEL_EXTRACONFIGS
+CONFIG_DEVTMPFS=y
+CONFIG_DEVTMPFS_MOUNT=y
+CONFIG_FHANDLE=y
+KERNEL_EXTRACONFIGS
+}
+
+do_patch_append () {
+    if bb.utils.contains('DISTRO_FEATURES', 'systemd', True, False, d):
+        bb.build.exec_func('do_defconfig_patch',d)
+}
+
 KERNEL_IMAGEDEST = "boot"
 
 DEPENDS_append_aarch64 = " libgcc"
