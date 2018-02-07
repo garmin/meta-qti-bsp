@@ -43,4 +43,5 @@ SECURITY_CFLAGS_remove_pn-ebtables = "-D_FORTIFY_SOURCE=2"
 
 # PACKAGES which can't compile with security format strings check
 SECURITY_CFLAGS_remove_pn-audiohal = "${SECURITY_STRINGFORMAT}"
+SECURITY_CFLAGS_remove_pn-fluoride = "${SECURITY_STRINGFORMAT}"
 SECURITY_CFLAGS_remove_pn-setools = "${SECURITY_STRINGFORMAT}"
