@@ -26,8 +26,9 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 [Unit]
-Description=Serial Getty on ttyHSL0
+Description=Serial Getty on @TERMINAL@
 Documentation=man:agetty(8) man:systemd-getty-generator(8)
+Documentation=http://0pointer.de/blog/projects/serial-console.html
 BindsTo=dev-%i.device
 After=dev-%i.device systemd-user-sessions.service plymouth-quit-wait.service
 After=rc-local.service
@@ -40,12 +41,12 @@ IgnoreOnIsolate=yes
 
 [Service]
 Environment="TERM=console"
-ExecStart=-/sbin/agetty -8 -L ttyHSL0 115200 $TERM
+ExecStart=-/sbin/agetty -8 -L @TERMINAL@ @BAUDRATE@ $TERM
 Type=idle
 Restart=always
 RestartSec=0
-UtmpIdentifier=ttyHSL0
-TTYPath=/dev/ttyHSL0
+UtmpIdentifier=@TERMINAL@
+TTYPath=/dev/@TERMINAL@
 TTYReset=yes
 TTYVHangup=yes
 KillMode=process

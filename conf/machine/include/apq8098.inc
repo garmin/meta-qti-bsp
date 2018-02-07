@@ -16,9 +16,11 @@ BBMASK .= "|.*/*/recipes-kernel/linux-msm-4.9"
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
 
-SERIAL_CONSOLE = "115200 ttyMSM0"
-PREFERRED_VERSION_weston ?= "1.1.9%"
+SERIAL_CONSOLE ?= "${@['', '115200 ttyMSM0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
+
 DISTRO ?= "msm"
+
+PREFERRED_VERSION_weston ?= "1.1.9%"
 
 MACHINE_FEATURES += "kernel26 keyboard"
 

@@ -12,7 +12,7 @@ require conf/machine/include/arm/arch-armv8.inc
 BBMASK = ".*/*/recipes-kernel/linux-msm-4.4"
 BBMASK .= "|.*/*/recipes-kernel/linux-quic"
 
-SERIAL_CONSOLE = "115200 ttyMSM0"
+SERIAL_CONSOLE ?= "${@['', '115200 ttyMSM0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
 
 DISTRO ?= "msm"
 

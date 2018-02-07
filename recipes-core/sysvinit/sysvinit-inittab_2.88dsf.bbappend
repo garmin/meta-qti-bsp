@@ -1,11 +1,11 @@
+inherit qperf
+
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
 
 SRC_URI += "\
            file://${BASEMACHINE}/inittab \
 "
 
-SERIAL_CONSOLE = "115200 console"
-TERMINAL = "${@bb.utils.contains_any('BASEMACHINE', 'apq8098 sdxpoorwills', 'ttyMSM0', 'ttyHSL0', d)}"
 USE_VT = "0"
 SYSVINIT_ENABLED_GETTYS = ""
 
@@ -13,20 +13,13 @@ do_install() {
     install -d ${D}${sysconfdir}
     install -m 0644 ${WORKDIR}/${BASEMACHINE}/inittab ${D}${sysconfdir}/inittab
 
-   if [ "${DISTRO_NAME}" != "msm-user" ]; then
-     if [ ! -z "${SERIAL_CONSOLE}" ]; then
-        echo "S:023456:respawn:${base_sbindir}/getty -L ${TERMINAL} ${SERIAL_CONSOLE}" >> ${D}${sysconfdir}/inittab
-     fi
-
-     idx=0
-#    tmp="${SERIAL_CONSOLES}"
-     tmp=""
-     for i in $tmp
-     do
-        j=`echo ${i} | sed s/\;/\ /g`
-        echo "${idx}:2345:respawn:${base_sbindir}/getty ${j}" >> ${D}${sysconfdir}/inittab
-        idx=`expr $idx + 1`
-     done
+    # SERIAL_CONSOLE is set from machine conf files in format 'baudrate terminal' (e.g. '115200 ttyMSM0')
+    if [ ! -z "${SERIAL_CONSOLE}" ]; then
+       tmp="${SERIAL_CONSOLE}"
+       BAUDRATE=`echo $tmp | head -n1 | awk '{print $1;}'`
+       TERMINAL=`echo $tmp | head -n1 | awk '{print $2;}'`
+       echo "S:023456:respawn:${base_sbindir}/getty -L ${TERMINAL} ${BAUDRATE} console" >> ${D}${sysconfdir}/inittab
+    fi
 
     if [ "${USE_VT}" = "1" ]; then
         cat <<EOF >>${D}${sysconfdir}/inittab
@@ -47,5 +40,4 @@ EOF
         done
         echo "" >> ${D}${sysconfdir}/inittab
     fi
-   fi
 }

@@ -16,7 +16,7 @@ BBMASK .= "|.*/*/recipes-devtools/mtd/"
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
 
-SERIAL_CONSOLE ?= "115200 ttyHSL0"
+SERIAL_CONSOLE ?= "${@['', '115200 ttyHSL0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
 
 DISTRO ?= "mdm"
 
