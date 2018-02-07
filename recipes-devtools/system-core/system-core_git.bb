@@ -42,7 +42,7 @@ COMPOSITION_apq8009 = "9091"
 COMPOSITION_apq8053 = "901D"
 COMPOSITION_apq8096 = "901D"
 COMPOSITION_apq8098 = "901D"
-COMPOSITION_sdxpoorwills = "90B8"
+COMPOSITION_sdxpoorwills = "90DB"
 
 do_install_append() {
    install -m 0755 ${S}/adb/launch_adbd -D ${D}${sysconfdir}/launch_adbd
