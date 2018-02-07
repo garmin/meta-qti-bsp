@@ -20,8 +20,8 @@ INSANE_SKIP_${PN} = "arch"
 
 EXTRA_OEMAKE = "'ANDROID_BUILD_TOP=${WORKSPACE}'\
                 'TARGET_GCC_VERSION=4.9'\
-                'CLANG_BIN=${WORKSPACE}/${SDCLANG_PATH}/' \
-                'CLANG_PREFIX=${STAGING_BINDIR_NATIVE}/arm-oe-linux-gnueabi/arm-oe-linux-gnueabi-' \
+                'CLANG_BIN=${STAGING_BINDIR_NATIVE}/llvm-arm-toolchain/bin/' \
+                'CLANG_PREFIX=${STAGING_BINDIR_NATIVE}/${TARGET_SYS}/${TARGET_PREFIX}' \
                 'TARGET_ARCHITECTURE=MACHINE_ARCH'\
                 'BUILDDIR=${S}'\
                 'BOOTLOADER_OUT=${S}/out'\
