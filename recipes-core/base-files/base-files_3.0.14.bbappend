@@ -22,6 +22,7 @@ dirs755 += "/media/cf /media/net /media/ram \
 dirs755_append_apq8053 +="/firmware /persist /cache /dsp "
 dirs755_append_apq8009 += "/firmware /persist /cache"
 dirs755_append_apq8017 += "/firmware /persist /cache /dsp"
+dirs755_append_qcs605 += "/firmware /persist /cache /dsp"
 
 do_install_append(){
     install -m 755 -o diag -g diag -d ${D}/media
