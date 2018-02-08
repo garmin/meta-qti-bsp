@@ -25,6 +25,9 @@ EXTRA_OECONF_append_msm = "${@base_conditional('USER_BUILD','1',' --disable-adb-
 # Pass on system partition size to adb
 EXTRA_OECONF_append = " --with-system-size=${SYSTEM_SIZE_EXT4}"
 
+#Pass on fec image size to adb
+EXTRA_OECONF_append = " --with-fec-size=${FEC_SIZE}"
+
 CPPFLAGS += "-I${STAGING_INCDIR}/ext4_utils"
 CPPFLAGS += "-I${STAGING_INCDIR}/libselinux"
 CPPFLAGS += "-I${STAGING_INCDIR}/libunwind"
