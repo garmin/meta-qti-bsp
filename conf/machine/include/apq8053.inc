@@ -10,7 +10,6 @@ require ${COREBASE}/meta-qti-bsp/conf/distro/include/security_flags.inc
 require conf/machine/include/arm/arch-armv8.inc
 
 BBMASK = ".*/*/recipes-kernel/linux-msm-4.4"
-BBMASK .= "|.*/*/recipes-kernel/linux-msm-4.9"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
