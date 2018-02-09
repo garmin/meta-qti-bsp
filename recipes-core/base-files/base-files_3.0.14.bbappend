@@ -18,9 +18,8 @@ dirs755 += "/media/cf /media/net /media/ram \
             /media/union /media/realroot /media/hdd \
             /media/mmc1 /systemrw"
 
-dirs755_append_apq8053 +="/persist /cache /dsp "
-
 #TODO Enabling systemd we need to add /firmware in dirs_755 list.
+dirs755_append_apq8053 +="/firmware /persist /cache /dsp "
 dirs755_append_apq8009 += "/firmware /persist /cache"
 dirs755_append_apq8017 += "/firmware /persist /cache /dsp"
 
