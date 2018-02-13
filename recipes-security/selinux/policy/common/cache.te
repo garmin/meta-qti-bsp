@@ -40,3 +40,4 @@ files_type(cache_t)
 #
 # /cache directory local policy
 #
+files_mountpoint(cache_t)

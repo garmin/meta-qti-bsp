@@ -40,3 +40,4 @@ files_type(persist_t)
 #
 # /persist mount local policy
 #
+files_mountpoint(persist_t)
