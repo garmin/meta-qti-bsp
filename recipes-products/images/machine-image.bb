@@ -1,5 +1,8 @@
 # List of packages installed onto the root file system as specified by the user.
-require ${BASEMACHINE}/${BASEMACHINE}-base-image.inc
+# If product is specifed include product inc otherwise include base inc.
+IMG_INC_FILE = "${BASEMACHINE}-${@[ d.getVar('PRODUCT', True), 'base'][d.getVar('PRODUCT', True) == ('' or 'base')]}-image"
+
+require ${BASEMACHINE}/${IMG_INC_FILE}.inc
 
 require include/mdm-bootimg.inc
 
