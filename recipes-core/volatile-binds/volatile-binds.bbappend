@@ -27,6 +27,10 @@ fi
 VOLATILE_BINDS = "\
 /systemrw/adb_devid  /etc/adb_devid\n\
 /systemrw/build.prop /etc/build.prop\n\
+/systemrw/ /etc/data/\n\
+/systemrw/ /etc/data/usb/\n\
+/systemrw/ /etc/data/miniupnpd/\n\
+/systemrw/rt_tables /etc/data/iproute2/rt_tables\n\
 "
 VOLATILE_BINDS_append_apq8017 = "\
 /systemrw/AlexaClientSDKConfig.json  /etc/AlexaClientSDKConfig.json \n\
