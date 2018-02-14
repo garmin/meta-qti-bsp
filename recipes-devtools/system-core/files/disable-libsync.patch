@@ -1,28 +1,20 @@
 diff --git a/Makefile.am b/Makefile.am
-index d8a8c72..7a01da9 100644
+index ebfd311..08ba0cc 100644
 --- a/Makefile.am
 +++ b/Makefile.am
-@@ -6,13 +6,13 @@ BUILD_COMPONENTS += base
+@@ -7,7 +7,6 @@ BUILD_COMPONENTS += base
  if BUILD_DEVICE
  BUILD_COMPONENTS += libutils
  BUILD_COMPONENTS += logwrapper
 -BUILD_COMPONENTS += libsync
-+#BUILD_COMPONENTS += libsync
  BUILD_COMPONENTS += fs_mgr
  BUILD_COMPONENTS += adb
  if USE_LOGD
- BUILD_COMPONENTS += logcat
- BUILD_COMPONENTS += libsysutils
--BUILD_COMPONENTS += logd
-+#BUILD_COMPONENTS += logd
- endif
- BUILD_COMPONENTS += libbacktrace
- BUILD_COMPONENTS += leproperties
 diff --git a/configure.ac b/configure.ac
-index 8603bc6..e3adcfa 100644
+index 6b78f1e..fb56d71 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -100,13 +100,10 @@ AC_CONFIG_FILES([ \
+@@ -112,8 +112,6 @@ AC_CONFIG_FILES([ \
      base/libbase.pc \
      logwrapper/Makefile \
      logwrapper/logwrapper.pc \
@@ -31,8 +23,3 @@ index 8603bc6..e3adcfa 100644
      fs_mgr/Makefile \
      fs_mgr/fs_mgr.pc \
      libsysutils/Makefile \
-     logcat/Makefile \
--    logd/Makefile \
-     adb/Makefile \
-     fastboot/Makefile \
-     leproperties/Makefile \
