@@ -34,3 +34,6 @@ vendor.audio.dolby.ds2.enabled=true
 
 #property to select 3/6 MICS
 ro.qc.sdk.fwk.mic_support=6
+
+#property to enable audio HAL server
+persist.vendor.audio.qas.enabled=false
