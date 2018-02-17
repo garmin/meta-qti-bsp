@@ -59,5 +59,9 @@ do_install_append(){
     ln -s /mnt/sdcard ${D}/sdcard
     rmdir ${D}/tmp
     ln -s /var/tmp ${D}/tmp
-    ln -s /var/run/resolv.conf ${D}/etc/resolv.conf
+    if [ ${BASEMACHINE} == "mdm9650" ]; then
+      ln -s /etc/resolvconf/run/resolv.conf ${D}/etc/resolv.conf
+    else
+      ln -s /var/run/resolv.conf ${D}/etc/resolv.conf
+    fi
 }
