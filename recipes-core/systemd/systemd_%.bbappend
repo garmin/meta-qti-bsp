@@ -10,6 +10,11 @@ SRC_URI += "file://mtpserver.rules"
 
 EXTRA_OECONF += " --disable-efi"
 
+# Don't use systemd network name resolution manager
+EXTRA_OECONF += " --disable-resolved"
+PACKAGECONFIG_remove = "resolved"
+ALTERNATIVE_LINK_NAME[resolv-conf] = "${sysconfdir}/resolv-systemd.conf"
+
 # In aarch64 targets systemd is not booting with -finline-functions -finline-limit=64 optimizations
 # So temporarily revert to default optimizations for systemd.
 FULL_OPTIMIZATION = "-O2 -fexpensive-optimizations -frename-registers -fomit-frame-pointer -ftree-vectorize"
