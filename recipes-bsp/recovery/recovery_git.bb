@@ -13,7 +13,7 @@ FILESPATH =+ "${WORKSPACE}:"
 SRC_URI = "file://bootable/recovery/"
 SRC_URI += "file://poky/meta-qti-bsp/recipes-bsp/recovery/files/recovery.service"
 
-S = "${WORKDIR}/bootable/${PN}/"
+S = "${WORKDIR}/bootable/recovery/"
 
 EXTRA_OECONF = "--with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include \
                 --with-core-headers=${STAGING_INCDIR}"
@@ -24,12 +24,17 @@ PARALLEL_MAKE = ""
 INITSCRIPT_NAME = "recovery"
 INITSCRIPT_PARAMS = "start 99 5 . stop 80 0 1 6 ."
 
+FILES_${PN}  = "${libdir} ${sysconfdir}"
 FILES_${PN} += "/cache"
+FILES_${PN} += "/data"
+FILES_${PN} += "/res"
 FILES_${PN} += "/system"
 FILES_${PN} += "/tmp"
-FILES_${PN} += "/res"
-FILES_${PN} += "/data"
 FILES_${PN} += "/lib"
+
+PACKAGES += "${PN}-bin"
+FILES_${PN}-bin += "${bindir}"
+
 do_install_append() {
         install -d ${D}/cache/
         install -d ${D}/tmp/
