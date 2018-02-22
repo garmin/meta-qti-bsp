@@ -58,3 +58,4 @@ type data_t;
 files_type(data_t);
 type wifi_data_file_t;
 files_type(wifi_data_file_t)
+files_mountpoint(data_t)
