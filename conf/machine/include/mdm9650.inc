@@ -8,7 +8,7 @@ include conf/machine/include/soc-family.inc
 require ${COREBASE}/meta-qti-bsp/conf/distro/include/security_flags.inc
 
 # Enable floating-point ABI to Hard-float
-DEFAULTTUNE = "cortexa8hf-neon"
+#DEFAULTTUNE = "cortexa8hf-neon"
 
 include conf/machine/include/tune-cortexa8.inc
 
@@ -46,7 +46,7 @@ USERDATA_SIZE_EXT4 ?= "2000000000"
 CACHE_SIZE_EXT4 ?= "80000000"
 
 #Enable SDK feature
-SDK_IMAGE ?= "1"
+#SDK_IMAGE ?= "1"
 
 # Formats of root filesystem images. 
 IMAGE_FSTYPES += "ext4 ubi"
