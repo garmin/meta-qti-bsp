@@ -9,7 +9,7 @@ python __anonymous() {
     revision = d.getVar('PR', True)
     if prd != "base":
         revision += "_"+prd
-    if var != "":
+    if var != "debug":
         revision += "_"+var
 
     # Update PR value to ensure recipe rebuilds.
