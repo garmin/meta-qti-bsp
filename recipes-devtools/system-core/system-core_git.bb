@@ -14,6 +14,7 @@ SRC_URI_append_qcs605       = " file://disable-libsync.patch"
 SRC_URI_append_sdxpoorwills = " file://disable-libsync.patch"
 SRC_URI_append_mdm9650 = " file://disable-libsync.patch"
 SRC_URI_append_mdm9607 = " file://disable-libsync.patch"
+SRC_URI_append_qcs405       = " file://disable-libsync.patch"
 
 S = "${WORKDIR}/system/core"
 PR = "r19"
