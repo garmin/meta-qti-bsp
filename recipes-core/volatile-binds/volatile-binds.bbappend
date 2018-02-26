@@ -31,6 +31,8 @@ VOLATILE_BINDS = "\
 /systemrw/ /etc/data/usb/\n\
 /systemrw/ /etc/data/miniupnpd/\n\
 /systemrw/rt_tables /etc/data/iproute2/rt_tables\n\
+/systemrw/boot_hsusb_comp /etc/usb/boot_hsusb_comp\n\
+/systemrw/boot_hsic_comp /etc/usb/boot_hsic_comp\n\
 "
 VOLATILE_BINDS_append_apq8017 = "\
 /systemrw/AlexaClientSDKConfig.json  /etc/AlexaClientSDKConfig.json \n\
