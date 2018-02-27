@@ -85,15 +85,10 @@ do_compile () {
 }
 
 do_shared_workdir_append () {
-
         cp Makefile $kerneldir/
-
         cp -fR usr $kerneldir/
 
-
         cp include/config/auto.conf $kerneldir/include/config/auto.conf
-
-
 
         if [ -d arch/${ARCH}/include ]; then
                 mkdir -p $kerneldir/arch/${ARCH}/include/
@@ -202,7 +197,7 @@ python update_cmdline () {
         cmdline = d.getVar('KERNEL_CMD_PARAMS', True)
         cmdline += " androidboot.veritymode=enforcing"
         # add "buildvariant=userdebug" for non-user builds.
-        cmdline += " ${@["buildvariant=userdebug", ""][(d.getVar('VARIANT', True) == 'user')]}"
+        cmdline += " ${@['buildvariant=userdebug', ''][(d.getVar('VARIANT', True) == 'user')]}"
         # generate and add verity key id.
         keycmd = "openssl x509 -in ${SECURITY_TOOLS_DIR}/verity.x509.pem -text \
                          | grep keyid | sed 's/://g' | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]' | sed 's/keyid//g'"

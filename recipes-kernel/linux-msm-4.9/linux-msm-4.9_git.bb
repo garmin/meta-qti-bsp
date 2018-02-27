@@ -27,20 +27,6 @@ python __anonymous () {
       d.setVar("KERNEL_IMAGETYPE_FOR_MAKE", "")
 }
 
-# Additional defconfigs for systemd
-do_defconfig_patch () {
-cat >> ${S}/arch/${ARCH}/configs/${KERNEL_CONFIG} <<KERNEL_EXTRACONFIGS
-CONFIG_DEVTMPFS=y
-CONFIG_DEVTMPFS_MOUNT=y
-CONFIG_FHANDLE=y
-KERNEL_EXTRACONFIGS
-}
-
-do_patch_append () {
-    if bb.utils.contains('DISTRO_FEATURES', 'systemd', True, False, d):
-        bb.build.exec_func('do_defconfig_patch',d)
-}
-
 KERNEL_IMAGEDEST = "boot"
 
 DEPENDS_append_aarch64 = " libgcc"
@@ -63,6 +49,7 @@ PV = "git"
 PR = "r5"
 
 DEPENDS += "mkbootimg-native dtc-native openssl-native"
+DEPENDS += " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'bouncycastle-native', '', d)}"
 RDEPENDS_kernel-base = ""
 
 PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
@@ -71,6 +58,20 @@ LDFLAGS_aarch64 = "-O1 --hash-style=gnu --as-needed"
 
 # Put the zImage in the kernel-dev pkg
 FILES_kernel-dev += "/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}"
+
+# Additional defconfigs for systemd
+do_defconfig_patch () {
+cat >> ${S}/arch/${ARCH}/configs/${KERNEL_CONFIG} <<KERNEL_EXTRACONFIGS
+CONFIG_DEVTMPFS=y
+CONFIG_DEVTMPFS_MOUNT=y
+CONFIG_FHANDLE=y
+KERNEL_EXTRACONFIGS
+}
+
+do_patch_append () {
+    if bb.utils.contains('DISTRO_FEATURES', 'systemd', True, False, d):
+        bb.build.exec_func('do_defconfig_patch',d)
+}
 
 do_configure () {
     oe_runmake_call -C ${S} ARCH=${ARCH} ${KERNEL_EXTRA_ARGS} ${KERNEL_CONFIG}
@@ -159,4 +160,34 @@ do_deploy() {
         --base ${KERNEL_BASE} \
         --ramdisk_offset 0x0 \
         ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img
+}
+
+# keep this path in-sync with bouncycastle recipe.
+SECURITY_TOOLS_DIR = "${TMPDIR}/work-shared/security_tools"
+
+# Copy verity certificate into ${S} to generate verity signed boot image
+do_configure_append () {
+    if [ "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'dm-verity', '', d)}" = "dm-verity" ] ; then
+        openssl x509 -in ${SECURITY_TOOLS_DIR}/verity.x509.pem -outform der -out ${S}/verity.x509
+    fi
+}
+
+# Update kernel cmdline for dm-verity.
+do_deploy[prefuncs] += "update_cmdline"
+
+python update_cmdline () {
+    if bb.utils.contains('DISTRO_FEATURES', 'dm-verity', True, False, d):
+        import subprocess
+
+        cmdline = d.getVar('KERNEL_CMD_PARAMS', True)
+        cmdline += " androidboot.veritymode=enforcing"
+        # add "buildvariant=userdebug" for non-user builds.
+        cmdline += " ${@['buildvariant=userdebug', ''][(d.getVar('VARIANT', True) == 'user')]}"
+        # generate and add verity key id.
+        keycmd = "openssl x509 -in ${SECURITY_TOOLS_DIR}/verity.x509.pem -text \
+                         | grep keyid | sed 's/://g' | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]' | sed 's/keyid//g'"
+        keyid = subprocess.check_output(keycmd, shell=True).strip()
+        cmdline += " veritykeyid=id:" + keyid
+
+        d.setVar('KERNEL_CMD_PARAMS', ''.join(cmdline))
 }
