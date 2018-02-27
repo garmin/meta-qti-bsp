@@ -30,6 +30,7 @@ VOLATILE_BINDS = "\
 /systemrw/ /etc/data/\n\
 /systemrw/ /etc/data/usb/\n\
 /systemrw/ /etc/data/miniupnpd/\n\
+/systemrw/ /etc/data/ipa/\n\
 /systemrw/rt_tables /etc/data/iproute2/rt_tables\n\
 "
 VOLATILE_BINDS_append_apq8017 = "\

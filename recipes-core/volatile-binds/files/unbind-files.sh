@@ -3,4 +3,5 @@ umount /etc/build.prop
 umount /etc/data/*
 umount /etc/data/usb/*
 umount /etc/data/miniupnpd/*
+umount /etc/data/ipa/*
 umount /etc/data/iproute2/rt_tables
