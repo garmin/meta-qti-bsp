@@ -7,7 +7,7 @@ IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux', 'selinux-con
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux', 'refpolicy-mls', '', d)}"
 
 IMAGE_INSTALL += "start-scripts-firmware-links"
-IMAGE_INSTALL += "start-scripts-find-partitions"
+#IMAGE_INSTALL += "start-scripts-find-partitions"
 IMAGE_INSTALL += "start-scripts-misc-daemon"
 
 IMAGE_INSTALL += "base-files"

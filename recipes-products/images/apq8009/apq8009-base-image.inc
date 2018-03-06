@@ -27,7 +27,7 @@ IMAGE_INSTALL += "liblog"
 
 IMAGE_INSTALL += "libxml2"
 
-IMAGE_INSTALL += "start-scripts-find-partitions"
+#IMAGE_INSTALL += "start-scripts-find-partitions"
 IMAGE_INSTALL += "start-scripts-firmware-links"
 IMAGE_INSTALL += "system-core-adbd"
 IMAGE_INSTALL += "system-core-logd"

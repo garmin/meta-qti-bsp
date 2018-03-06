@@ -10,7 +10,7 @@ IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
 
 IMAGE_INSTALL += "start-scripts-firmware-links"
-IMAGE_INSTALL += "start-scripts-find-partitions"
+#IMAGE_INSTALL += "start-scripts-find-partitions"
 IMAGE_INSTALL += "start-scripts-misc-daemon"
 IMAGE_INSTALL += "start-scripts-update-perms"
 
