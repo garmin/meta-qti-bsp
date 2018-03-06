@@ -8,4 +8,4 @@ Subject: [PATCH] new
  diag:*:53:
  rebooters:*:1301:diag
  nogroup:*:65534:
-+inet:x:3003:nobody
++inet:x:3003:nobody,root
