@@ -1,12 +1,12 @@
 # Rootfs creation.
 
-DEPENDS += "lk"
+#DEPENDS += "lk"
 
 # Formats of root filesystem images.
 
 IMAGE_INSTALL += "packagegroup-core-boot"
 
-IMAGE_INSTALL += "${ROOTFS_PKGMANAGE_BOOTSTRAP}"
+#IMAGE_INSTALL += "${ROOTFS_PKGMANAGE_BOOTSTRAP}"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
 
 # The MSM Linux minimal boot image files.
