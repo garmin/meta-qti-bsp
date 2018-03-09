@@ -11,7 +11,7 @@ IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
 
 # The MSM Linux minimal boot image files.
 
-IMAGE_INSTALL += "alx"
+#IMAGE_INSTALL += "alx"
 IMAGE_INSTALL += "base-files"
 IMAGE_INSTALL += "base-passwd"
 IMAGE_INSTALL += "chrony"
