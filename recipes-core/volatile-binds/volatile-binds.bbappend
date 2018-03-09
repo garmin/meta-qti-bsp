@@ -39,7 +39,7 @@ VOLATILE_BINDS_append_apq8017 = "\
 /systemrw/AlexaClientSDKConfig.json  /etc/AlexaClientSDKConfig.json \n\
 "
 VOLATILE_BINDS_append_apq8009 = "\
-/systemrw/AlexaClientSDKConfig.json  /etc/AlexaClientSDKConfig.json \n\
+/systemrw/AlexaClientSDKConfig.json  /etc/alexa/AlexaClientSDKConfig.json \n\
 "
 
 INITSCRIPT_PACKAGES =+ "${PN}"
