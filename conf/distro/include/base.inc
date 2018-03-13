@@ -4,6 +4,10 @@
 #@COMMENT: basically consists of: libc, busybox, udev, sysv init, and a few
 #@COMMENT: init scripts for running up the system on qti chipsets.
 #############################################################################
+BASEDISTRO ??= ""
+
+# Add BASEDISTRO to overrides
+DISTROOVERRIDES =. "${@['', '${BASEDISTRO}:']['${BASEDISTRO}' != '']}"
 
 # DISTRO FEATURE SELECTION
 MICRO_GOLD ?= "ld-is-gold"
@@ -40,15 +44,17 @@ USE_LDCONFIG = "0"
 LDCONFIGDEPEND = ""
 COMMERCIAL_LICENSE_DEPENDEES = ""
 
-# Add the yaffs2 imaging commands to the filesystem support for Bitbake as
-# OE-Core doesn't support them directly...
-IMAGE_CMD_yaffs2 = "mkyaffs2image ${EXTRA_IMAGECMD} ${IMAGE_ROOTFS} ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.yaffs2; chmod 644 ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.yaffs2"
-
-# fastboot imaging commands
-IMAGE_DEPENDS_fastboot = "mkbootimg-native virtual/kernel"
-IMAGE_CMD_fastboot = "${STAGING_BINDIR_NATIVE}/mkbootimg --kernel ${STAGING_DIR_TARGET}/kernel/arch/arm/boot/Image --ramdisk /dev/null --ramdisk_offset $(awk --non-decimal-data '/ _end/ {end="0x" $1} /_stext/ {beg="0x" $1} END {size1=end-beg+4096; size=and(size1,compl(4095)); printf("%#x",size)}' ${STAGING_DIR_TARGET}/boot/System.map-${MACHINE_KERNEL_VERSION}) --cmdline 'root=${MACHINE_ROOTDEV} rw init=/sbin/init --verbose loglevel=7 rootwait console=${MACHINE_CONSOLE} no_console_suspend=1 androidboot.hardware=qcom log_buf_len=262144' --base ${MACHINE_KERNEL_BASE} ${EXTRA_IMAGECMD} --pagesize ${MACHINE_FLASH_PAGE_SIZE} --output ${DEPLOY_DIR_IMAGE}/${IMAGE_NAME}.rootfs.fastboot"
-
 PREFERRED_VERSION_readline = "5.2"
+
+PRODUCT ??= "base"
+
+# Retain existing directory structure for msm or mdm distro images.
+# Append variants like '-perf', '-user' etc to deploy dir.
+DEPLOY_NAME_BASE = "${MACHINE}${@bb.utils.contains_any('DISTRO', 'msm mdm', '', '-' + d.getVar('DISTRO'), d)}"
+DEPLOY_NAME = "${DEPLOY_NAME_BASE}${@['-' + d.getVar('VARIANT', True), ''][d.getVar('VARIANT', True) == ('' or 'debug')]}"
+DEPLOY_DIR_IMAGE = "${DEPLOY_DIR}/images/${DEPLOY_NAME}"
+
+INHERIT += "extrausers"
 
 EXTRA_USERS_PARAMS = "\
  useradd -u 1000 -U system; \
@@ -100,3 +106,5 @@ EXTRA_USERS_PARAMS = "\
  groupadd -g 3009 readproc; \
  groupadd -g 3010 wakelock; \
 "
+
+EXTRA_USERS_PARAMS_append = " ${@['', 'usermod -L -e 1 root;'][d.getVar('VARIANT', True) == 'user']}"
