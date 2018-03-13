@@ -3,7 +3,7 @@ DEPENDS += "${@["","machine-recovery-image releasetools-native"][(d.getVar('RECO
 # Add tasks to generate recovery image, OTA zip files
 python __anonymous () {
     if d.getVar('RECOVERY_IMAGE', True) == '1' and bb.utils.contains('IMAGE_FSTYPES', 'ext4', True, False, d):
-        bb.build.addtask('do_recovery_ext4', 'do_build', 'do_rootfs', d)
+        bb.build.addtask('do_recovery_ext4', 'do_build', 'do_makesystem', d)
         bb.build.addtask('do_gen_otazip_ext4', 'do_build', 'do_recovery_ext4', d)
 }
 
@@ -19,6 +19,7 @@ do_recovery_ext4[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_EXT4}/OTA"
 do_recovery_ext4[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_EXT4}/RECOVERY"
 do_recovery_ext4[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_EXT4}/SYSTEM"
 do_recovery_ext4[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_EXT4}/RADIO"
+do_recovery_ext4[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_EXT4}/IMAGES"
 
 # Create this folder just for saving file_contexts(SElinux security context file),
 # It will be used to generate OTA packages when selinux_fc is set.
@@ -39,6 +40,12 @@ do_recovery_ext4() {
     cp ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/BOOTABLE_IMAGES/boot.img
 
     cp ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/BOOTABLE_IMAGES/recovery.img
+    cp ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/IMAGES/recovery.img
+    cp ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/IMAGES/boot.img
+    cp ${DEPLOY_DIR_IMAGE}/${MACHINE}*-sysfs.ext4 ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/IMAGES/system.img
+    if [ -e ${DEPLOY_DIR_IMAGE}/system.map ]; then
+       cp ${DEPLOY_DIR_IMAGE}/system.map ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/IMAGES/system.map
+    fi
 
     # copy the contents of system rootfs
     cp -r ${IMAGE_ROOTFS}/. ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/SYSTEM/.
@@ -55,7 +62,7 @@ do_recovery_ext4() {
     echo /cache    ext4  cache >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/RECOVERY/recovery.fstab
     echo /data     ext4  userdata >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/RECOVERY/recovery.fstab
     echo /recovery emmc  /dev/block/bootdevice/by-name/recovery >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/RECOVERY/recovery.fstab
-    echo /system   ext4  system >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/RECOVERY/recovery.fstab
+    echo /system   ext4  /dev/block/bootdevice/by-name/system >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/RECOVERY/recovery.fstab
 
     #Copy contents of userdata rootfs
     if [ -d ${TMPDIR}/rootfs/${MACHINE}-usrfs/ ]; then
@@ -122,23 +129,40 @@ do_recovery_ext4() {
 
     #default_system_dev_certificate : Dummy location
     echo default_system_dev_certificate=build/abcd >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
+
+    if [ "${BASEMACHINE}" == "apq8053" ]; then
+        echo recovery_upgrade_supported=1 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
+    fi
 }
 
 # Task to generate OTA zip files
 python do_gen_otazip_ext4() {
     import subprocess
+    cmd0  = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./make_recovery_patch ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4 ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4"
+    subprocess.call(cmd0, shell=True)
 
-    cmd1 = "cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4 && zip -qry ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ext4.zip *"
+    # Clean up any existing target-files*.zip as this can lead to incorrect content getting packed in the zip.
+    cleanupcmd = "rm ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ext4.zip"
+    subprocess.call(cleanupcmd, shell=True)
+
+    cmd1 = "cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4 && zip -qry -FS ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ext4.zip *"
     subprocess.call(cmd1, shell=True)
 
-    cmd2 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ext4.zip ${IMAGE_ROOTFS} ext4"
+    cmd2 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && zip -qry target-files-ext4.zip BOOTABLE_IMAGES/recovery-unsparsed.ext4"
 
     if (d.getVar('OTA_EXTRA_OPTS', True) == '1'):
         cmd2 += " -p system/ -c ${WORKDIR}/rootfs-fsconfig.conf"
 
     subprocess.call(cmd2, shell=True)
 
-    cmd3 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ext4.zip target-files-ext4.zip ${DEPLOY_DIR_IMAGE}"
+    cmd3 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ext4.zip ${IMAGE_ROOTFS} ext4"
+
+    if (d.getVar('OTA_EXTRA_OPTS', True) == '1'):
+        cmd3 += " -p system/ -c ${WORKDIR}/rootfs-fsconfig.conf"
+
     subprocess.call(cmd3, shell=True)
+
+    cmd4 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ext4.zip target-files-ext4.zip ${DEPLOY_DIR_IMAGE}"
+    subprocess.call(cmd4, shell=True)
 }
 

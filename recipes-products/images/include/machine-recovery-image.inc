@@ -16,7 +16,9 @@ IMAGE_INSTALL += "base-passwd"
 IMAGE_INSTALL += "system-core-adbd"
 IMAGE_INSTALL += "system-core-logd"
 IMAGE_INSTALL += "system-core-usb"
+IMAGE_INSTALL += "recovery-bin"
 IMAGE_INSTALL += "recovery"
+IMAGE_INSTALL += "${@base_contains('MULTILIB_VARIANTS', 'lib32', 'lib32-recovery', '', d)}"
 IMAGE_INSTALL += "powerapp"
 IMAGE_INSTALL += "powerapp-powerconfig"
 IMAGE_INSTALL += "powerapp-reboot"
@@ -47,24 +49,37 @@ SELINUX_FILE_CONTEXTS = "${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_con
 
 do_fsconfig() {
  chmod go-r ${IMAGE_ROOTFS}/etc/passwd
- chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/
- if [ "${DISTRO_NAME}" == "msm-user" ]; then
-  if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
-    rm ${IMAGE_ROOTFS}/lib/systemd/system/sys-kernel-debug.mount
-  else
+ if ${@bb.utils.contains('DISTRO_FEATURES','systemd','false','true',d)}; then
+  if [ "${DISTRO_NAME}" == "msm-user" ]; then
+   if [ -e ${IMAGE_ROOTFS}/etc/init.d/sysfs.sh]; then
     sed -i '/mount -t debugfs/ d' ${IMAGE_ROOTFS}/etc/init.d/sysfs.sh
+   fi
   fi
+  chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/
  fi
 }
+
+UNSPARSED_RECOVERYFS_DEST = "${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/BOOTABLE_IMAGES"
+
+# Create a BOOTABLE_IMAGES dir in this location,
+# so as to maintain directory structure for zipping
+do_makesystem[cleandirs] += "${UNSPARSED_RECOVERYFS_DEST}"
 
 # Below is to generate sparse ext4 recovery image (OE by default supports raw ext4 images)
 do_makesystem() {
     if [ "${MACHINE}" != "mdm9607" ]; then
+
         # SELinux feature is enabled
         if [[ "${DISTRO_FEATURES}" =~ "selinux" ]]; then
             make_ext4fs -s -a / -S ${SELINUX_FILE_CONTEXTS} -l ${RECOVERYFS_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-recovery.ext4 ${IMAGE_ROOTFS}
+
+            # Create an unsparse image as well to be included as part ota target-files
+            make_ext4fs -a / -S ${SELINUX_FILE_CONTEXTS} -l ${RECOVERYFS_SIZE_EXT4} ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4 ${IMAGE_ROOTFS}
         else
             make_ext4fs -s -l ${RECOVERYFS_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-recovery.ext4 ${IMAGE_ROOTFS}
+
+            # Create an unsparse image as well to be included as part ota target-files
+            make_ext4fs -l ${RECOVERYFS_SIZE_EXT4} ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4 ${IMAGE_ROOTFS}
         fi
     fi
 

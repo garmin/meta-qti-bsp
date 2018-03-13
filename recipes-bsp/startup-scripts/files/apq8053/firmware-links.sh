@@ -33,11 +33,12 @@
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 export PATH
 
+slot_suffix=$(getslotsuffix)
 
 if [ -f /etc/selinux/config ];then
-   mount -t vfat /dev/mmcblk0p1 /firmware -o context=system_u:object_r:firmware_t:s0,noexec,nodev,ro
+   mount -t vfat /dev/block/bootdevice/by-name/modem${slot_suffix} /firmware -o context=system_u:object_r:firmware_t:s0,noexec,nodev,ro,gid=1000
 else
-   mount -t vfat /dev/mmcblk0p1 /firmware -o noexec,nodev,ro
+   mount -t vfat /dev/block/bootdevice/by-name/modem${slot_suffix} /firmware -o noexec,nodev,ro,gid=1000
 fi
 
 

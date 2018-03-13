@@ -6,6 +6,8 @@
 #############################################################################
 
 # DISTRO FEATURE SELECTION
+MICRO_GOLD ?= "ld-is-gold"
+MICRO_GOLD_apq8017 = ""
 
 USE_DEVFS = "0"
 
@@ -87,6 +89,9 @@ EXTRA_USERS_PARAMS = "\
  usermod -L -e 1 adb; \
  usermod -L -e 1 sensors; \
  usermod -L -e 1 apps; \
+ usermod -L -e 1 adb; \
+ usermod -L -e 1 sensors; \
+ usermod -L -e 1 Apps; \
  usermod -L -e 1 nobody; \
  usermod -L -e 1 qmmfsvr; \
  usermod -L -e 1 qmmfwebsvr; \
@@ -97,8 +102,8 @@ EXTRA_USERS_PARAMS = "\
  usermod -a -G diag,inet,system,leprop sensors; \
  usermod -a -G inet,system,leprop camera; \
  usermod -a -G leprop bluetooth; \
+ usermod -a -G system,gps,locclient gps; \
  groupadd -g 3005 net_admin; \
  groupadd -g 3009 readproc; \
  groupadd -g 3010 wakelock; \
- usermod -a -G system,gps,locclient gps; \
 "

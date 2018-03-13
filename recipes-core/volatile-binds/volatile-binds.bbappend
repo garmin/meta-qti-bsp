@@ -24,6 +24,7 @@ else
   install -m 0755 start_robind -D ${D}${sysconfdir}/init.d/robind
 fi
 }
+
 VOLATILE_BINDS = "\
 /systemrw/adb_devid  /etc/adb_devid\n\
 /systemrw/build.prop /etc/build.prop\n\

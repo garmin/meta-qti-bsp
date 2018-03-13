@@ -36,6 +36,7 @@ if [ "$#" -lt 4 ]; then
     echo "----------------------------------------------------------------------------------------------------"
     echo "example: $0 v1_target_files_ubi.zip  v2_target_files_ubi.zip  machine-image/1.0-r0/rootfs ubi"
     echo "example: $0 v1_target_files_ext4.zip v2_target_files_ext4.zip machine-image/1.0/rootfs ext4"
+    echo "example: $0 v1_target_files_ext4.zip v2_target_files_ext4.zip machine-image/1.0/rootfs ext4 --block"
     exit 1
 fi
 
@@ -46,11 +47,16 @@ export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 export FSCONFIGFOPTS=" "
+block_based=" "
 
 if [ "$#" -gt 4 ]; then
     IFS=' ' read -a allopts <<< "$@"
     for i in $(seq 4 $#); do
-        FSCONFIGFOPTS=$FSCONFIGFOPTS${allopts[${i}]}" "
+       if [ "${allopts[${i}]}" = "--block" ]; then
+           block_based="${allopts[${i}]}"
+       else
+           FSCONFIGFOPTS=$FSCONFIGFOPTS${allopts[${i}]}" "
+       fi
     done
 fi
 
@@ -73,4 +79,4 @@ fi
 
 cd target_files && zip -q ../$2 META/*filesystem_config.txt SYSTEM/build.prop && cd ..
 
-python3 ./ota_from_target_files -n -v -d $device_type -v -p . -s "${WORKSPACE}/android_compat/device/qcom/common" --no_signing -i $1 $2 update_incr_$4.zip
+./ota_from_target_files $block_based -n -v -d $device_type -v -p . -s "${WORKSPACE}/android_compat/device/qcom/common" --no_signing -i $1 $2 update_incr_$4.zip
