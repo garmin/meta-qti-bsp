@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2013,2017 The Linux Foundation. All rights reserved.
+# Copyright (c) 2013,2017-2018 The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -36,7 +36,9 @@ FindAndMountEXT4 () {
    mmc_block_device=/dev/block/bootdevice/by-name/$partition
    mkdir -p $dir
    mount -t ext4 $mmc_block_device $dir -o $flags
-   /sbin/restorecon -R $2
+   if [ -x /sbin/restorecon ]; then
+       /sbin/restorecon -R $dir
+   fi
 }
 
 FindAndMountEXT4 userdata /data relatime,data=ordered,noauto_da_alloc,discard,nodev,nosuid
