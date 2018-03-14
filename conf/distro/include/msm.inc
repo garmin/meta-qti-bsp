@@ -23,13 +23,6 @@ FULL_OPTIMIZATION         += " -finline-functions -finline-limit=64 "
 # Ignore a few common warnings
 FULL_OPTIMIZATION         += " -Wno-error=maybe-uninitialized -Wno-error=unused-result "
 
-# These flags are taken from android build tree and can be used by recipes if needed.
-
-OPTIONAL_CFLAGS = "-fstack-protector -fdata-sections -funwind-tables -Wa,--noexecstack  -Wformat  -Werror=format-security -D_FORTIFY_SOURCE=2  -fno-short-enums -no-canonical-prefixes -Wno-error=return-type"
-OPTIONAL_CFLAGS += " -fmessage-length=0 -DNDEBUG -UDEBUG -Wno-error=unused-result -Wno-error=attributes -Wno-error=uninitialized -Wno-error=unused-variable -Wno-error=unused-parameter -Wno-error=builtin-macro-redefined -Wno-error=type-limits -Wno-error=unused-but-set-variable "
-THUMB_FLAGS = " -Os -mthumb "
-OPTIONAL_LDFLAGS = "-Wl,-z,noexecstack -Wl,-z,relro -Wl,-z,now -Wl,--warn-shared-textrel -Wl,--fatal-warnings "
-
 # NLS
 USE_NLS = "no"
 USE_NLS_glib-2.0 = "yes"
