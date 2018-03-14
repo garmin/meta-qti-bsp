@@ -39,6 +39,8 @@ do_install() {
         install -d ${D}/boot
 }
 
+do_configure[noexec]="1"
+
 FILES_${PN} = "/boot"
 FILES_${PN}-dbg = "/boot/.debug"
 

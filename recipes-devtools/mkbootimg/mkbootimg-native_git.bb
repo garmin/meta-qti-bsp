@@ -21,7 +21,7 @@ do_fetch () {
 }
 
 EXTRA_OEMAKE = "INCLUDES='-Imincrypt' LIBS='${libdir}/libmincrypt.a'"
-
+do_configure[noexec]="1"
 do_install() {
 	install -d ${D}${bindir}
 	install ${MY_PN} ${D}${bindir}
