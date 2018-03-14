@@ -34,10 +34,14 @@ PAGE_SIZE ?= '4096'
 EXTRA_IMAGECMD ?= "-N 2048"
 
 # Sizes for EXT4 (in bytes)
-SYSTEM_SIZE_EXT4 ?= "768000000"
+SYSTEM_SIZE_EXT4 ?= "786432000"
 SYSTEMRW_SIZE_EXT4 ?= "8388608"
 USERDATA_SIZE_EXT4 ?= "3000000000"
-CACHE_SIZE_EXT4 ?= "65536000"
+CACHE_SIZE_EXT4 ?= "734003200"
+
+# FEC_SIZE depends on SYSTEM_SIZE_EXT4; command: fec -s "<SYSTEM_SIZE>"
+# If fec enable :  "6172672" ; fec disable : 0 bytes of image size
+FEC_SIZE ?= "6172672"
 
 # Enable LE Verified Boot
 DISTRO_FEATURES_append = " vble"
@@ -53,3 +57,5 @@ IMAGE_FSTYPES += "ext4"
 
 #Extra fsconfig related options for ota package generator scripts.
 OTA_EXTRA_OPTS ?= "1"
+
+# DISTRO_FEATURES += "ab-support"

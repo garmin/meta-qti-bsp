@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2016-2017 The Linux Foundation. All rights reserved.
+# Copyright (c) 2017-2018 The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -26,30 +26,44 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# find_partitions        init.d script to dynamically find partitions
+# trigger-recovery-updater
+# This is an init script that spawns recovery-updater.sh as a daemon.
+# The daemon will be launched as user-system:group-system.
+# an upgrade.
+# This script itself runs as root.
 #
 
-FindAndMountEXT4 () {
-   partition=$1
-   dir=$2
-   flags=$3
-   mmc_block_device=/dev/block/bootdevice/by-name/$partition
-   mkdir -p $dir
-   mount -t ext4 $mmc_block_device $dir -o $flags
-   /sbin/restorecon -R $2
+set -e
 
-   if [ $1 == "dsp" ]; then
-      chown -R system:system $2
-      mount -o ro,remount /dsp
-   fi
-}
+PIDFILE=/var/run/recovery-updater.pid
 
-slot_suffix=$(getslotsuffix)
+case "$1" in
+  start)
+        # chgrp of /cache to "system" so that
+        # recovery-updater can also access it
+        find /cache -exec chgrp system {} +
+        chmod -R g+rw /cache
+        find /cache -type d -exec chmod g+s {} +
+        echo -e "Starting recovery-updater ..." > /dev/kmsg
 
-FindAndMountEXT4 userdata /data relatime,data=ordered,noauto_da_alloc,discard,nodev,nosuid,noexec
-FindAndMountEXT4 dsp${slot_suffix} /dsp relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
-FindAndMountEXT4 persist /persist relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
-FindAndMountEXT4 cache  /cache relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
-FindAndMountEXT4 systemrw  /systemrw relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
+        # start recovery-updater as user:system and group:system
+        start-stop-daemon -S -m -p $PIDFILE \
+                -c system:system -b -a /etc/recovery-updater.sh
+
+        pid=`cat $PIDFILE`
+        echo -e "\nStarted recovery-updater! pid - $pid ..." > /dev/kmsg
+        rm -f $PIDFILE #clean up the pid file to avoid reading stale entries
+        ;;
+  stop)
+        # Do nothing
+        ;;
+  restart)
+        # Do nothing
+        ;;
+  *)
+        echo "Usage $0 { start | stop | restart}" >&2
+        exit 1
+        ;;
+esac
 
 exit 0

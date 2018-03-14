@@ -41,11 +41,15 @@ EXTRA_OEMAKE = "${MY_TARGET} TOOLCHAIN_PREFIX='${TARGET_PREFIX}'  LIBGCC='${LIBG
 
 EXTRA_OEMAKE_append_mdm9650 = " ENABLE_EARLY_ETHERNET=1"
 
-EXTRA_OEMAKE_append = " VERIFIED_BOOT=0 DEFAULT_UNLOCK=true EMMC_BOOT=${emmc_bootloader} APPEND_CMDLINE=${emmc_bootloader}"
+EXTRA_OEMAKE_append = " VERIFIED_BOOT=0 DEFAULT_UNLOCK=true EMMC_BOOT=${emmc_bootloader}"
+
+EXTRA_OEMAKE_append = " ${@base_contains('DISTRO_FEATURES', 'ab-support', '', 'APPEND_CMDLINE=1', d)}"
 
 EXTRA_OEMAKE_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'USE_LE_SYSTEMD=true', '', d)}"
 
 EXTRA_OEMAKE_append = " ${@base_contains('DISTRO_FEATURES', 'vble', 'VERIFIED_BOOT_LE=1', '', d)}"
+
+EXTRA_OEMAKE_append = " ${@base_contains('DISTRO_FEATURES', 'dm-verity', 'VERITY_LE=1', '', d)}"
 
 #enable hardfloat
 EXTRA_OEMAKE_append = " ${@ bb.utils.contains('TUNE_FEATURES', 'callconvention-hard', 'ENABLE_HARD_FPU=1', '', d)}"
