@@ -9,8 +9,8 @@ BLOCK_SIZE = "4096"
 BLOCK_DEVICE_SYSTEM ?= "/dev/block/bootdevice/by-name/system"
 ORG_SYSTEM_SIZE_EXT4 = "0"
 VERITY_SIZE = "0"
-FEC_SUPPORT = "1"
 
+FEC_SUPPORT = "${@bb.utils.contains('VERITY_ENABLED', '1', '1', '0', d)}"
 DEPENDS += " ${@bb.utils.contains('FEC_SUPPORT', '1', 'fec-native', '', d)}"
 
 VERITY_IMAGE_DIR     = "${DEPLOY_DIR_IMAGE}/verity"
