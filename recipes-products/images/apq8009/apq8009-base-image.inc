@@ -19,6 +19,9 @@ IMAGE_INSTALL += "base-passwd"
 
 IMAGE_INSTALL += "binder"
 
+#Install coreutils for non-user builds.
+IMAGE_INSTALL += "${@bb.utils.contains('VARIANT','user','','coreutils',d)}"
+
 IMAGE_INSTALL += "glib-2.0"
 
 IMAGE_INSTALL += "libnl"
