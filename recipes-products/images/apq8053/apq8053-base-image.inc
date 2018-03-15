@@ -8,7 +8,7 @@ inherit dm-verity
 
 # Compute sha1sum of unsparsed recovery&recoveryfs images
 # only after recoveryfs.ext4 image creation has already happened.
-do_rootfs[depends] += "machine-recovery-image:do_makesystem"
+do_rootfs[depends] = "${@["","machine-recovery-image:do_makesystem"][(d.getVar('RECOVERY_IMAGE', True) == '1')]}"
 
 IMAGE_INSTALL += "packagegroup-core-boot"
 #IMAGE_INSTALL += "${ROOTFS_PKGMANAGE_BOOTSTRAP}"
