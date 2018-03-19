@@ -55,7 +55,7 @@ EXTRA_OEMAKE_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'VE
 EXTRA_OEMAKE_append = " ${@ bb.utils.contains('TUNE_FEATURES', 'callconvention-hard', 'ENABLE_HARD_FPU=1', '', d)}"
 
 #add more cflags to lk, if GCC6.3 version
-EXTRA_OEMAKE_append = " 'LKLE_CFLAGS=-Wno-shift-negative-value -Wno-misleading-indentation -Wunused-const-variable=0 ' "
+EXTRA_OEMAKE_append = " 'LKLE_CFLAGS=-Wno-shift-negative-value -Wno-misleading-indentation -Wunused-const-variable=0 -DINIT_BIN_LE=\"/sbin/init\"' "
 
 do_install() {
         install -d ${D}/boot
