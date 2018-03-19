@@ -17,13 +17,17 @@ do_install_append_msm(){
       install -d ${D}/etc/initscripts
       cp ${D}/etc/init.d/wlan ${D}/etc/initscripts/wlan
       install -d ${D}/etc/systemd/system/
-      install -m 0644 ${WORKDIR}/wlan_daemon.service -D ${D}/etc/systemd/system/wlan_daemon.service
       install -d ${D}/etc/systemd/system/multi-user.target.wants/
-      # enable the service for multi-user.target
-      ln -sf /etc/systemd/system/wlan_daemon.service \
-         ${D}/etc/systemd/system/multi-user.target.wants/wlan_daemon.service
+    if ${@base_conditional('BASEMACHINE', 'apq8009', base_conditional('BASEPRODUCT', 'qsap', 'false', 'true', d), 'true', d)}; then
+        install -m 0644 ${WORKDIR}/wlan_daemon.service -D ${D}/etc/systemd/system/wlan_daemon.service
+        # enable the service for multi-user.target
+        ln -sf /etc/systemd/system/wlan_daemon.service \
+           ${D}/etc/systemd/system/multi-user.target.wants/wlan_daemon.service
+    fi
   else
-     install -m 0755 ${S}/wlan_daemon -D ${D}${sysconfdir}/init.d/wlan_daemon
+    if ${@base_conditional('BASEMACHINE', 'apq8009', base_conditional('BASEPRODUCT', 'qsap', 'false', 'true', d), 'true', d)}; then
+        install -m 0755 ${S}/wlan_daemon -D ${D}${sysconfdir}/init.d/wlan_daemon
+    fi
   fi
 }
 
