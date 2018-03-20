@@ -31,7 +31,7 @@ BOOTLOADER_NAME = "${@bb.utils.contains('DISTRO_FEATURES', 'emmc-boot', 'emmc_ap
 
 emmc_bootloader = "${@bb.utils.contains('DISTRO_FEATURES', 'emmc-boot', '1', '0', d)}"
 
-LIBGCC = "${STAGING_LIBDIR}/${TARGET_SYS}/6.3.0/libgcc.a"
+LIBGCC = "${STAGING_LIBDIR}/${TARGET_SYS}/6.4.0/libgcc.a"
 
 DISPLAY_SCREEN = "${@base_conditional('PRODUCT', 'drone', '0', '1', d)}"
 
