@@ -9,6 +9,8 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 PR = "r1"
 
 DEPENDS += "libhardware system-media"
+DEPENDS += "binder"
+DEPENDS += "liblog"
 
 FILESPATH =+ "${WORKSPACE}:"
 SRC_URI   = "file://frameworks/av/"
@@ -23,6 +25,7 @@ FILES_${PN}        = "${libdir}/libcamera_client.so.* ${libdir}/pkgconfig/* ${bi
 FILES_${PN}-dev    = "${libdir}/libcamera_client.so ${libdir}/libcamera_client.la ${includedir}"
 
 CPPFLAGS += "-I${STAGING_INCDIR}/camera"
+LDFLAGS += "-llog"
 
 do_install_append() {
    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
