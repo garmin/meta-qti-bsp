@@ -3,7 +3,7 @@
 inherit dm-verity
 
 # lk supports only 32-bit compilation.
-DEPENDS_append_arm += " lk"
+# DEPENDS_append_arm += " lk"
 # DEPENDS_append_aarch64 += " lib32-lk"
 
 # Compute sha1sum of unsparsed recovery&recoveryfs images
