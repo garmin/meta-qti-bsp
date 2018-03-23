@@ -27,7 +27,7 @@ do_install_append(){
     install -m 755 -o diag -g diag -d ${D}/media
     install -m 755 -o diag -g diag -d ${D}/mnt/sdcard
 
-    if ${@base_contains('DISTRO_FEATURES','selinux','true','false',d)}; then
+    if ${@bb.utils.contains('DISTRO_FEATURES','selinux','true','false',d)}; then
       install -m 0644 ${WORKDIR}/selinux-fstab ${D}${sysconfdir}/fstab
     else
       install -m 0644 ${WORKDIR}/fstab ${D}${sysconfdir}/fstab
@@ -35,8 +35,8 @@ do_install_append(){
       sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware.mount
     fi
 
-    if ${@base_contains('DISTRO_FEATURES','systemd','true','false',d)}; then
-      if ${@base_contains('DISTRO_FEATURES','nand-boot','false','true',d)};then
+    if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+      if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)};then
        install -d 0644 ${D}${sysconfdir}/systemd/system
        install -m 0644 ${WORKDIR}/systemd/cache.mount ${D}${sysconfdir}/systemd/system/cache.mount
        install -m 0644 ${WORKDIR}/systemd/firmware.mount ${D}${sysconfdir}/systemd/system/firmware.mount
@@ -47,7 +47,7 @@ do_install_append(){
        ln -sf  ../firmware.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware.mount
        ln -sf  ../dsp.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp.mount
        ln -sf  ../persist.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/persist.mount
-       if ${@base_contains('DISTRO_FEATURES','ro-rootfs','true','false',d)}; then
+       if ${@bb.utils.contains('DISTRO_FEATURES','ro-rootfs','true','false',d)}; then
           install -m 0644 ${WORKDIR}/systemd/systemrw.mount ${D}${sysconfdir}/systemd/system/systemrw.mount
           ln -sf  ../systemrw.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/systemrw.mount
        fi
