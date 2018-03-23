@@ -63,4 +63,4 @@ IMAGE_FSTYPES += "ext4"
 #Extra fsconfig related options for ota package generator scripts.
 OTA_EXTRA_OPTS ?= "1"
 
-# DISTRO_FEATURES += "ab-support"
+DISTRO_FEATURES += "ab-boot-support"
