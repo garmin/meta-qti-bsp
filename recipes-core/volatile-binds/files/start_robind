@@ -35,7 +35,7 @@ set -e
 case "$1" in
   start)
         echo -n "Starting ro-binding: " >/dev/kmsg
-        start-stop-daemon -S -b -a /sbin/bind-files.sh
+        start-stop-daemon -S -a /sbin/bind-files.sh
         echo "done"
         ;;
   stop)
