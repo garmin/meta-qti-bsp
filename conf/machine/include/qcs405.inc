@@ -10,8 +10,9 @@ require ${COREBASE}/meta-qti-bsp/conf/distro/include/security_flags.inc
 
 include conf/machine/include/arm/arch-armv8.inc
 
-BBMASK = ".*/*/recipes-kernel/linux-msm-4.4"
-BBMASK .= "|.*/*/recipes-kernel/linux-quic"
+# TODO: preferred kernel will be linux-msm_4.14"
+PREFERRED_PROVIDER_virtual/kernel = "linux-msm"
+PREFERRED_VERSION_linux-msm = "4.9%"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
@@ -22,9 +23,6 @@ DISTRO ?= "msm"
 
 DISTRO_FEATURES_append = " ro-rootfs"
 
-# TODO: preferred kernel will be linux-msm-4.14"
-
-PREFERRED_PROVIDER_virtual/kernel ?= "linux-msm-4.9"
 PAGE_SIZE ?= '4096'
 
 MACHINE_FEATURES += "kernel26 keyboard"

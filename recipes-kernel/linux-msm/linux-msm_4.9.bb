@@ -47,7 +47,6 @@ SRC_URI   =  "file://kernel"
 SRC_DIR   =  "${WORKSPACE}/kernel/msm-4.9"
 S         =  "${WORKDIR}/kernel/msm-4.9"
 GITVER    =  "${@base_get_metadata_git_revision('${SRC_DIR}',d)}"
-PV = "git"
 PR = "r5"
 
 DEPENDS += "mkbootimg-native dtc-native openssl-native"

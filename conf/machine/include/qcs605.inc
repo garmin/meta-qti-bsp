@@ -9,8 +9,8 @@ require ${COREBASE}/meta-qti-bsp/conf/distro/include/security_flags.inc
 
 require conf/machine/include/arm/arch-armv8.inc
 
-BBMASK = ".*/*/recipes-kernel/linux-msm-4.4"
-BBMASK .= "|.*/*/recipes-kernel/linux-quic"
+PREFERRED_PROVIDER_virtual/kernel = "linux-msm"
+PREFERRED_VERSION_linux-msm = "4.9%"
 
 SERIAL_CONSOLE ?= "${@['', '115200 ttyMSM0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
 

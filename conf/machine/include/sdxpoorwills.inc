@@ -9,8 +9,8 @@ require ${COREBASE}/meta-qti-bsp/conf/distro/include/security_flags.inc
 
 include conf/machine/include/tune-cortexa8.inc
 
-BBMASK = ".*/*/recipes-kernel/linux-msm-4.4"
-BBMASK .= "|.*/*/recipes-kernel/linux-quic"
+PREFERRED_PROVIDER_virtual/kernel = "linux-msm"
+PREFERRED_VERSION_linux-msm = "4.9%"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"

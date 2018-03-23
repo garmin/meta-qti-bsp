@@ -11,8 +11,8 @@ DEFAULTTUNE ?= "armv7ahf-neon"
 
 include conf/machine/include/tune-cortexa7.inc
 
-BBMASK = ".*/*/recipes-kernel/linux-msm-4.4"
-BBMASK .= "|.*/*/recipes-kernel/linux-msm-4.9"
+PREFERRED_PROVIDER_virtual/kernel = "linux-msm"
+PREFERRED_VERSION_linux-msm = "3.18%"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"

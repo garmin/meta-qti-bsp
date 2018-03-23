@@ -1,6 +1,6 @@
 inherit kernel qperf
 
-DESCRIPTION = "QuIC Linux Kernel"
+DESCRIPTION = "CAF Linux Kernel"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
@@ -47,9 +47,7 @@ SRC_URI   =  "file://kernel"
 SRC_DIR   =  "${WORKSPACE}/kernel/msm-4.4"
 S         =  "${WORKDIR}/kernel/msm-4.4"
 GITVER    =  "${@base_get_metadata_git_revision('${SRC_DIR}',d)}"
-PV = "git"
 PR = "r6"
-
 
 DEPENDS += "mkbootimg-native dtc-native"
 DEPENDS += "bouncycastle"
