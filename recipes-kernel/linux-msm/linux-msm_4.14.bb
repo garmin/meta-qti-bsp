@@ -1,25 +1,20 @@
 require recipes-kernel/linux-msm/linux-msm.inc
 
-COMPATIBLE_MACHINE = "(apq8053|qcs605|sdxpoorwills|mdm9650|mdm9607)"
+COMPATIBLE_MACHINE = "(qcs405)"
 
 KERNEL_IMAGEDEST = "boot"
 
-SRC_URI_append_batcam = " file://msm8953-batcam_defconfig"
-SRC_URI_append_batcam = " file://msm8953-batcam-perf_defconfig"
-
-SRC_DIR   =  "${WORKSPACE}/kernel/msm-4.9"
-S         =  "${WORKDIR}/kernel/msm-4.9"
-GITVER    =  "${@base_get_metadata_git_revision('${SRC_DIR}',d)}"
-PR = "r5"
+SRC_DIR   =  "${WORKSPACE}/kernel/msm-4.14"
+S         =  "${WORKDIR}/kernel/msm-4.14"
+PR = "r0"
 
 DEPENDS += "dtc-native"
 
-do_patch_prepend_batcam() {
-    import shutil
+LDFLAGS_aarch64 = "-O1 --hash-style=gnu --as-needed"
+TARGET_CXXFLAGS += "-Wno-format"
 
-    defcfg   = d.getVar('WORKDIR', True) + '/' + d.getVar('KERNEL_CONFIG', True) 
-    destfile = "%s/arch/arm/configs/%s" % (d.getVar('S', True), d.getVar('KERNEL_CONFIG', True))
-    shutil.copyfile(defcfg, destfile)
+do_compile () {
+    oe_runmake CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS} $use_alternate_initrd
 }
 
 do_shared_workdir_append () {
@@ -75,6 +70,8 @@ do_shared_workdir_append () {
 	fi
 }
 
+nand_boot_flag = "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', '1', '0', d)}"
+
 do_deploy() {
     if [ -f ${D}/${KERNEL_IMAGEDEST}/-${KERNEL_VERSION} ]; then
         mv ${D}/${KERNEL_IMAGEDEST}/-${KERNEL_VERSION} ${D}/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}
@@ -94,5 +91,5 @@ do_deploy() {
         --pagesize ${PAGE_SIZE} \
         --base ${KERNEL_BASE} \
         --ramdisk_offset 0x0 \
-        ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${BOOTIMAGE_TARGET}
+        ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img
 }

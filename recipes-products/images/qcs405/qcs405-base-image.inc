@@ -1,7 +1,6 @@
 # Packages to be included in rootfs creation.
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', 'packagegroup-core-boot', '', d)}"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
-IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', 'lib64-sectool5', 'sectool5', d)}"
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', 'lib64-edk2', 'edk2', d)}"
 
 IMAGE_INSTALL += "start-scripts-misc-daemon"
