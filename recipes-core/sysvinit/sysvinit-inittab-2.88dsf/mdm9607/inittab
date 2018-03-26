@@ -46,4 +46,5 @@ m1:5:wait:rm -f /var/run/qbi_session_active
 m2:5:respawn:/usr/bin/mbimd
 m3:5:respawn:/usr/bin/diagrebootapp
 m4:5:respawn:/usr/bin/loc_launcher
+m5:5:respawn:/usr/bin/location_hal_daemon
 
