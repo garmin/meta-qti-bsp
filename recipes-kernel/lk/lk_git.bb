@@ -33,7 +33,10 @@ emmc_bootloader = "${@bb.utils.contains('DISTRO_FEATURES', 'emmc-boot', '1', '0'
 
 LIBGCC = "${STAGING_LIBDIR}/${TARGET_SYS}/6.4.0/libgcc.a"
 
-DISPLAY_SCREEN = "${@base_conditional('PRODUCT', 'drone', '0', '1', d)}"
+# Disable display for nodisplay products
+DISPLAY_SCREEN = "1"
+DISPLAY_SCREEN_drone = "0"
+DISPLAY_SCREEN_batcam = "0"
 
 ENABLE_DISPLAY = "${DISPLAY_SCREEN}"
 
@@ -52,16 +55,18 @@ EXTRA_OEMAKE_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'vble', 'VERIFIE
 EXTRA_OEMAKE_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'VERITY_LE=1', '', d)}"
 
 #enable hardfloat
-EXTRA_OEMAKE_append = " ${@ bb.utils.contains('TUNE_FEATURES', 'callconvention-hard', 'ENABLE_HARD_FPU=1', '', d)}"
+EXTRA_OEMAKE_append = " ${@bb.utils.contains('TUNE_FEATURES', 'callconvention-hard', 'ENABLE_HARD_FPU=1', '', d)}"
 
 #add more cflags to lk, if GCC6.3 version
 EXTRA_OEMAKE_append = " 'LKLE_CFLAGS=-Wno-shift-negative-value -Wno-misleading-indentation -Wunused-const-variable=0 -DINIT_BIN_LE=\"/sbin/init\"' "
+
+# Disable debug logs for perf, user variant builds
+EXTRA_OEMAKE_append = " ${@bb.utils.contains_any('VARIANT', 'perf user', 'TARGET_BUILD_VARIANT=user', '', d)}"
 
 do_install() {
         install -d ${D}/boot
         install build-${MY_TARGET}/*.mbn ${D}/boot
 }
-
 
 FILES_${PN} = "/boot"
 FILES_${PN}-dbg = "/boot/.debug"
