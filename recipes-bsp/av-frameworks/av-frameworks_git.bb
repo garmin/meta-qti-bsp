@@ -25,6 +25,7 @@ FILES_${PN}        = "${libdir}/libcamera_client.so.* ${libdir}/pkgconfig/* ${bi
 FILES_${PN}-dev    = "${libdir}/libcamera_client.so ${libdir}/libcamera_client.la ${includedir}"
 
 CPPFLAGS += "-I${STAGING_INCDIR}/camera"
+CPPFLAGS += "-fpermissive"
 LDFLAGS += "-llog"
 
 do_install_append() {
