@@ -16,8 +16,6 @@ INITSCRIPT_NAME   = "firmware-links.sh"
 INITSCRIPT_PARAMS = "start 37 S ."
 
 do_install() {
-    install -d ${D}/lib/firmware
-    ln -s /firmware/image ${D}/lib/firmware/image
     if ${@bb.utils.contains('DISTRO_FEATURES', 'ro-rootfs', 'false', 'true', d)}; then
         if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
            install -m 0755 ${WORKDIR}/${BASEMACHINE}/firmware-links.sh -D ${D}${sysconfdir}/initscripts/firmware-links.sh
@@ -30,6 +28,17 @@ do_install() {
         else
            install -m 0755 ${WORKDIR}/${BASEMACHINE}/firmware-links.sh -D ${D}${sysconfdir}/init.d/firmware-links.sh
         fi
+    fi
+}
+
+# In msm-4.9 PIL expects firmware in /lib/firmware
+do_install_append() {
+    if [ "${BASEMACHINE}" == "apq8053" ]; then
+        install -d ${D}/lib
+        ln -s /firmware/image ${D}/lib/firmware
+    else
+        install -d ${D}/lib/firmware
+        ln -s /firmware/image ${D}/lib/firmware/image
     fi
 }
 
@@ -50,5 +59,5 @@ pkg_postinst_${PN} () {
     fi
 }
 
-FILES_${PN} += "/lib/firmware/*"
+FILES_${PN} += "/lib/*"
 FILES_${PN} += "${systemd_unitdir}/system/"
