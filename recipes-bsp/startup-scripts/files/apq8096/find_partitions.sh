@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2016-2017, The Linux Foundation. All rights reserved.
+# Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -36,22 +36,27 @@ FindAndMountEXT4 () {
    mmc_block_device=/dev/block/bootdevice/by-name/$partition
    mkdir -p $dir
    mount -t ext4 $mmc_block_device $dir -o $flags
-   /sbin/restorecon -R $2
+   if [ -x /sbin/restorecon ]; then
+       /sbin/restorecon -R $dir
+   fi
 }
 
-#For now we only have firmware with VFAT and which need protection ( selinux)
-# It mounted with secontext as firmware_t
 FindAndMountVFAT () {
    partition=$1
    dir=$2
+   selinux=$3
    mmc_block_device=/dev/block/bootdevice/by-name/$partition
    mkdir -p $dir
-   mount -t vfat $mmc_block_device $dir -o context=system_u:object_r:firmware_t:s0
+   if [ -x /sbin/restorecon ]; then
+       mount -t vfat $mmc_block_device $dir -o context=$selinux
+   else
+       mount -t vfat $mmc_block_device $dir
+   fi
 }
 
 
 FindAndMountEXT4 userdata /data relatime,data=ordered,noauto_da_alloc,discard,nodev,nosuid
-FindAndMountVFAT modem   /firmware
+FindAndMountVFAT modem   /firmware system_u:object_r:firmware_t:s0
 FindAndMountEXT4 persist /persist relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
 FindAndMountEXT4 cache  /cache relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
 FindAndMountEXT4 dsp /dsp relatime,data=ordered,noauto_da_alloc,discard,ro,noexec,nodev,nosuid

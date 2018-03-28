@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2017, The Linux Foundation. All rights reserved.
+# Copyright (c) 2017-2018, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -35,15 +35,22 @@ FindAndMountEXT4 () {
    mmc_block_device=/dev/block/bootdevice/by-name/$partition
    mkdir -p $dir
    mount -t ext4 $mmc_block_device $dir -o relatime,data=ordered,noauto_da_alloc,discard
-   /sbin/restorecon -R $2
+   if [ -x /sbin/restorecon ]; then
+       /sbin/restorecon -R $dir
+   fi
 }
 
 FindAndMountVFAT () {
    partition=$1
    dir=$2
+   selinux=$3
    mmc_block_device=/dev/block/bootdevice/by-name/$partition
    mkdir -p $dir
-   mount -t vfat $mmc_block_device $dir -o context=$3
+   if [ -x /sbin/restorecon ]; then
+       mount -t vfat $mmc_block_device $dir -o context=$selinux
+   else
+       mount -t vfat $mmc_block_device $dir
+   fi
 }
 FindAndMountEXT4 userdata /data
 FindAndMountVFAT modem /firmware system_u:object_r:firmware_t:s0
