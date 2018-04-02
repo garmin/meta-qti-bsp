@@ -7,3 +7,4 @@
 /sbin/mount-copybind /systemrw/rt_tables /etc/data/iproute2/rt_tables
 /sbin/mount-copybind /systemrw/boot_hsusb_comp /etc/usb/boot_hsusb_comp
 /sbin/mount-copybind /systemrw/boot_hsic_comp /etc/usb/boot_hsic_comp
+/sbin/mount-copybind /systemrw/ /etc/misc/wifi
