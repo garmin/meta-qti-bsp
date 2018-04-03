@@ -9,9 +9,9 @@
 mountpoint=$1
 
 if [ -f "$mountpoint" ]; then
-    /sbin/umount $mountpoint
+    umount $mountpoint
 fi
 if [ -d "$mountpoint" ]; then
-    /sbin/umount $mountpoint/*
+    umount $mountpoint/*
 fi
 
