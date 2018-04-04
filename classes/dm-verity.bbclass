@@ -14,10 +14,10 @@ FEC_SUPPORT = "${@bb.utils.contains('VERITY_ENABLED', '1', '1', '0', d)}"
 DEPENDS += " ${@bb.utils.contains('FEC_SUPPORT', '1', 'fec-native', '', d)}"
 
 VERITY_IMAGE_DIR     = "${DEPLOY_DIR_IMAGE}/verity"
-SPARSE_SYSTEM_IMG    = "${DEPLOY_DIR_IMAGE}/${MACHINE}-sysfs.ext4"
-VERITY_IMG           = "${VERITY_IMAGE_DIR}/${MACHINE}-verity.img"
-VERITY_METADATA_IMG  = "${VERITY_IMAGE_DIR}/${MACHINE}-verity-metadata.img"
-VERITY_FEC_IMG       = "${VERITY_IMAGE_DIR}/${MACHINE}-verity-fec.img"
+SPARSE_SYSTEM_IMG    = "${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET}"
+VERITY_IMG           = "${VERITY_IMAGE_DIR}/verity.img"
+VERITY_METADATA_IMG  = "${VERITY_IMAGE_DIR}/verity-metadata.img"
+VERITY_FEC_IMG       = "${VERITY_IMAGE_DIR}/verity-fec.img"
 
 python adjust_system_size_for_verity () {
     partition_size = int(d.getVar("SYSTEM_SIZE_EXT4",True))

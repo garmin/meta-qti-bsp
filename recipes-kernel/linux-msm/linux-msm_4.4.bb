@@ -129,7 +129,7 @@ boot_signing () {
         ${DEPLOY_DIR_IMAGE}/boot.img                   \
 	${BC_BUILD}/security/target/product/security/verity.pk8 \
 	${BC_BUILD}/security/target/product/security/verity.x509.pem \
-        ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img
+        ${DEPLOY_DIR_IMAGE}/${BOOTIMAGE_TARGET}
 
     rm -f ${DEPLOY_DIR_IMAGE}/boot.img
 }
@@ -151,7 +151,7 @@ do_deploy () {
         --pagesize ${PAGE_SIZE} \
         --base ${KERNEL_BASE} \
         --ramdisk_offset 0x0 \
-        ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img
+        ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${BOOTIMAGE_TARGET}
 
 }
 

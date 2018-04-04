@@ -42,6 +42,6 @@ IMAGE_INSTALL += "volatile-binds"
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
 
 do_makesystem() {
-    make_ext4fs -s -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-${PRODUCT}-sysfs.ext4 ${IMAGE_ROOTFS}
-    make_ext4fs -s -l ${SYSTEMRW_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-${PRODUCT}-systemrw.ext4
+    make_ext4fs -s -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET} ${IMAGE_ROOTFS}
+    make_ext4fs -s -l ${SYSTEMRW_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMRWIMAGE_TARGET}
 }

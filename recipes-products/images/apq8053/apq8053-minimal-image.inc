@@ -81,10 +81,10 @@ python do_rootfs_append() {
     subprocess.call(cmd1, shell=True)
 
     # first compute sha1 of boot.img, which is same as recovery partition's content
-    cmd2 = "sha1sum ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img | awk '{ print $1 }'" \
+    cmd2 = "sha1sum ${DEPLOY_DIR_IMAGE}/${BOOTIMAGE_TARGET} | awk '{ print $1 }'" \
            " > ${IMAGE_ROOTFS}/recoveryupgrade/recoveryimg_sha1"
     subprocess.call(cmd2, shell=True)
-    cmd3 = "stat --printf=\"%s\" ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img" \
+    cmd3 = "stat --printf=\"%s\" ${DEPLOY_DIR_IMAGE}/${BOOTIMAGE_TARGET}" \
            " > ${IMAGE_ROOTFS}/recoveryupgrade/recoveryimg_length"
     subprocess.call(cmd3, shell=True)
 
@@ -99,6 +99,6 @@ python do_rootfs_append() {
 
 do_makesystem() {
     cp ${THISDIR}/${BASEMACHINE}/apq8053-fsconfig.conf ${WORKDIR}/rootfs-fsconfig.conf
-    make_ext4fs -C ${WORKDIR}/rootfs-fsconfig.conf ${IMAGE_EXT4_EXTRA_OPTIONS} -s -a / ${IMAGE_EXT4_SELINUX_OPTIONS} -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-sysfs.ext4 ${IMAGE_ROOTFS}
-    make_ext4fs  -l ${SYSTEMRW_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-systemrw.ext4
+    make_ext4fs -C ${WORKDIR}/rootfs-fsconfig.conf ${IMAGE_EXT4_EXTRA_OPTIONS} -s -a / ${IMAGE_EXT4_SELINUX_OPTIONS} -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET} ${IMAGE_ROOTFS}
+    make_ext4fs  -l ${SYSTEMRW_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMRWIMAGE_TARGET}
 }

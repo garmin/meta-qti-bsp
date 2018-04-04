@@ -31,13 +31,9 @@ IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "system-prop"
 IMAGE_INSTALL += "wireless-tools"
 
-
-#IMAGE_PREPROCESS_COMMAND += "echo ${MACHINE} >> ${IMAGE_ROOTFS}/target;"
-
 # 32-bit packages
 IMAGE_INSTALL += "lib32-live555-qti"
 IMAGE_INSTALL += "lib32-gtest"
-
 
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
 SELINUX_FILE_CONTEXTS = "${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_contexts"
@@ -47,6 +43,5 @@ do_fsconfig_append() {
 }
 
 do_makesystem() {
-
-    make_ext4fs -B ${DEPLOY_DIR_IMAGE}/system.map -b 4096 -s -a / -S ${SELINUX_FILE_CONTEXTS} -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-sysfs.ext4 ${IMAGE_ROOTFS}
+    make_ext4fs -B ${DEPLOY_DIR_IMAGE}/system.map -b 4096 -s -a / -S ${SELINUX_FILE_CONTEXTS} -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET} ${IMAGE_ROOTFS}
 }

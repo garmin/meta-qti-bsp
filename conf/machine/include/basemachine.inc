@@ -10,3 +10,12 @@ BASEMACHINE_ARCH = "${@['${MACHINE_ARCH}', '${BASEMACHINE}']['${BASEMACHINE}' !=
 # This variable is originally set in bitbake.conf
 PACKAGE_ARCHS .= "${@['', ' ${BASEMACHINE_ARCH}']['${BASEMACHINE_ARCH}' != '${MACHINE_ARCH}']}"
 PACKAGE_ARCHS[vardepsexclude] += "BASEMACHINE_ARCH"
+
+# Default Image names
+BOOTIMAGE_TARGET ?= "${BASEMACHINE}-boot.img"
+CACHEIMAGE_TARGET ?= "${BASEMACHINE}-cache.ext4"
+PERSISTIMAGE_TARGET ?= "${BASEMACHINE}-persist.ext4"
+RECOVERYIMAGE_TARGET ?= "${BASEMACHINE}-recovery.ext4"
+SYSTEMIMAGE_TARGET ?= "${BASEMACHINE}-sysfs.ext4"
+SYSTEMRWIMAGE_TARGET ?= "${BASEMACHINE}-systemrw.ext4"
+USERDATAIMAGE_TARGET ?= "${BASEMACHINE}-usrfs.ext4"
