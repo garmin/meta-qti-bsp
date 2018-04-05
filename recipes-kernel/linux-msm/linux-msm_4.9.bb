@@ -29,6 +29,8 @@ PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 FILESPATH =+ "${WORKSPACE}:"
 SRC_URI   =  "file://kernel"
+SRC_URI_append_batcam = " file://msm8953-batcam_defconfig"
+SRC_URI_append_batcam = " file://msm8953-batcam-perf_defconfig"
 
 SRC_DIR   =  "${WORKSPACE}/kernel/msm-4.9"
 S         =  "${WORKDIR}/kernel/msm-4.9"
@@ -53,6 +55,14 @@ CONFIG_DEVTMPFS=y
 CONFIG_DEVTMPFS_MOUNT=y
 CONFIG_FHANDLE=y
 KERNEL_EXTRACONFIGS
+}
+
+do_patch_prepend_batcam() {
+    import shutil
+
+    defcfg   = d.getVar('WORKDIR', True) + '/' + d.getVar('KERNEL_CONFIG', True) 
+    destfile = "%s/arch/arm/configs/%s" % (d.getVar('S', True), d.getVar('KERNEL_CONFIG', True))
+    shutil.copyfile(defcfg, destfile)
 }
 
 do_patch_append () {
