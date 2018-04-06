@@ -1,6 +1,6 @@
 # Rootfs creation.
 
-#DEPENDS += "edk2"
+DEPENDS += "edk2"
 
 
 IMAGE_INSTALL += "packagegroup-core-boot"
