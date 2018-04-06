@@ -6,21 +6,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
 
 COMPATIBLE_MACHINE = "(mdm9607|mdm9650|apq8009|apq8096|apq8053|apq8017|msm8909w|sdx20)"
 
-
 python __anonymous () {
-  if (d.getVar('PERF_BUILD', True) == '1'):
-      imgtype = d.getVar("KERNEL_PERF_IMAGETYPE", True)
-      if imgtype:
-          d.setVar("KERNEL_IMAGETYPE", d.getVar("KERNEL_PERF_IMAGETYPE", True))
-      perfconf = d.getVar("KERNEL_PERF_DEFCONFIG", True)
-      if perfconf:
-          d.setVar("KERNEL_CONFIG", d.getVar("KERNEL_PERF_DEFCONFIG", True))
-      perfcmd = d.getVar("KERNEL_PERF_CMD_PARAMS", True)
-      if perfcmd:
-          d.setVar("KERNEL_CMD_PARAMS", d.getVar("KERNEL_PERF_CMD_PARAMS", True))
-  else:
-      d.setVar("KERNEL_CONFIG", d.getVar("KERNEL_DEFCONFIG", True))
-
   # Override KERNEL_IMAGETYPE_FOR_MAKE variable, which is internal
   # to kernel.bbclass. We override the variable as msm kernel can't
   # support alternate image builds

@@ -7,6 +7,8 @@ SRC_URI += "file://ffbm.target"
 SRC_URI += "file://mount-data"
 SRC_URI += "file://mount-data.service"
 SRC_URI += "file://mtpserver.rules"
+SRC_URI_append_batcam = " file://pre_hibernate.sh"
+SRC_URI_append_batcam = " file://post_hibernate.sh"
 
 EXTRA_OECONF += " --disable-efi"
 
@@ -41,6 +43,14 @@ do_install_append () {
    install -d ${D}${systemd_unitdir}/system/local-fs.target.requires/
    ln -sf ${systemd_unitdir}/system/mount-data.service \
                ${D}${systemd_unitdir}/system/local-fs.target.requires/mount-data.service
+}
+
+# Scripts for pre and post hibernate functions for BatCam
+do_install_append_batcam () {
+   install -d ${D}${systemd_unitdir}/system-sleep/
+   install -m 0755 ${WORKDIR}/pre_hibernate.sh -D ${D}${systemd_unitdir}/system-sleep/pre_hibernate.sh
+   install -m 0755 ${WORKDIR}/post_hibernate.sh -D ${D}${systemd_unitdir}/system-sleep/post_hibernate.sh
+
 }
 
 FILES_${PN} += "/etc/initscripts"
