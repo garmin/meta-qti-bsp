@@ -1,34 +1,10 @@
-inherit kernel qperf
-
-DESCRIPTION = "CAF Linux Kernel"
-LICENSE = "GPLv2"
-LIC_FILES_CHKSUM = "file://COPYING;md5=d7810fab7487fb0aad327b76f1be7cd7"
+require recipes-kernel/linux-msm/linux-msm.inc
 
 # qcs405 is temporarily added
 COMPATIBLE_MACHINE = "(qcs405|apq8053|qcs605|sdxpoorwills|mdm9650|mdm9607)"
 
-python __anonymous () {
-  # Override KERNEL_IMAGETYPE_FOR_MAKE variable, which is internal
-  # to kernel.bbclass. We override the variable as msm kernel can't
-  # support alternate image builds
-  if d.getVar("KERNEL_IMAGETYPE", True):
-      d.setVar("KERNEL_IMAGETYPE_FOR_MAKE", "")
-}
-
 KERNEL_IMAGEDEST = "boot"
 
-DEPENDS_append_aarch64 = " libgcc"
-KERNEL_CC_append_aarch64 = " ${TOOLCHAIN_OPTIONS}"
-KERNEL_LD_append_aarch64 = " ${TOOLCHAIN_OPTIONS}"
-
-KERNEL_PRIORITY           = "9001"
-# Add V=1 to KERNEL_EXTRA_ARGS for verbose
-KERNEL_EXTRA_ARGS        += "O=${B}"
-
-PACKAGE_ARCH = "${MACHINE_ARCH}"
-
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI   =  "file://kernel"
 SRC_URI_append_batcam = " file://msm8953-batcam_defconfig"
 SRC_URI_append_batcam = " file://msm8953-batcam-perf_defconfig"
 
@@ -37,25 +13,7 @@ S         =  "${WORKDIR}/kernel/msm-4.9"
 GITVER    =  "${@base_get_metadata_git_revision('${SRC_DIR}',d)}"
 PR = "r5"
 
-DEPENDS += "mkbootimg-native dtc-native openssl-native"
-DEPENDS += " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'bouncycastle-native', '', d)}"
-RDEPENDS_kernel-base = ""
-
-PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
-
-LDFLAGS_aarch64 = "-O1 --hash-style=gnu --as-needed"
-
-# Put the zImage in the kernel-dev pkg
-FILES_kernel-dev += "/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}"
-
-# Additional defconfigs for systemd
-do_defconfig_patch () {
-cat >> ${S}/arch/${ARCH}/configs/${KERNEL_CONFIG} <<KERNEL_EXTRACONFIGS
-CONFIG_DEVTMPFS=y
-CONFIG_DEVTMPFS_MOUNT=y
-CONFIG_FHANDLE=y
-KERNEL_EXTRACONFIGS
-}
+DEPENDS += "dtc-native"
 
 do_patch_prepend_batcam() {
     import shutil
@@ -63,19 +21,6 @@ do_patch_prepend_batcam() {
     defcfg   = d.getVar('WORKDIR', True) + '/' + d.getVar('KERNEL_CONFIG', True) 
     destfile = "%s/arch/arm/configs/%s" % (d.getVar('S', True), d.getVar('KERNEL_CONFIG', True))
     shutil.copyfile(defcfg, destfile)
-}
-
-do_patch_append () {
-    if bb.utils.contains('DISTRO_FEATURES', 'systemd', True, False, d):
-        bb.build.exec_func('do_defconfig_patch',d)
-}
-
-do_configure () {
-    oe_runmake_call -C ${S} ARCH=${ARCH} ${KERNEL_EXTRA_ARGS} ${KERNEL_CONFIG}
-}
-
-do_compile () {
-    oe_runmake CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS} $use_alternate_initrd
 }
 
 do_shared_workdir_append () {
@@ -131,12 +76,6 @@ do_shared_workdir_append () {
 	fi
 }
 
-do_install_append() {
-    oe_runmake_call -C ${STAGING_KERNEL_DIR} ARCH=${ARCH} CC="${KERNEL_CC}" LD="${KERNEL_LD}" headers_install O=${STAGING_KERNEL_BUILDDIR}
-}
-
-nand_boot_flag = "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', '1', '0', d)}"
-
 do_deploy() {
     if [ -f ${D}/${KERNEL_IMAGEDEST}/-${KERNEL_VERSION} ]; then
         mv ${D}/${KERNEL_IMAGEDEST}/-${KERNEL_VERSION} ${D}/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}
@@ -157,34 +96,4 @@ do_deploy() {
         --base ${KERNEL_BASE} \
         --ramdisk_offset 0x0 \
         ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img
-}
-
-# keep this path in-sync with bouncycastle recipe.
-SECURITY_TOOLS_DIR = "${TMPDIR}/work-shared/security_tools"
-
-# Copy verity certificate into ${S} to generate verity signed boot image
-do_configure_append () {
-    if [ "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'dm-verity', '', d)}" = "dm-verity" ] ; then
-        openssl x509 -in ${SECURITY_TOOLS_DIR}/verity.x509.pem -outform der -out ${S}/verity.x509
-    fi
-}
-
-# Update kernel cmdline for dm-verity.
-do_deploy[prefuncs] += "update_cmdline"
-
-python update_cmdline () {
-    if bb.utils.contains('DISTRO_FEATURES', 'dm-verity', True, False, d):
-        import subprocess
-
-        cmdline = d.getVar('KERNEL_CMD_PARAMS', True)
-        cmdline += " androidboot.veritymode=enforcing"
-        # add "buildvariant=userdebug" for non-user builds.
-        cmdline += " ${@['buildvariant=userdebug', ''][(d.getVar('VARIANT', True) == 'user')]}"
-        # generate and add verity key id.
-        keycmd = "openssl x509 -in ${SECURITY_TOOLS_DIR}/verity.x509.pem -text \
-                         | grep keyid | sed 's/://g' | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]' | sed 's/keyid//g'"
-        keyid = subprocess.check_output(keycmd, shell=True).strip()
-        cmdline += " veritykeyid=id:" + keyid
-
-        d.setVar('KERNEL_CMD_PARAMS', ''.join(cmdline))
 }
