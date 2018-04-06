@@ -12,6 +12,9 @@ SRC_URI_append += "file://systemd/media-ram.mount"
 SRC_URI_append += "file://systemd/persist.mount"
 SRC_URI_append += "file://systemd/proc-bus-usb.mount"
 SRC_URI_append += "file://systemd/dash.mount"
+SRC_URI_append += "file://systemd/firmware-mount.service"
+SRC_URI_append += "file://systemd/dsp-mount.service"
+SRC_URI_append += "file://systemd/ab_mount.sh"
 
 dirs755 += "/media/cf /media/net /media/ram \
             /media/union /media/realroot /media/hdd \
@@ -33,20 +36,34 @@ do_install_append(){
       install -m 0644 ${WORKDIR}/fstab ${D}${sysconfdir}/fstab
       # Remove selinux entries from mount options
       sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware.mount
+      sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware-mount.service
     fi
 
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
       if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)};then
        install -d 0644 ${D}${sysconfdir}/systemd/system
        install -m 0644 ${WORKDIR}/systemd/cache.mount ${D}${sysconfdir}/systemd/system/cache.mount
-       install -m 0644 ${WORKDIR}/systemd/firmware.mount ${D}${sysconfdir}/systemd/system/firmware.mount
-       install -m 0644 ${WORKDIR}/systemd/dsp.mount ${D}${sysconfdir}/systemd/system/dsp.mount
        install -m 0644 ${WORKDIR}/systemd/persist.mount ${D}${sysconfdir}/systemd/system/persist.mount
        install -d 0644 ${D}${sysconfdir}/systemd/system/local-fs.target.requires
        ln -sf  ../cache.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/cache.mount
-       ln -sf  ../firmware.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware.mount
-       ln -sf  ../dsp.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp.mount
        ln -sf  ../persist.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/persist.mount
+
+       # If the AB boot feature is enabled, then instead of <partition>.mount,
+       # a <partition-mount>.service invokes mounting the A/B partition as detected at the time of boot.
+       if ${@bb.utils.contains('DISTRO_FEATURES','ab-boot-support','true','false',d)};then
+          install -m 0644 ${WORKDIR}/systemd/firmware-mount.service ${D}${sysconfdir}/systemd/system/firmware-mount.service
+          install -m 0644 ${WORKDIR}/systemd/dsp-mount.service ${D}${sysconfdir}/systemd/system/dsp-mount.service
+          ln -sf  ../firmware-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware-mount.service
+          ln -sf  ../dsp-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp-mount.service
+          install -d 0644 ${D}${sysconfdir}/initscripts
+          install -m 0744 ${WORKDIR}/systemd/ab_mount.sh ${D}${sysconfdir}/initscripts/ab_mount.sh
+       else
+          install -m 0644 ${WORKDIR}/systemd/firmware.mount ${D}${sysconfdir}/systemd/system/firmware.mount
+          install -m 0644 ${WORKDIR}/systemd/dsp.mount ${D}${sysconfdir}/systemd/system/dsp.mount
+          ln -sf  ../firmware.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware.mount
+          ln -sf  ../dsp.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp.mount
+       fi
+
        if ${@bb.utils.contains('DISTRO_FEATURES','ro-rootfs','true','false',d)}; then
           install -m 0644 ${WORKDIR}/systemd/systemrw.mount ${D}${sysconfdir}/systemd/system/systemrw.mount
           ln -sf  ../systemrw.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/systemrw.mount
