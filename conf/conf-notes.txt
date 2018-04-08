@@ -1,9 +1,28 @@
-Supported targets are:
-      machine-image
-      machine-concam-image
-      machine-drone-image
-      machine-robot-image
-      machine-psm-image
-      machine-qsap-image
-      machine-recovery-image
+
+### Shell environment ready to run bitake commands. ###
+
+Ensure MACHINE, DISTRO & VARIANT are set appropriately and proceed.
+
+Supported MACHINE and DISTRO combinations are listed below.
+
+VARIANT can be one of 'debug/perf/user' for all of these.
+
+ 1. [apq8009 qsap]
+ 2. [apq8009 robot]
+ 3. [apq8009 robot-som]
+ 4. [apq8017 qsap]
+ 5. [apq8053-32 batcam]
+ 6. [apq8053-32 concam]
+ 7. [apq8098]
+ 8. [qcs405-32 qsap]
+ 9. [qcs405-64 qsap]
+10. [qcs605 concam]
+11. [mdm9607]
+12. [mdm9650]
+13. [sdxpoorwills]
+
+Once ready run 'bitbake machine-image' to build the final image.
+
+Alternatively you can also use convenience commands to build images. run 'list-build-commands' to list these.
+
 
