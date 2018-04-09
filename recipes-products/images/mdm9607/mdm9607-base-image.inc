@@ -1,6 +1,6 @@
 # Rootfs creation.
 
-#DEPENDS += "lk"
+DEPENDS += "lk"
 
 
 IMAGE_INSTALL += "packagegroup-core-boot"
