@@ -134,12 +134,13 @@ boot_signing () {
     rm -f ${DEPLOY_DIR_IMAGE}/boot.img
 }
 
+nand_boot_flag = "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', '1', '0', d)}"
 
 do_deploy () {
 
     extra_mkbootimg_params=""
     if [ ${nand_boot_flag} == "1" ]; then
-        extra_mkbootimg_params='--dt ${D}/${KERNEL_IMAGEDEST}/masterDTB --tags-addr ${KERNEL_TAGS_OFFSET}'
+        extra_mkbootimg_params='--tags-addr ${KERNEL_TAGS_OFFSET}'
     fi
 
     mkdir -p ${DEPLOY_DIR_IMAGE}

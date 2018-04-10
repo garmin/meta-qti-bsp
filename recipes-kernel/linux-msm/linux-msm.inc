@@ -34,8 +34,6 @@ SRC_URI   =  "file://kernel \
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
 
-nand_boot_flag = "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', '1', '0', d)}"
-
 KBRANCH ?= ""
 KMETA = "kernel-meta"
 KMACHINE ?= "${MACHINE}"
