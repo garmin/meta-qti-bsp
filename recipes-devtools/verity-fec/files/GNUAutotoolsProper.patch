@@ -1,21 +1,21 @@
-From 070c03838d91e85112833cda8daf22c32222ef19 Mon Sep 17 00:00:00 2001
+From 993fcf6fc69bb942a8c8048bdd01279559c37fca Mon Sep 17 00:00:00 2001
 From: Divya Theja <divyathe@codeaurora.org>
-Date: Tue, 13 Feb 2018 11:55:13 +0530
-Subject: [PATCH] GNUAutotoolsProper
+Date: Mon, 9 Apr 2018 20:27:00 +0530
+Subject: [PATCH] Add GNUAutotools build files.
 
 ---
- Makefile.am  | 30 ++++++++++++++++++++++++++++++
+ Makefile.am  | 31 +++++++++++++++++++++++++++++++
  configure.ac | 53 +++++++++++++++++++++++++++++++++++++++++++++++++++++
- 2 files changed, 83 insertions(+)
+ 2 files changed, 84 insertions(+)
  create mode 100644 Makefile.am
  create mode 100644 configure.ac
 
 diff --git a/Makefile.am b/Makefile.am
 new file mode 100644
-index 0000000..8a70f29
+index 0000000..657ffe6
 --- /dev/null
 +++ b/Makefile.am
-@@ -0,0 +1,30 @@
+@@ -0,0 +1,31 @@
 +AM_CPPFLAGS := -Wall \
 +             -Werror \
 +             -Wno-error=c++0x-compat\
@@ -41,10 +41,11 @@ index 0000000..8a70f29
 +             @FECRS_LIBS@\
 +             @SQUASHFSUTILS_LIBS@
 +
-+fec_LDFLAGS := -lcrypto\
-+               -lbase\
-+               -lext4_utils\
-+               -lcutils
++fec_LDFLAGS := -lcrypto \
++               -lbase \
++               -lext4_utils \
++               -lcutils \
++               -lpthread
 +
 diff --git a/configure.ac b/configure.ac
 new file mode 100644
