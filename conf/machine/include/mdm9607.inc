@@ -12,7 +12,7 @@ require ${COREBASE}/meta-qti-bsp/conf/distro/include/security_flags.inc
 require conf/machine/include/tune-cortexa8.inc
 
 PREFERRED_PROVIDER_virtual/kernel = "linux-msm"
-PREFERRED_VERSION_linux-msm = "4.9"
+PREFERRED_VERSION_linux-msm ?= "3.18"
 
 BBMASK = ".*/*/recipes-devtools/mtd/"
 #BBMASK .= "|.*/*/recipes-security/libselinux/"
@@ -20,7 +20,7 @@ BBMASK = ".*/*/recipes-devtools/mtd/"
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
 
-SERIAL_CONSOLE ?= "${@['', '115200 ttyMSM0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
+SERIAL_CONSOLE ?= "${@['', '115200 ttyHSL0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
 
 DISTRO ?= "mdm"
 
