@@ -10,7 +10,7 @@ require ${COREBASE}/meta-qti-bsp/conf/distro/include/security_flags.inc
 require conf/machine/include/arm/arch-armv8.inc
 
 PREFERRED_PROVIDER_virtual/kernel = "linux-msm"
-PREFERRED_VERSION_linux-msm = "4.9%"
+PREFERRED_VERSION_linux-msm = "4.9"
 
 SERIAL_CONSOLE ?= "${@['', '115200 ttyMSM0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
 

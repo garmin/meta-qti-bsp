@@ -10,7 +10,7 @@ require ${COREBASE}/meta-qti-bsp/conf/distro/include/security_flags.inc
 require conf/machine/include/arm/arch-armv8.inc
 
 PREFERRED_PROVIDER_virtual/kernel = "linux-msm"
-PREFERRED_VERSION_linux-msm = "3.18%"
+PREFERRED_VERSION_linux-msm = "3.18"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
