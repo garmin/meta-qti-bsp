@@ -12,7 +12,7 @@ include conf/machine/include/arm/arch-armv8.inc
 
 # TODO: preferred kernel will be linux-msm_4.14"
 PREFERRED_PROVIDER_virtual/kernel = "linux-msm"
-PREFERRED_VERSION_linux-msm = "4.9%"
+PREFERRED_VERSION_linux-msm = "4.9"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
