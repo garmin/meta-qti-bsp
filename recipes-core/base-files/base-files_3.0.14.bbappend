@@ -4,6 +4,7 @@ DEPENDS = "base-passwd"
 SRC_URI_append += "file://selinux-fstab"
 SRC_URI_append += "file://fstab"
 SRC_URI_append += "file://systemd/cache.mount"
+SRC_URI_append += "file://systemd/data.mount"
 SRC_URI_append += "file://systemd/firmware.mount"
 SRC_URI_append += "file://systemd/systemrw.mount"
 SRC_URI_append += "file://systemd/dsp.mount"
@@ -44,9 +45,11 @@ do_install_append(){
        install -d 0644 ${D}${sysconfdir}/systemd/system
        install -m 0644 ${WORKDIR}/systemd/cache.mount ${D}${sysconfdir}/systemd/system/cache.mount
        install -m 0644 ${WORKDIR}/systemd/persist.mount ${D}${sysconfdir}/systemd/system/persist.mount
+       install -m 0644 ${WORKDIR}/systemd/data.mount ${D}${sysconfdir}/systemd/system/data.mount
        install -d 0644 ${D}${sysconfdir}/systemd/system/local-fs.target.requires
        ln -sf  ../cache.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/cache.mount
        ln -sf  ../persist.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/persist.mount
+       ln -sf  ../data.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/data.mount
 
        # If the AB boot feature is enabled, then instead of <partition>.mount,
        # a <partition-mount>.service invokes mounting the A/B partition as detected at the time of boot.
