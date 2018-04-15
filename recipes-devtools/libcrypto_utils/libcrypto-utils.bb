@@ -15,4 +15,6 @@ S = "${WORKDIR}/libcrypto_utils"
 
 EXTRA_OECONF_class-native = "--with-header-includes=${S}/include"
 
+DEPENDS += "openssl"
+
 BBCLASSEXTEND += "native"
