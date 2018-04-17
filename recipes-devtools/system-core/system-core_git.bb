@@ -19,6 +19,7 @@ EXTRA_OECONF_append = " --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/
 EXTRA_OECONF_append = " --with-logd-logging"
 EXTRA_OECONF_append = "${@base_conditional('USER_BUILD','1',' --disable-debuggerd','',d)}"
 EXTRA_OECONF_append_apq8053 = " --enable-logd-privs"
+EXTRA_OECONF_append_qcs405 = " --disable-libsync"
 
 # Disable adb root privileges in USER builds for msm targets
 EXTRA_OECONF_append_msm = "${@base_conditional('USER_BUILD','1',' --disable-adb-root','',d)}"
