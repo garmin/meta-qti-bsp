@@ -31,7 +31,7 @@ SourcePath=/etc/initscripts/ab_mount.sh
 Before=local-fs.target
 
 [Service]
-Restart=no
+Restart=on-failure
 ExecStart=/etc/initscripts/ab_mount.sh "noexec,nodev,ro,context=system_u:object_r:firmware_t:s0" vfat /dev/disk/by-partlabel/modem /firmware
 
 [Install]

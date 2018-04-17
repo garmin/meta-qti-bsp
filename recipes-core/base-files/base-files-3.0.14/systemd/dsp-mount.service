@@ -31,7 +31,7 @@ SourcePath=/etc/initscripts/ab_mount.sh
 Before=local-fs.target
 
 [Service]
-Restart=no
+Restart=on-failure
 ExecStart=/etc/initscripts/ab_mount.sh "relatime,data=ordered,noauto_da_alloc,discard,ro,noexec,nodev,nosuid" ext4 /dev/disk/by-partlabel/dsp /dsp
 
 [Install]
