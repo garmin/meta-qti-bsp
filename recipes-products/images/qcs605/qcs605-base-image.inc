@@ -9,6 +9,7 @@ IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux', 'refpolicy-m
 IMAGE_INSTALL += "start-scripts-firmware-links"
 #IMAGE_INSTALL += "start-scripts-find-partitions"
 IMAGE_INSTALL += "start-scripts-misc-daemon"
+IMAGE_INSTALL += "start-script-ab-slot-util"
 
 IMAGE_INSTALL += "base-files"
 IMAGE_INSTALL += "base-passwd"
@@ -25,6 +26,7 @@ IMAGE_INSTALL += "system-core-post-boot"
 #IMAGE_INSTALL += "system-prop"
 IMAGE_INSTALL += "wireless-tools"
 IMAGE_INSTALL += "volatile-binds"
+IMAGE_INSTALL += "abctl"
 
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
 do_makesystem() {
