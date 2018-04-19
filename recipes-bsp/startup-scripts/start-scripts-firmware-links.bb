@@ -10,10 +10,7 @@ S = "${WORKDIR}/${BASEMACHINE}"
 
 PR = "r5"
 
-inherit systemd update-rc.d
-
-INITSCRIPT_NAME   = "firmware-links.sh"
-INITSCRIPT_PARAMS = "start 37 S ."
+inherit systemd
 
 do_install() {
     if ${@bb.utils.contains('DISTRO_FEATURES', 'ro-rootfs', 'false', 'true', d)}; then
