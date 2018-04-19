@@ -33,6 +33,7 @@ SYSTEM_SIZE_EXT4 ?= "500000000"
 SYSTEMRW_SIZE_EXT4 ?= "8388608"
 USERDATA_SIZE_EXT4 ?= "268435456"
 CACHE_SIZE_EXT4 ?= "65536000"
+RECOVERYFS_SIZE_EXT4 ?= "136000000"
 
 # Multilib configuration
 # This sets any packages preprended with lib32- to be built with

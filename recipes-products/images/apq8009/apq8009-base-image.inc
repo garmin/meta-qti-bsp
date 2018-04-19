@@ -48,8 +48,6 @@ IMAGE_INSTALL += "${@base_conditional('USER_BUILD', '1', '', 'gdb', d)}"
 IMAGE_INSTALL += "${@base_conditional('USER_BUILD', '1', '', 'gdbserver', d)}"
 
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
-# Limit the recovery image size to 136M
-RECOVERYFS_SIZE_EXT4 ?= "136000000"
 
 do_makesystem() {
     make_ext4fs -s ${IMAGE_EXT4_SELINUX_OPTIONS} -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET} ${IMAGE_ROOTFS}

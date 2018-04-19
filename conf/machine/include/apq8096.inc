@@ -32,6 +32,7 @@ EXTRA_IMAGECMD ?= "-N 2048"
 SYSTEM_SIZE_EXT4 ?= "3000000000"
 USERDATA_SIZE_EXT4 ?= "5000000000"
 CACHE_SIZE_EXT4 ?= "65536000"
+RECOVERYFS_SIZE_EXT4 ?= "136000000"
 
 # Multilib configuration
 # This sets any packages preprended with lib32- to be built with

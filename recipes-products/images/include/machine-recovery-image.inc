@@ -38,9 +38,6 @@ IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','packagegroup
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','selinux-config',' ',d)}"
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','refpolicy-mls',' ',d)}"
 
-# Limit the recovery image size to 136M
-RECOVERYFS_SIZE_EXT4 ?= "136000000"
-
 # Needed for generating recovery.ubi ignored for ext4
 MKUBIFS_ARGS = "${@bb.utils.contains('IMAGE_FSTYPES', 'ubi', '-m 4096 -e 253952 -c 83 -F', '', d)}"
 UBI_VOLNAME  = "${@bb.utils.contains('IMAGE_FSTYPES', 'ubi', 'rootfs', '', d)}"
