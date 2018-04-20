@@ -1,4 +1,5 @@
-# Copyright (c) 2017, The Linux Foundation. All rights reserved.
+#!/bin/sh
+# Copyright (c) 2018, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -23,18 +24,30 @@
 # BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 
+FindAndMountUBI () {
+   partition=$1
+   dir=$2
 
-[Unit]
-Description= Find-Partitions Service
-SourcePath=/etc/initscripts/find_partitions.sh
-DefaultDependencies=no
+   mtd_block_number=`cat $mtd_file | grep -i $partition | sed 's/^mtd//' | awk -F ':' '{print $1}'`
+   echo "MTD : Detected block device : $dir for $partition"
+   mkdir -p $dir
 
-[Service]
-Restart=no
-RemainAfterExit=yes
-ExecStart=/etc/initscripts/find_partitions.sh start
+   ubiattach -m $mtd_block_number -d 1 /dev/ubi_ctrl
+   device=/dev/ubi1_0
+   while [ 1 ]
+    do
+        if [ -c $device ]
+        then
+            mount -t ubifs /dev/ubi1_0 $dir -o bulk_read
+            break
+        else
+            sleep 0.010
+        fi
+    done
+}
+mtd_file=/proc/mtd
+eval FindAndMountUBI modem /firmware
+exit 0
 
-[Install]
-WantedBy=sysinit.target

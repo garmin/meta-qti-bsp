@@ -34,10 +34,9 @@ IMAGE_INSTALL += "powerapp"
 IMAGE_INSTALL += "powerapp-powerconfig"
 IMAGE_INSTALL += "powerapp-reboot"
 IMAGE_INSTALL += "powerapp-shutdown"
-IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', 'start-scripts-find-partitions', '', d)}"
 IMAGE_INSTALL += "start-scripts-firmware-links"
 IMAGE_INSTALL += "systemd-coredump"
-
+IMAGE_INSTALL += "coreutils"
 do_makesystem() {
     if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
      make_ext4fs -a /systemrw ${IMAGE_EXT4_SELINUX_OPTIONS}  -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET} ${IMAGE_ROOTFS}
