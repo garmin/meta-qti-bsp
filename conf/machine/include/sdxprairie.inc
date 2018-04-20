@@ -59,3 +59,18 @@ IMAGE_FSTYPES += "ext4 ubi"
 # Userspace needs below given macro to support libion after kernel 4.12.
 TARGET_CFLAGS_append = " -DTARGET_ION_ABI_VERSION=2 "
 TARGET_CXXFLAGS_append = " -DTARGET_ION_ABI_VERSION=2 "
+
+# readonly-rootfs
+DISTRO_FEATURES_append = " ro-rootfs"
+
+# Use systemd init manager.
+DISTRO_FEATURES_remove = "sysvinit"
+DISTRO_FEATURES_append = " systemd"
+DISTRO_FEATURES_BACKFILL_CONSIDERED += "sysvinit"
+VIRTUAL-RUNTIME_dev_manager = "udev"
+VIRTUAL-RUNTIME_init_manager = "systemd"
+
+# Change Image features for systemd.
+IMAGE_DEV_MANAGER = "udev"
+IMAGE_INIT_MANAGER = "systemd"
+IMAGE_INITSCRIPTS = ""
