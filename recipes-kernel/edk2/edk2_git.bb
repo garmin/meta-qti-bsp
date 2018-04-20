@@ -18,11 +18,9 @@ S         =  "${WORKDIR}/edk2"
 
 INSANE_SKIP_${PN} = "arch"
 
-EXTRA_OEMAKE = "'ANDROID_BUILD_TOP=${WORKSPACE}'\
-                'TARGET_GCC_VERSION=4.9'\
-                'CLANG_BIN=${STAGING_BINDIR_NATIVE}/llvm-arm-toolchain/bin/' \
+EXTRA_OEMAKE = "'CLANG_BIN=${STAGING_BINDIR_NATIVE}/llvm-arm-toolchain/bin/' \
                 'CLANG_PREFIX=${STAGING_BINDIR_NATIVE}/${TARGET_SYS}/${TARGET_PREFIX}' \
-                'TARGET_ARCHITECTURE=MACHINE_ARCH'\
+                'TARGET_ARCHITECTURE=${TARGET_ARCH}'\
                 'BUILDDIR=${S}'\
                 'BOOTLOADER_OUT=${S}/out'\
                 'ENABLE_LE_VARIANT=true'\
