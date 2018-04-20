@@ -17,6 +17,7 @@ SERIAL_CONSOLE ?= "${@['', '115200 ttyMSM0'][d.getVar('VARIANT', True) == ('' or
 DISTRO ?= "msm"
 
 DISTRO_FEATURES += "persist-image"
+DISTRO_FEATURES += "ab-boot-support"
 
 PAGE_SIZE ?= '4096'
 
