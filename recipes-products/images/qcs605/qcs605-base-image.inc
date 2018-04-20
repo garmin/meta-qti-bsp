@@ -1,3 +1,6 @@
+# Enable Bootloader
+DEPENDS += "edk2"
+
 # Packages to be included in rootfs creation.
 IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
