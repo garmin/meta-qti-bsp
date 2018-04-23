@@ -1,4 +1,4 @@
-BASEMACHINE ?= "qcs405"
+BASEMACHINE ?= "qcs40x"
 require conf/machine/include/basemachine.inc
 
 SOC_FAMILY ?= "qcs405"
@@ -16,7 +16,7 @@ PREFERRED_VERSION_linux-msm = "4.14"
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
 
-SERIAL_CONSOLE ?= "${@['', '115200 ttyHSL0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
+SERIAL_CONSOLE ?= "${@['', '115200 ttyMSM0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
 
 DISTRO ?= "msm"
 

@@ -1,6 +1,6 @@
 require recipes-kernel/linux-msm/linux-msm.inc
 
-COMPATIBLE_MACHINE = "(qcs405)"
+COMPATIBLE_MACHINE = "(qcs40x)"
 
 KERNEL_IMAGEDEST = "boot"
 
@@ -91,5 +91,5 @@ do_deploy() {
         --pagesize ${PAGE_SIZE} \
         --base ${KERNEL_BASE} \
         --ramdisk_offset 0x0 \
-        ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img
+        ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${BOOTIMAGE_TARGET}
 }
