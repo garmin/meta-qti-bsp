@@ -1,5 +1,5 @@
 # Packages to be included in rootfs creation.
-IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', 'packagegroup-core-boot', '', d)}"
+IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', 'lib64-edk2', 'edk2', d)}"
 
@@ -40,7 +40,7 @@ IMAGE_INSTALL += "start-scripts-firmware-links"
 
 do_makesystem() {
     if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
-     make_ext4fs -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-sysfs.ext4 ${IMAGE_ROOTFS}
-     make_ext4fs -l ${SYSTEMRW_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${MACHINE}-systemrw.ext4
+     make_ext4fs -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET} ${IMAGE_ROOTFS}
+     make_ext4fs -l ${SYSTEMRW_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMRWIMAGE_TARGET}
     fi
 }
