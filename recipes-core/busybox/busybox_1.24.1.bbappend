@@ -26,6 +26,10 @@ prefix = ""
 
 BUSYBOX_SPLIT_SUID = "0"
 
+do_compile_append_mdm() {
+    sed -i '/modprobe/d' ./busybox.links
+}
+
 do_install_append() {
     # systemd is udev compatible.
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
@@ -51,11 +55,6 @@ do_install_append() {
     chmod -R go-x ${D}${sysconfdir}/mdev/
     mkdir -p ${D}/usr/bin
     ln -s /bin/env ${D}/usr/bin/env
-}
-
-python do_package_append_mdm() {
-    import subprocess
-    subprocess.call('rm -f ${D}/../packages-split/busybox/usr/lib/busybox/sbin/modprobe', shell=True)
 }
 
 #FILES_${PN}-mdev += "${sysconfdir}/mdev/* "
