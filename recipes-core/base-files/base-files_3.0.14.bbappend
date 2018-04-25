@@ -12,6 +12,7 @@ SRC_URI_append += "file://systemd/dsp-mount.service"
 SRC_URI_append += "file://systemd/media-card.mount"
 SRC_URI_append += "file://systemd/media-ram.mount"
 SRC_URI_append += "file://systemd/persist.mount"
+SRC_URI_append += "file://systemd/var-volatile.mount"
 SRC_URI_append += "file://systemd/proc-bus-usb.mount"
 SRC_URI_append += "file://systemd/dash.mount"
 SRC_URI_append += "file://systemd/ab_mount.sh"
@@ -27,10 +28,11 @@ dirs755_append_qcs605 += "/firmware /persist /cache /dsp"
 
 # Remove sepolicy entries from various files when selinux is not present.
 do_fix_sepolicies () {
-    if ${@bb.utils.contains('DISTRO_FEATURES','selinux','true','false',d)}; then
-        # mount services
+    if ${@bb.utils.contains('DISTRO_FEATURES','selinux','false','true',d)}; then
+        # For mount services
         sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware.mount
         sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware-mount.service
+        sed -i "s#,rootcontext=system_u:object_r:var_t:s0##g"  ${WORKDIR}/systemd/var-volatile.mount
         # Remove selinux entries from fstab
         #For /run
         sed -i "s#,rootcontext=system_u:object_r:var_run_t:s0##g" ${WORKDIR}/fstab
