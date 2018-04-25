@@ -36,6 +36,7 @@ IMAGE_INSTALL += "powerapp-reboot"
 IMAGE_INSTALL += "powerapp-shutdown"
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', 'start-scripts-find-partitions', '', d)}"
 IMAGE_INSTALL += "start-scripts-firmware-links"
+IMAGE_INSTALL += "systemd-coredump"
 
 do_makesystem() {
     if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
