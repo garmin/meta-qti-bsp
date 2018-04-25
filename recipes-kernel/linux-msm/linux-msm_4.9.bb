@@ -14,13 +14,19 @@ PR = "r5"
 
 DEPENDS += "dtc-native"
 
-do_patch_prepend_batcam() {
+python copy_local_defconfig() {
     import shutil
-
     defcfg   = d.getVar('WORKDIR', True) + '/' + d.getVar('KERNEL_CONFIG', True) 
     destfile = "%s/arch/arm/configs/%s" % (d.getVar('S', True), d.getVar('KERNEL_CONFIG', True))
     shutil.copyfile(defcfg, destfile)
 }
+
+python do_local_config_batcam() {
+    if bb.utils.contains('DISTRO', 'batcam', True, False, d):
+        bb.build.exec_func('copy_local_defconfig',d)
+}
+
+addtask local_config_batcam before do_kernel_metadata after do_unpack
 
 do_shared_workdir_append () {
         cp Makefile $kerneldir/
@@ -96,3 +102,4 @@ do_deploy() {
         --ramdisk_offset 0x0 \
         ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${BOOTIMAGE_TARGET}
 }
+

@@ -1,4 +1,4 @@
-inherit kernel qperf
+inherit kernel qperf kernel-yocto
 
 DESCRIPTION = "CAF Linux Kernel"
 LICENSE = "GPLv2"
@@ -12,7 +12,7 @@ python __anonymous () {
       d.setVar("KERNEL_IMAGETYPE_FOR_MAKE", "")
 }
 
-DEPENDS += " mkbootimg-native openssl-native"
+DEPENDS += " mkbootimg-native openssl-native kern-tools-native"
 DEPENDS += " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'bouncycastle-native', '', d)} "
 RDEPENDS_kernel-base = ""
 
@@ -27,30 +27,26 @@ KERNEL_PRIORITY           = "9001"
 KERNEL_EXTRA_ARGS        += "O=${B}"
 
 FILESPATH =+ "${WORKSPACE}:"
-SRC_URI   =  "file://kernel"
+SRC_URI   =  "file://kernel \
+	      ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'file://systemd.cfg', '', d)} \
+	     "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
 
 nand_boot_flag = "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', '1', '0', d)}"
 
-# Additional defconfigs for systemd
-do_defconfig_patch () {
-cat >> ${S}/arch/${ARCH}/configs/${KERNEL_CONFIG} <<KERNEL_EXTRACONFIGS
-CONFIG_DEVTMPFS=y
-CONFIG_DEVTMPFS_MOUNT=y
-CONFIG_FHANDLE=y
-KERNEL_EXTRACONFIGS
-}
+KBRANCH ?= ""
+KMETA = "kernel-meta"
+KMACHINE ?= "${MACHINE}"
+KCONFIG_MODE = "--alldefconfig"
+KBUILD_DEFCONFIG ?= "${KERNEL_CONFIG}"
+LINUX_VERSION_EXTENSION = "${@['-perf', ''][d.getVar('VARIANT', True) == ('' or 'debug')]}"
 
-do_patch_append () {
-    if bb.utils.contains('DISTRO_FEATURES', 'systemd', True, False, d):
-        bb.build.exec_func('do_defconfig_patch',d)
-}
+do_kernel_checkout[noexec] = "1"
 
-do_configure () {
-    oe_runmake_call -C ${S} ARCH=${ARCH} ${KERNEL_EXTRA_ARGS} ${KERNEL_CONFIG}
-}
+# extra task for configuration checks
+addtask kernel_configcheck after do_configure before do_compile
 
 do_compile () {
     oe_runmake CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS} $use_alternate_initrd
