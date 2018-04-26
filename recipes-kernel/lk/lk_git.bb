@@ -60,7 +60,9 @@ EXTRA_OEMAKE_append = " ${@bb.utils.contains('TUNE_FEATURES', 'callconvention-ha
 #add more cflags to lk, if GCC6.3 version
 EXTRA_OEMAKE_append = " 'LKLE_CFLAGS=-Wno-shift-negative-value -Wno-misleading-indentation -Wunused-const-variable=0 -DINIT_BIN_LE=\"/sbin/init\"' "
 
-# Disable debug logs for user variant builds.
+# Disable debug logs for non debug variant builds.
+EXTRA_OEMAKE_append = " ${@bb.utils.contains('VARIANT', 'debug', '', 'DISABLE_LOGGING_BL=1', d)}"
+
 EXTRA_OEMAKE_append = " ${@bb.utils.contains('VARIANT', 'user', 'TARGET_BUILD_VARIANT=user', '', d)}"
 
 do_install() {
