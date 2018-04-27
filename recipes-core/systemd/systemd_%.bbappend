@@ -5,8 +5,6 @@ SRC_URI += "file://mountpartitions.rules"
 SRC_URI += "file://systemd-udevd.service"
 SRC_URI += "file://ffbm.target"
 SRC_URI += "file://mtpserver.rules"
-SRC_URI_append_batcam = " file://pre_hibernate.sh"
-SRC_URI_append_batcam = " file://post_hibernate.sh"
 SRC_URI += "file://sysctl-core.conf"
 SRC_URI += "file://limit-core.conf"
 SRC_URI += "file://logind.conf"
@@ -86,14 +84,6 @@ do_install_append () {
    install -m 0644 ${WORKDIR}/ion.rules -D ${D}${sysconfdir}/udev/rules.d/ion.rules
 }
 
-# Scripts for pre and post hibernate functions for BatCam
-do_install_append_batcam () {
-   install -d ${D}${systemd_unitdir}/system-sleep/
-   install -m 0755 ${WORKDIR}/pre_hibernate.sh -D ${D}${systemd_unitdir}/system-sleep/pre_hibernate.sh
-   install -m 0755 ${WORKDIR}/post_hibernate.sh -D ${D}${systemd_unitdir}/system-sleep/post_hibernate.sh
-
-}
-
 RRECOMMENDS_${PN}_remove += "systemd-extra-utils"
 PACKAGES_remove += "${PN}-extra-utils"
 
@@ -105,4 +95,3 @@ PACKAGES +="${PN}-coredump"
 FILES_${PN} += "/etc/initscripts \
                 ${sysconfdir}/udev/rules.d "
 FILES_${PN}-coredump = "/etc/sysctl.d/core.conf /etc/security/limits.d/core.conf"
-
