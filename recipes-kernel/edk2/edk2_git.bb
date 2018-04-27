@@ -27,6 +27,7 @@ EXTRA_OEMAKE = "'CLANG_BIN=${STAGING_BINDIR_NATIVE}/llvm-arm-toolchain/bin/' \
                 'BOOTLOADER_OUT=${S}/out'\
                 'ENABLE_LE_VARIANT=true'\
                 'VERIFIED_BOOT_LE=${VBLE}'\
+                'INIT_BIN_LE=\"/sbin/init\"'\
                 'EDK_TOOLS_PATH=${S}/BaseTools'"
 
 do_compile () {
