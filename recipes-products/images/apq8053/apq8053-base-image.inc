@@ -39,6 +39,7 @@ IMAGE_INSTALL += "system-core-usb"
 IMAGE_INSTALL += "system-core-post-boot"
 #IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "system-prop"
+IMAGE_INSTALL += "systemd-machine-units"
 IMAGE_INSTALL += "wireless-tools"
 IMAGE_INSTALL += "volatile-binds"
 

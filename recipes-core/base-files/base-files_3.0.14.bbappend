@@ -15,7 +15,6 @@ SRC_URI_append += "file://systemd/persist.mount"
 SRC_URI_append += "file://systemd/var-volatile.mount"
 SRC_URI_append += "file://systemd/proc-bus-usb.mount"
 SRC_URI_append += "file://systemd/dash.mount"
-SRC_URI_append += "file://systemd/ab_mount.sh"
 SRC_URI_append += "file://systemd/cache-ubi.mount"
 SRC_URI_append += "file://systemd/data-ubi.mount"
 SRC_URI_append += "file://systemd/systemrw-ubi.mount"
@@ -106,8 +105,6 @@ do_install_append_msm() {
             # If the AB boot feature is enabled, then instead of <partition>.mount,
             # a <partition-mount>.service invokes mounting the A/B partition as detected at the time of boot.
             if ${@bb.utils.contains('DISTRO_FEATURES','ab-boot-support','true','false',d)};then
-                install -d 0644 ${D}${sysconfdir}/initscripts
-                install -m 0744 ${WORKDIR}/systemd/ab_mount.sh ${D}${sysconfdir}/initscripts/ab_mount.sh
                 if [ "$d" == "/firmware" ]; then
                     install -m 0644 ${WORKDIR}/systemd/firmware-mount.service ${D}${sysconfdir}/systemd/system/firmware-mount.service
                     ln -sf  ../firmware-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware-mount.service

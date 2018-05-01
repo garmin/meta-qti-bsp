@@ -27,11 +27,12 @@
 
 [Unit]
 Description=Mount modem partition to /firmware mount point
-SourcePath=/etc/initscripts/ab_mount.sh
 
 [Service]
-Restart=on-failure
-ExecStart=/etc/initscripts/ab_mount.sh "noexec,nodev,ro,context=system_u:object_r:firmware_t:s0" vfat /dev/disk/by-partlabel/modem /firmware
+Type=oneshot
+RemainAfterExit=yes
+PassEnvironment="SLOT_SUFFIX"
+ExecStart=/bin/mount -o noexec,nodev,ro,context=system_u:object_r:firmware_t:s0 -t vfat /dev/disk/by-partlabel/modem${SLOT_SUFFIX} /firmware
 
 [Install]
 WantedBy=local-fs.target
