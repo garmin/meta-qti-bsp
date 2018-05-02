@@ -23,16 +23,17 @@ FILES_${PN} += "${systemd_unitdir}/system/"
 do_install() {
     if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
        install -m 0755 ${WORKDIR}/${BASEMACHINE}/recovery-updater.sh -D \
-           ${D}${sysconfdir}/initscripts/recovery-updater.sh
+           ${D}${sysconfdir}/recovery-updater.sh
        install -m 0755 ${WORKDIR}/${BASEMACHINE}/trigger-recovery-updater.sh -D \
            ${D}${sysconfdir}/initscripts/trigger-recovery-updater.sh
        install -d ${D}${systemd_unitdir}/system/
        install -m 0644 ${WORKDIR}/recovery_updater.service -D \
            ${D}${systemd_unitdir}/system/recovery_updater.service
-       install -d ${D}${systemd_unitdir}/system/sysinit.target.wants/
-       # enable the service for sysinit.target
+
+       # enable the service for multi-user.target
+       install -d ${D}${systemd_unitdir}/system/multi-user.target.wants/
        ln -sf ${systemd_unitdir}/system/recovery_updater.service \
-           ${D}${systemd_unitdir}/system/sysinit.target.wants/recovery_updater.service
+           ${D}${systemd_unitdir}/system/multi-user.target.wants/recovery_updater.service
     else
        install -m 0744 ${WORKDIR}/${BASEMACHINE}/recovery-updater.sh -D \
            ${D}${sysconfdir}/recovery-updater.sh

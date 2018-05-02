@@ -133,7 +133,7 @@ do_recovery_ext4() {
     # set block img diff version to v4
     echo "blockimgdiff_versions=3" >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
 
-    if [ "${BASEMACHINE}" == "apq8053" ]; then
+    if [ "${BASEMACHINE}" == "apq8053" ] || [ "${BASEMACHINE}" == "apq8009" ]; then
         echo recovery_upgrade_supported=1 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
     fi
 }
@@ -141,7 +141,12 @@ do_recovery_ext4() {
 # Generate OTA zip files
 do_gen_otazip_ext4() {
 
+    # Clean up any existing target-files*.zip as this can lead to incorrect content getting packed in the zip.
+    rm -f ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ext4.zip
+
     cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4 && /usr/bin/zip -qry ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ext4.zip *
+
+    cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && zip -qry target-files-ext4.zip BOOTABLE_IMAGES/recovery-unsparsed.ext4
 
     block_based=""
     if [ "${BASEMACHINE}" == "apq8009" ]; then
