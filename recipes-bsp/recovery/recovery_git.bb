@@ -17,7 +17,7 @@ S = "${WORKDIR}/OTA/recovery/"
 
 EXTRA_OECONF = "--with-glib --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include \
                 --with-core-headers=${STAGING_INCDIR}"
-CFLAGS += "-lsparse -lfs_mgr -llog"
+CFLAGS += "-lsparse -llog"
 
 SYSTEMD_SUPPORT = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemd', '', d)}"
 

@@ -11,9 +11,9 @@ HOMEPAGE = "http://android.git.kernel.org/?p=platform/system/core.git"
 DEPENDS += "libselinux libcutils"
 
 FILESPATH =+ "${WORKSPACE}:"
-SRC_URI = "file://android_compat/build/tools/fs_config/"
+SRC_URI = "file://OTA/build/tools/fs_config/"
 
-S = "${WORKDIR}/android_compat/build/tools/fs_config/"
+S = "${WORKDIR}/OTA/build/tools/fs_config/"
 
 BBCLASSEXTEND = "native"
 

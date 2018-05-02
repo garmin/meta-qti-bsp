@@ -135,34 +135,12 @@ do_recovery_ext4() {
     fi
 }
 
-# Task to generate OTA zip files
-python do_gen_otazip_ext4() {
-    import subprocess
-    cmd0  = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./make_recovery_patch ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4 ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4"
-    subprocess.call(cmd0, shell=True)
+# Generate OTA zip files
+do_gen_otazip_ext4() {
 
-    # Clean up any existing target-files*.zip as this can lead to incorrect content getting packed in the zip.
-    cleanupcmd = "rm ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ext4.zip"
-    subprocess.call(cleanupcmd, shell=True)
+    cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4 && /usr/bin/zip -qry ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ext4.zip *
 
-    cmd1 = "cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4 && zip -qry -FS ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ext4.zip *"
-    subprocess.call(cmd1, shell=True)
+    cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ext4.zip ${IMAGE_ROOTFS} ext4
 
-    cmd2 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && zip -qry target-files-ext4.zip BOOTABLE_IMAGES/recovery-unsparsed.ext4"
-
-    if (d.getVar('OTA_EXTRA_OPTS', True) == '1'):
-        cmd2 += " -p system/ -c ${WORKDIR}/rootfs-fsconfig.conf"
-
-    subprocess.call(cmd2, shell=True)
-
-    cmd3 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ext4.zip ${IMAGE_ROOTFS} ext4"
-
-    if (d.getVar('OTA_EXTRA_OPTS', True) == '1'):
-        cmd3 += " -p system/ -c ${WORKDIR}/rootfs-fsconfig.conf"
-
-    subprocess.call(cmd3, shell=True)
-
-    cmd4 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ext4.zip target-files-ext4.zip ${DEPLOY_DIR_IMAGE}"
-    subprocess.call(cmd4, shell=True)
+    cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ext4.zip target-files-ext4.zip ${DEPLOY_DIR_IMAGE}
 }
-

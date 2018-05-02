@@ -35,7 +35,7 @@ IMAGE_INSTALL += "libext2fs"
 
 # utils and scripts needed for SELinux
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','packagegroup-core-selinux',' ',d)}"
-IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','selinux-config',' ',d)}"
+#IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','selinux-config',' ',d)}"
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','refpolicy-mls',' ',d)}"
 
 # Needed for generating recovery.ubi ignored for ext4

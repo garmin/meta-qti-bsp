@@ -7,7 +7,7 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 PR = "r0"
 
-FILESPATH =+ "${WORKSPACE}/android_compat/build/tools/:"
+FILESPATH =+ "${WORKSPACE}/OTA/build/tools/:"
 
 SRC_URI   = "file://releasetools/"
 SRC_URI  += "file://full_ota.sh"
