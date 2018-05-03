@@ -28,7 +28,6 @@
 [Unit]
 Description=Mount dsp partition to /dsp mount point
 SourcePath=/etc/initscripts/ab_mount.sh
-Before=local-fs.target
 
 [Service]
 Restart=on-failure
