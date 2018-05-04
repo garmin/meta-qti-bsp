@@ -49,9 +49,6 @@ RECOVERYFS_SIZE_EXT4 ?= "136000000"
 # If fec enable :  "6172672" ; fec disable : 0 bytes of image size
 FEC_SIZE ?= "6172672"
 
-# Enable LE Verified Boot
-DISTRO_FEATURES_append = " vble"
-
 #Enable SDK feature
 SDK_IMAGE ?= "0"
 
@@ -64,4 +61,11 @@ IMAGE_FSTYPES += "ext4"
 #Extra fsconfig related options for ota package generator scripts.
 OTA_EXTRA_OPTS ?= "1"
 
-DISTRO_FEATURES += "ab-boot-support"
+# Support A/B schema for eMMC partitions
+DISTRO_FEATURES_append = " ab-boot-support"
+
+# Enable face recognition support
+DISTRO_FEATURES_append = " face-recognition"
+
+# Enable LE Verified Boot
+DISTRO_FEATURES_append = " vble"
