@@ -1,4 +1,4 @@
-inherit autotools pkgconfig sdllvm
+inherit autotools pkgconfig
 
 DESCRIPTION = "Android IPC utilities"
 HOMEPAGE = "http://developer.android.com/"
