@@ -38,6 +38,7 @@ IMAGE_INSTALL += "system-core-usb"
 IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "wireless-tools"
 IMAGE_INSTALL += "volatile-binds"
+IMAGE_INSTALL += "coreutils"
 
 # Below packages are open source packages that depend on proprietary packages
 
