@@ -7,6 +7,8 @@ SRC_URI += "file://ffbm.target"
 SRC_URI += "file://mtpserver.rules"
 SRC_URI_append_batcam = " file://pre_hibernate.sh"
 SRC_URI_append_batcam = " file://post_hibernate.sh"
+SRC_URI += "file://sysctl-core.conf"
+SRC_URI += "file://limit-core.conf"
 
 EXTRA_OECONF += " --disable-efi"
 
@@ -33,6 +35,10 @@ do_install_append () {
    ln -sf /lib/systemd/system/systemd-logind.service ${D}/lib/systemd/system/ffbm.target.wants/systemd-logind.service
    ln -sf /lib/systemd/system/getty.target ${D}/lib/systemd/system/ffbm.target.wants/getty.target
    ln -sf /lib/systemd/system/systemd-ask-password-wall.path ${D}/lib/systemd/system/ffbm.target.wants/systemd-ask-password-wall.path
+   install -d ${D}/etc/security/limits.d/
+   install -m 0644 ${WORKDIR}/limit-core.conf -D ${D}/etc/security/limits.d/core.conf
+   install -d /etc/sysctl.d/
+   install -m 0644 ${WORKDIR}/sysctl-core.conf -D ${D}/etc/sysctl.d/core.conf
 }
 
 # Scripts for pre and post hibernate functions for BatCam
@@ -42,5 +48,7 @@ do_install_append_batcam () {
    install -m 0755 ${WORKDIR}/post_hibernate.sh -D ${D}${systemd_unitdir}/system-sleep/post_hibernate.sh
 
 }
-
+PACKAGES +="${PN}-coredump"
 FILES_${PN} += "/etc/initscripts"
+FILES_${PN}-coredump = "/etc/sysctl.d/core.conf /etc/security/limits.d/core.conf"
+
