@@ -16,7 +16,7 @@ mountpoint=$2
 
 if [ -f "$mountpoint" ]; then
     if [ ! -f "$spec" ]; then
-        cp -pP "$mountpoint" "$spec"
+        cp -P --preserve=all "$mountpoint" "$spec"
     fi
   mount -o "bind" "$spec" "$mountpoint"
 fi
@@ -27,7 +27,7 @@ if [ -d "$mountpoint" ]; then
  for file in *
   do
     if [ ! -f "$spec/$file" ]; then
-        cp  "$file" "$spec/"
+        cp --preserve=all "$file" "$spec/"
     fi
  mount -o "bind" "$spec/$file" "$mountpoint/$file"
  done
