@@ -48,6 +48,7 @@ export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 export FSCONFIGFOPTS=" "
 block_based=" "
+python_version="python3"
 
 if [ "$#" -gt 4 ]; then
     IFS=' ' read -a allopts <<< "$@"
@@ -79,4 +80,9 @@ fi
 
 cd target_files && zip -q ../$2 META/*filesystem_config.txt SYSTEM/build.prop && cd ..
 
-./ota_from_target_files $block_based -n -v -d $device_type -v -p . -s "${WORKSPACE}/android_compat/device/qcom/common" --no_signing -i $1 $2 update_incr_$4.zip
+if ["${block_based}" = "--block" ]; then
+	./make_recovery_patch $target_files $target_files 
+	python_version="python2"
+fi
+
+$python_version ./ota_from_target_files $block_based -n -v -d $device_type -v -p . -s "${WORKSPACE}/android_compat/device/qcom/common" --no_signing -i $1 $2 update_incr_$4.zip

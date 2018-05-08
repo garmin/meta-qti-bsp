@@ -55,6 +55,7 @@ export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 export FSCONFIGFOPTS=" "
 block_based=" "
+python_version="python3"
 
 if [ "$#" -gt 3 ]; then
     IFS=' ' read -a allopts <<< "$@"
@@ -79,6 +80,12 @@ mkdir -p $target_files/SYSTEM
 mkdir -p target_files/BOOT/RAMDISK
 touch target_files/BOOT/RAMDISK/empty
 
+#Needed for block based OTA.
+if [ "${block_based}" = "--block" ]; then
+	./make_recovery_patch $target_files $target_files
+	python_version="python2"
+fi
+
 # Generate selabel rules only if file_contexts is packed in target-files
 if grep "selinux_fc" $target_files/META/misc_info.txt
 then
@@ -89,7 +96,8 @@ fi
 
 cd $target_files && zip -q ../$1 META/*filesystem_config.txt SYSTEM/build.prop BOOT/RAMDISK/empty && cd ..
 
-python3 ./ota_from_target_files $block_based -n -v -d $device_type -p . -m linux_embedded -s "${WORKSPACE}/OTA/device/qcom/common" --no_signing  $1 update_$3.zip > ota_debug.txt 2>&1
+
+$python_version ./ota_from_target_files $block_based -n -v -d $device_type -p . -m linux_embedded -s "${WORKSPACE}/OTA/device/qcom/common" --no_signing  $1 update_$3.zip > ota_debug.txt 2>&1
 
 if [[ $? = 0 ]]; then
     echo "update.zip generation was successful"
