@@ -1,7 +1,7 @@
 # Packages to be included in rootfs creation.
 IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
-IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', 'lib64-edk2', 'edk2', d)}"
+IMAGE_INSTALL += "${@bb.utils.contains('TARGET_ARCH', 'arm','lib64-edk2','edk2',d)}"
 
 IMAGE_INSTALL += "start-scripts-misc-daemon"
 
@@ -19,7 +19,6 @@ IMAGE_INSTALL += "system-core-post-boot"
 #IMAGE_INSTALL += "system-conf"
 #IMAGE_INSTALL += "system-prop"
 IMAGE_INSTALL += "wireless-tools"
-IMAGE_INSTALL += "volatile-binds"
 IMAGE_INSTALL +="${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', 'mtd-utils-ubifs', '', d)}"
 
 # The MSM Linux minimal boot image files.
