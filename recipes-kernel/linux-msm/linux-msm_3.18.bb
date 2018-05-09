@@ -7,7 +7,7 @@ KERNEL_IMAGEDEST_apq8096 = "boot"
 SRC_DIR   =  "${WORKSPACE}/kernel/msm-3.18"
 S         =  "${WORKDIR}/kernel/msm-3.18"
 GITVER    =  "${@base_get_metadata_git_revision('${SRC_DIR}',d)}"
-PR = "${@base_conditional('PRODUCT', 'psm', 'r5-psm', 'r5', d)}"
+PR = "${@bb.utils.contains('PRODUCT', 'psm', 'r5-psm', 'r5', d)}"
 
 DEPENDS_apq8096 += "dtc-native"
 
@@ -50,7 +50,7 @@ do_shared_workdir_append () {
         cp ${STAGING_KERNEL_DIR}/scripts/gen_initramfs_list.sh $kerneldir/scripts/
 
         # Make vmlinux available as soon as possible
-        VMLINUX_DIR=${@base_conditional('PERF_BUILD', '1', '${STAGING_DIR_TARGET}-perf', base_conditional('PRODUCT', 'psm', '${STAGING_DIR_TARGET}-psm', '${STAGING_DIR_TARGET}', d), d)}
+        VMLINUX_DIR=${@bb.utils.contains('PERF_BUILD', '1', '${STAGING_DIR_TARGET}-perf', bb.utils.contains('PRODUCT', 'psm', '${STAGING_DIR_TARGET}-psm', '${STAGING_DIR_TARGET}', d), d)}
         install -d ${VMLINUX_DIR}/${KERNEL_IMAGEDEST}
         install -m 0644 ${KERNEL_OUTPUT_DIR}/${KERNEL_IMAGETYPE} ${VMLINUX_DIR}/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}
         install -m 0644 vmlinux ${VMLINUX_DIR}/${KERNEL_IMAGEDEST}/vmlinux-${KERNEL_VERSION}

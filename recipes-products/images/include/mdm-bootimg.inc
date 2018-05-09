@@ -41,3 +41,7 @@ gen_buildprop() {
 do_rootfs_append_sdxpoorwills() {
     bb.build.exec_func('do_ramdisk_create',d)
 }
+# Generate ramdisk for sdxprairie
+do_rootfs_append_sdxprairie() {
+    bb.build.exec_func('do_ramdisk_create',d)
+}

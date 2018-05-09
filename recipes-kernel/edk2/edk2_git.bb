@@ -18,7 +18,7 @@ S         =  "${WORKDIR}/edk2"
 
 INSANE_SKIP_${PN} = "arch"
 
-VBLE = "${@base_contains('DISTRO_FEATURES', 'vble','1', '0', d)}"
+VBLE = "${@bb.utils.contains('DISTRO_FEATURES', 'vble','1', '0', d)}"
 
 EXTRA_OEMAKE = "'CLANG_BIN=${STAGING_BINDIR_NATIVE}/llvm-arm-toolchain/bin/' \
                 'CLANG_PREFIX=${STAGING_BINDIR_NATIVE}/${TARGET_SYS}/${TARGET_PREFIX}' \

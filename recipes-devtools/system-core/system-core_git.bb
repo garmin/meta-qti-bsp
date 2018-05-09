@@ -14,12 +14,12 @@ DEPENDS = "virtual/kernel openssl glib-2.0 libselinux safe-iop ext4-utils libunw
 EXTRA_OECONF = " --with-host-os=${HOST_OS} --with-glib"
 EXTRA_OECONF_append = " --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
 EXTRA_OECONF_append = " --with-logd-logging"
-EXTRA_OECONF_append = "${@base_conditional('USER_BUILD','1',' --disable-debuggerd','',d)}"
+EXTRA_OECONF_append = "${@bb.utils.contains('USER_BUILD','1',' --disable-debuggerd','',d)}"
 EXTRA_OECONF_append_apq8053 = " --enable-logd-privs"
 EXTRA_OECONF_append_qcs40x = " --disable-libsync"
 
 # Disable adb root privileges in USER builds for msm targets
-EXTRA_OECONF_append_msm = "${@base_conditional('USER_BUILD','1',' --disable-adb-root','',d)}"
+EXTRA_OECONF_append_msm = "${@bb.utils.contains('USER_BUILD','1',' --disable-adb-root','',d)}"
 
 # Pass on system partition size to adb
 EXTRA_OECONF_append = " --with-system-size=${SYSTEM_SIZE_EXT4}"
@@ -44,6 +44,7 @@ COMPOSITION_apq8096 = "901D"
 COMPOSITION_apq8098 = "901D"
 COMPOSITION_qcs605 = "901D"
 COMPOSITION_sdxpoorwills = "90DB"
+COMPOSITION_sdxprairie = "90DB"
 
 do_install_append() {
    install -m 0755 ${S}/adb/launch_adbd -D ${D}${sysconfdir}/launch_adbd
@@ -115,7 +116,7 @@ do_install_append_apq8009() {
 #Install rules specific to apq8053 target
 do_install_append_apq8053(){
 
-  DEBUGGERD_NO_INSTALL=${@base_conditional('USER_BUILD','1','no-debuggerd','',d)}
+  DEBUGGERD_NO_INSTALL=${@bb.utils.contains('USER_BUILD','1','no-debuggerd','',d)}
   if [ "x$DEBUGGERD_NO_INSTALL" == "x" ]; then
     if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'false', 'true', d)}; then
       install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/init.d/init_debuggerd

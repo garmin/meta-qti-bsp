@@ -32,7 +32,7 @@ do_install() {
 # Use /lib/firmware/updates instead till userspace is capable of firmware load.
 do_install_append() {
     install -d ${D}/lib/firmware
-    if ${@base_version_less_or_equal('PREFERRED_VERSION_linux-msm', '3.18', 'true', 'false', d)}; then
+    if ${@oe.utils.version_less_or_equal('PREFERRED_VERSION_linux-msm', '3.18', 'true', 'false', d)}; then
         ln -s /firmware/image ${D}/lib/firmware/image
     else
         ln -s /firmware/image ${D}/lib/firmware/updates
