@@ -40,7 +40,7 @@ IMAGE_INSTALL += "systemd-coredump"
 
 do_makesystem() {
     if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
-     make_ext4fs -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET} ${IMAGE_ROOTFS}
+     make_ext4fs -a /systemrw ${IMAGE_EXT4_SELINUX_OPTIONS}  -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET} ${IMAGE_ROOTFS}
      make_ext4fs -l ${SYSTEMRW_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMRWIMAGE_TARGET}
     fi
 }
