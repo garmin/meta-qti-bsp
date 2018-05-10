@@ -130,6 +130,9 @@ do_recovery_ext4() {
     #default_system_dev_certificate : Dummy location
     echo default_system_dev_certificate=build/abcd >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
 
+    # set block img diff version to v4
+    echo "blockimgdiff_versions=3,4" >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
+
     if [ "${BASEMACHINE}" == "apq8053" ]; then
         echo recovery_upgrade_supported=1 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
     fi
@@ -140,7 +143,12 @@ do_gen_otazip_ext4() {
 
     cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4 && /usr/bin/zip -qry ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ext4.zip *
 
-    cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ext4.zip ${IMAGE_ROOTFS} ext4
+    block_based=""
+    if [ "${BASEMACHINE}" == "apq8009" ]; then
+        block_based="--block"
+    fi
+
+    cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ext4.zip ${IMAGE_ROOTFS} ext4 $block_based
 
     cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ext4.zip target-files-ext4.zip ${DEPLOY_DIR_IMAGE}
 }
