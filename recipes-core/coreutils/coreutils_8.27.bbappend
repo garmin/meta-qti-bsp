@@ -1,4 +1,4 @@
-do_install_append_sdxpoorwills(){
+do_install_append_mdm(){
 	mv ${D}${base_bindir}/cp.coreutils ${D}/cp.coreutils;
 	mv ${D}${bindir}/chcon ${D}/chcon;
 	rm -rf ${D}${base_bindir};
