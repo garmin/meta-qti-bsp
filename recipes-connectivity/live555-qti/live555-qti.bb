@@ -13,6 +13,7 @@ SRC_URI += "file://0004-live555-Add-support-for-metadata-streaming.patch"
 SRC_URI += "file://0001-live555-Add-support-for-server-port-reuse.patch"
 SRC_URI += "file://0006-live555-Remove-computing-fDurationInMicroseconds.patch"
 SRC_URI += "file://0007-live555-Rewrite-H264or5VideoStreamDiscreteFramer.patch"
+SRC_URI += "file://0008-live555-Remove-support-for-xlocale.patch"
 # commit d9e97d7953d531a243a8372870bdb6c7a9bb80cb
 SRCREV = "d9e97d7953d531a243a8372870bdb6c7a9bb80cb"
 
