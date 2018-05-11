@@ -50,7 +50,7 @@ RECOVERYFS_SIZE_EXT4 ?= "136000000"
 FEC_SIZE ?= "6172672"
 
 #Enable SDK feature
-SDK_IMAGE ?= "0"
+SDK_IMAGE ?= "1"
 
 #Enable Recovery image generation
 RECOVERY_IMAGE ?= "0"
