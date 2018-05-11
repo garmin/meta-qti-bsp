@@ -39,6 +39,12 @@ do_install_append () {
    install -m 0644 ${WORKDIR}/limit-core.conf -D ${D}/etc/security/limits.d/core.conf
    install -d /etc/sysctl.d/
    install -m 0644 ${WORKDIR}/sysctl-core.conf -D ${D}/etc/sysctl.d/core.conf
+
+   #  Mask journaling services by default.
+   #  'systemctl unmask' can be used on device to enable them if needed.
+   ln -sf /dev/null ${D}/etc/systemd/system/systemd-journald.service
+   ln -sf /dev/null ${D}${systemd_unitdir}/system/sysinit.target.wants/systemd-journal-flush.service
+   ln -sf /dev/null ${D}${systemd_unitdir}/system/sysinit.target.wants/systemd-journal-catalog-update.service
 }
 
 # Scripts for pre and post hibernate functions for BatCam
