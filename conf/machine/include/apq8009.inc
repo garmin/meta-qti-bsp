@@ -42,3 +42,6 @@ RECOVERY_IMAGE ?= "1"
 
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4"
+
+#Enable SDK feature
+SDK_IMAGE ?= "1"
