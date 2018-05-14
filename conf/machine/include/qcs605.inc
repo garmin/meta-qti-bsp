@@ -38,7 +38,7 @@ RECOVERYFS_SIZE_EXT4 ?= "136000000"
 SDK_IMAGE ?= "1"
 
 #Enable Recovery image generation
-RECOVERY_IMAGE ?= "1"
+RECOVERY_IMAGE ?= "0"
 
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4"
