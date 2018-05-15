@@ -40,9 +40,19 @@ if [ "$#" -lt 4 ]; then
     exit 1
 fi
 
-export PATH=.:${STAGING_BINDIR_NATIVE}:$PATH
+FSCONFIG_PATH=../../../../../sysroots-components/x86_64/fsconfig-native/usr/bin
+IMGDIFF_PATH=../../../../../sysroots-components/x86_64/applypatch-native/usr/bin
+BSDIFF_PATH=../../../../../sysroots-components/x86_64/bsdiff-native/usr/bin
+export PATH=.:${STAGING_BINDIR_NATIVE}:$FSCONFIG_PATH:$IMGDIFF_PATH:$BSDIFF_PATH:$PATH:/usr/bin
 export OUT_HOST_ROOT=.
-export LD_LIBRARY_PATH=${STAGING_LIBDIR_NATIVE}
+
+LIBSELINUX_PATH=../../../../../sysroots-components/x86_64/libselinux-native/usr/lib
+LIBCUTILS_PATH=../../../../../sysroots-components/x86_64/libcutils-native/usr/lib
+LIBPCRE_PATH=../../../../../sysroots-components/x86_64/libpcre-native/usr/lib
+LIBLOG_PATH=../../../../../sysroots-components/x86_64/liblog-native/usr/lib
+LIBDIVSUFSORT_PATH=../../../../../sysroots-components/x86_64/libdivsufsort-native/usr/lib
+export LD_LIBRARY_PATH=${STAGING_LIBDIR_NATIVE}:$LIBSELINUX_PATH:$LIBCUTILS_PATH:$LIBPCRE_PATH:$LIBLOG_PATH:$LIBDIVSUFSORT_PATH
+
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
@@ -80,9 +90,8 @@ fi
 
 cd target_files && zip -q ../$2 META/*filesystem_config.txt SYSTEM/build.prop && cd ..
 
-if ["${block_based}" = "--block" ]; then
-	./make_recovery_patch $target_files $target_files 
-	python_version="python2"
+if [ "${block_based}" = "--block" ]; then
+    python_version="python2"
 fi
 
-$python_version ./ota_from_target_files $block_based -n -v -d $device_type -v -p . -s "${WORKSPACE}/android_compat/device/qcom/common" --no_signing -i $1 $2 update_incr_$4.zip
+$python_version ./ota_from_target_files $block_based -n -v -d $device_type -v -p . -m linux_embedded -s "${WORKSPACE}/android_compat/device/qcom/common" --no_signing -i $1 $2 update_incr_$4.zip
