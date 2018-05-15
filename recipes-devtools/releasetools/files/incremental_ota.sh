@@ -94,4 +94,4 @@ if [ "${block_based}" = "--block" ]; then
     python_version="python2"
 fi
 
-$python_version ./ota_from_target_files $block_based -n -v -d $device_type -v -p . -m linux_embedded -s "${WORKSPACE}/android_compat/device/qcom/common" --no_signing -i $1 $2 update_incr_$4.zip
+$python_version ./ota_from_target_files $block_based -n -v -d $device_type -v -p . -m linux_embedded --no_signing -i $1 $2 update_incr_$4.zip

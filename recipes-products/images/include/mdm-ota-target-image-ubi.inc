@@ -68,6 +68,11 @@ do_recovery_ubi() {
 
     cp   ${OTA_TARGET_IMAGE_ROOTFS_UBI}/RECOVERY/usr/bin/updater ${OTA_TARGET_IMAGE_ROOTFS_UBI}/OTA/bin/.
 
+    # Pack releasetools.py into META folder itself.
+    # This could also have been done by passing "--device_specific" to
+    # ota_from_target_files.py but it would be hacky to find the absolute path there.
+    cp ${WORKSPACE}/OTA/device/qcom/common/releasetools.py ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/.
+
     #cp and modify file_contexts to BOOT/RAMDISK folder
     if [[ "${DISTRO_FEATURES}" =~ "selinux" ]]; then
         cp ${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_contexts ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/.
