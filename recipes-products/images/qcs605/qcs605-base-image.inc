@@ -30,6 +30,8 @@ IMAGE_INSTALL += "system-core-post-boot"
 IMAGE_INSTALL += "wireless-tools"
 IMAGE_INSTALL += "volatile-binds"
 IMAGE_INSTALL += "abctl"
+IMAGE_INSTALL += "libhardware"
+IMAGE_INSTALL += "binder"
 
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
 do_makesystem() {
