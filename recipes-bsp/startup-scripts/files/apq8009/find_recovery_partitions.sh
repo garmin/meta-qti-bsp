@@ -31,7 +31,7 @@
 
 emmc_dir=/dev/block/bootdevice/by-name
 mtd_file=/proc/mtd
-fstab_file=/res/recovery_volume_detected
+fstab_file=/tmp/recovery_volume_detected
 
 
 ubi_device_number=1
