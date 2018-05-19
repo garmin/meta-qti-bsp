@@ -12,6 +12,10 @@ require conf/machine/include/arm/arch-armv8.inc
 PREFERRED_PROVIDER_virtual/kernel = "linux-msm"
 PREFERRED_VERSION_linux-msm = "4.9"
 
+PREFERRED_PROVIDER_virtual/egl ?= "adreno"
+PREFERRED_PROVIDER_virtual/libgles1 ?= "adreno"
+PREFERRED_PROVIDER_virtual/libgles2 ?= "adreno"
+
 SERIAL_CONSOLE ?= "${@['', '115200 ttyMSM0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
 
 DISTRO ?= "msm"
