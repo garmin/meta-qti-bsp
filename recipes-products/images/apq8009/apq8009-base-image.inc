@@ -2,6 +2,9 @@
 
 DEPENDS += "lk"
 
+# Compute sha1sum of unsparsed recovery&recoveryfs images
+# only after recoveryfs.ext4 image creation has already happened.
+do_rootfs[depends] += "machine-recovery-image:do_makesystem"
 
 IMAGE_INSTALL += "packagegroup-core-boot"
 
@@ -41,11 +44,37 @@ IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "system-prop"
 IMAGE_INSTALL += "wireless-tools"
 IMAGE_INSTALL += "volatile-binds"
+IMAGE_INSTALL += "start-scripts-recovery-updater"
 
 # Don't install GDB and related pacakges in production builds.
 DEPENDS += "${@base_conditional('USER_BUILD', '1', '', 'gdb-cross-arm', d)}"
 IMAGE_INSTALL += "${@base_conditional('USER_BUILD', '1', '', 'gdb', d)}"
 IMAGE_INSTALL += "${@base_conditional('USER_BUILD', '1', '', 'gdbserver', d)}"
+
+# Location of unsparsed recoveryfs & recovery images
+UNSPARSED_RECOVERYFS_DEST = "${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/BOOTABLE_IMAGES"
+
+# Compute sha1 of recovery(fs) images
+# as an extension of the do_rootfs() task.
+do_process_recovery_images() {
+    # Create a "recoveryupgrade" directory which will house the
+    # data needed by the recovery/recoveryfs upgrade mechanism.
+    mkdir -p ${IMAGE_ROOTFS}/recoveryupgrade
+
+    # first compute sha1 of boot.img, which is same as recovery partition's content
+    /usr/bin/sha1sum ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img | \
+        awk '{ print $1 }' > ${IMAGE_ROOTFS}/recoveryupgrade/recoveryimg_sha1
+    stat --printf="%s" ${DEPLOY_DIR_IMAGE}/${MACHINE}-boot.img > \
+        ${IMAGE_ROOTFS}/recoveryupgrade/recoveryimg_length
+
+    # now compute sha1 of the unsparsed recoveryfs image
+    /usr/bin/sha1sum ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4 | \
+        awk '{ print $1 }' > ${IMAGE_ROOTFS}/recoveryupgrade/recoveryfsimg_sha1
+    stat --printf="%s" ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4 > \
+        ${IMAGE_ROOTFS}/recoveryupgrade/recoveryfsimg_length
+}
+
+ROOTFS_POSTPROCESS_COMMAND += "do_process_recovery_images; "
 
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
 
