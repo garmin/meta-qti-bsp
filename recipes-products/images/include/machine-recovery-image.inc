@@ -70,13 +70,13 @@ do_makesystem() {
         if [[ "${DISTRO_FEATURES}" =~ "selinux" ]]; then
             make_ext4fs -s -a / -S ${SELINUX_FILE_CONTEXTS} -l ${RECOVERYFS_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${RECOVERYIMAGE_TARGET} ${IMAGE_ROOTFS}
 
-            # Create an unsparse image as well to be included as part ota target-files
-            make_ext4fs -a / -S ${SELINUX_FILE_CONTEXTS} -l ${RECOVERYFS_SIZE_EXT4} ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4 ${IMAGE_ROOTFS}
+            # Create an unsparse image as well to be included as part of ota target-files
+            simg2img ${DEPLOY_DIR_IMAGE}/${RECOVERYIMAGE_TARGET} ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4
         else
             make_ext4fs -s -l ${RECOVERYFS_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${RECOVERYIMAGE_TARGET} ${IMAGE_ROOTFS}
 
-            # Create an unsparse image as well to be included as part ota target-files
-            make_ext4fs -l ${RECOVERYFS_SIZE_EXT4} ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4 ${IMAGE_ROOTFS}
+            # Create an unsparse image as well to be included as part of ota target-files
+            simg2img ${DEPLOY_DIR_IMAGE}/${RECOVERYIMAGE_TARGET} ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4
         fi
     fi
 
