@@ -44,6 +44,9 @@ do_fix_sepolicies () {
 
 addtask fix_sepolicies before do_install after do_compile
 
+do_install_basefilesissue[vardepsexclude] += "DISTRO_NAME"
+do_install_basefilesissue[vardepsexclude] += "DISTRO_VERSION"
+
 do_install_append(){
     install -m 755 -o diag -g diag -d ${D}/media
     install -m 755 -o diag -g diag -d ${D}/mnt/sdcard
