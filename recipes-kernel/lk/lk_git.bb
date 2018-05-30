@@ -37,6 +37,7 @@ LIBGCC = "${STAGING_LIBDIR}/${TARGET_SYS}/6.4.0/libgcc.a"
 DISPLAY_SCREEN = "1"
 DISPLAY_SCREEN_drone = "0"
 DISPLAY_SCREEN_batcam = "0"
+DISPLAY_SCREEN_robot-som = "0"
 
 ENABLE_DISPLAY = "${DISPLAY_SCREEN}"
 
@@ -53,6 +54,8 @@ EXTRA_OEMAKE_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'USE_
 EXTRA_OEMAKE_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'vble', 'VERIFIED_BOOT_LE=1', '', d)}"
 
 EXTRA_OEMAKE_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'VERITY_LE=1', '', d)}"
+
+EXTRA_OEMAKE_append_robot-som = "TARGET_USE_QSEECOM_V4=1"
 
 #enable hardfloat
 EXTRA_OEMAKE_append = " ${@bb.utils.contains('TUNE_FEATURES', 'callconvention-hard', 'ENABLE_HARD_FPU=1', '', d)}"
