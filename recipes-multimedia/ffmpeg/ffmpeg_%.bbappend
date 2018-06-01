@@ -1,16 +1,3 @@
-SUMMARY = "FFmpeg is a complete, cross-platform solution to record, convert and stream audio and video."
-HOMEPAGE = "http://ffmpeg.org"
-BUGTRACKER = "http://ffmpeg.org/trac/ffmpeg"
-LICENSE = "LGPLv2.1"
-PRIORITY = "optional"
-LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/LGPL-2.1;md5=1a6d268fd218675ffea8be556788b780"
-
-# Package Revision (update whenever recipe is changed)
-PR = "r0"
-
-SRC_URI = "git://source.codeaurora.org/quic/le/ffmpeg/;protocol=http;branch=ffmpeg/release/2.3;destsuffix=ffmpeg-2.3;name=ffmpeg-2.3"
-SRCREV = "${AUTOREV}"
-
 EXTRA_OEMAKE = ""
 
 FILES_${PN} += "/lib/lib*.so.*"
@@ -18,15 +5,16 @@ FILES_${PN} += "/lib/pkgconfig/*"
 FILES_${PN}-dev += "/usr/share/*"
 FILES_${PN}-dev += "/lib/lib*.so"
 
+PACKAGECONFIG = "avdevice avfilter avcodec avformat swresample swscale postproc bzlib gpl theora"
+
 EXTRA_CFLAGS_append += " -fPIC"
 EXTRA_CFLAGS_append += " ${@ bb.utils.contains('TUNE_FEATURES', 'callconvention-hard', '-mfloat-abi=hard', '', d)}"
 EXTRA_CFLAGS_append += " ${@ bb.utils.contains('TUNE_FEATURES', 'neon', '-mfpu=neon', '', d)}"
 EXTRA_CFLAGS_append += " ${@ bb.utils.contains('TUNE_FEATURES', 'armv7a', '-march=armv7-a', '', d)}"
 EXTRA_CFLAGS_append += " ${@ bb.utils.contains('TUNE_FEATURES', 'cortexa8', '-mtune=cortex-a8', '', d)}"
 
-do_configure () {
-    ./configure --enable-cross-compile --cross-prefix=${TARGET_PREFIX} \
-    --cpu=armv7-a --target-os=linux --sysroot=${STAGING_DIR_TARGET} --arch=${TARGET_ARCH} --disable-mmx \
+EXTRA_OECONF_append += " \
+    --target-os=linux --sysroot=${STAGING_DIR_TARGET} --arch=${TARGET_ARCH} --disable-mmx \
     --enable-shared --disable-doc --disable-htmlpages --disable-manpages --disable-podpages \
     --disable-txtpages --disable-avdevice --disable-swresample --disable-swscale \
     --disable-postproc --enable-small --disable-avfilter --disable-debug --disable-ffserver --disable-ffplay \
@@ -48,8 +36,8 @@ do_configure () {
     --disable-demuxer=vmd --disable-demuxer=voc --disable-demuxer=wc3 --disable-demuxer=wsaud \
     --disable-demuxer=wsvqa --disable-demuxer=xa --disable-demuxer=yuv4mpegpipe --enable-demuxer=matroska \
     --disable-altivec --enable-fft --libdir=${base_libdir} --shlibdir=${base_libdir} \
-    --prefix=${base_libdir} --incdir=${includedir}
-}
+    --prefix=${base_libdir} --incdir=${includedir} \
+"
 
 do_install() {
     oe_runmake 'DESTDIR=${D}' install
