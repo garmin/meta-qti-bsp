@@ -8,3 +8,4 @@
 /sbin/mount-copybind /systemrw/boot_hsusb_comp /etc/usb/boot_hsusb_comp
 /sbin/mount-copybind /systemrw/boot_hsic_comp /etc/usb/boot_hsic_comp
 /sbin/mount-copybind /systemrw/misc/wifi /etc/misc/wifi
+/sbin/mount-copybind /systemrw/bluetooth /etc/bluetooth
