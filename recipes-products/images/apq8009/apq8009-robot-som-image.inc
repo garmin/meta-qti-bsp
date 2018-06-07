@@ -18,3 +18,9 @@ IMAGE_INSTALL += "${@base_conditional('PRODUCT','robot-rome', 'libcap', '', d)}"
 IMAGE_INSTALL += "${@base_conditional('PRODUCT','robot-rome', 'attr', '', d)}"
 IMAGE_INSTALL += "mtd-utils-ubifs"
 IMAGE_INSTALL += "start-scripts-storage-mount"
+
+IMAGE_INSTALL += "kernel-modules"
+# Following packages support audio-dlkm enabled
+
+AUDIOMODULE_FLAG = "${@bb.utils.contains('DISTRO_FEATURES', 'audio-dlkm', 'True', 'False', d)}"
+IMAGE_INSTALL += "${@base_conditional('AUDIOMODULE_FLAG', 'True', bb.utils.contains('MULTILIB_VARIANTS', 'lib32', 'lib32-audiodlkm', 'audiodlkm', d), '', d)}"
