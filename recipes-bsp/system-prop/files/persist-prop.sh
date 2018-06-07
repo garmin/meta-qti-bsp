@@ -30,4 +30,5 @@
 #
 
 # Start using persist properties
+while [ ! -e /dev/socket/leprop-service ] ; do sleep 0.01; done
 setprop le.persistprop.enable true

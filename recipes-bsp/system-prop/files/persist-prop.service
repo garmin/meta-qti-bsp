@@ -4,7 +4,8 @@ After=leprop.service
 Requires=leprop.service
 
 [Service]
-ExecStart=/usr/bin/setprop le.persistprop.enable true
+ExecStart=/sbin/persist-prop.sh
+Type=oneshot
 
 [Install]
 WantedBy=multi-user.target

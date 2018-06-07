@@ -26,6 +26,7 @@ do_install() {
     install -d ${D}
     install ${S}/build.prop ${D}/build.prop
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+       install -m 0755 ${WORKDIR}/persist-prop.sh -D ${D}${base_sbindir}/persist-prop.sh
        install -d ${D}${systemd_unitdir}/system
        install -d ${D}${systemd_unitdir}/system/multi-user.target.wants/
        install -m 644 ${WORKDIR}/persist-prop.service ${D}/${systemd_unitdir}/system
@@ -46,5 +47,6 @@ pkg_postinst_${PN} () {
 }
 
 PACKAGES = "${PN}"
+FILES_${PN} += "${base_sbindir}/"
 FILES_${PN} += "/build.prop"
 FILES_${PN} += "${systemd_unitdir}/"
