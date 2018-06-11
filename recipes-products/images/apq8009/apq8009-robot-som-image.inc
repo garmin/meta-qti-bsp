@@ -8,6 +8,7 @@ IMAGE_INSTALL_remove = "packagegroup-ss-mgr"
 IMAGE_INSTALL += "reboot-daemon"
 IMAGE_INSTALL += "e2fsprogs"
 IMAGE_INSTALL += "start-scripts-userfs-reset"
+IMAGE_INSTALL += "start-script-ab-slot-util"
 IMAGE_INSTALL += "chrony"
 IMAGE_INSTALL += "chronyc"
 
