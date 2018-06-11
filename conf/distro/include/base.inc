@@ -105,6 +105,7 @@ EXTRA_USERS_PARAMS = "\
  groupadd -g 3005 net_admin; \
  groupadd -g 3009 readproc; \
  groupadd -g 3010 wakelock; \
+ groupadd -g 3012 powermgr; \
 "
 
 EXTRA_USERS_PARAMS_append = " ${@['', 'usermod -L -e 1 root;'][d.getVar('VARIANT', True) == 'user']}"
