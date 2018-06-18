@@ -45,9 +45,8 @@ SECURITY_CFLAGS_pn-libcutils  = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-liblog  = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-av-frameworks  = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-libbase = "${SECURITY_PIC_CFLAGS}"
-# libutils, part of system-core needs -fPIC
-SECURITY_CFLAGS_pn-system-core = "${SECURITY_PIC_CFLAGS}"
-SECURITY_CFLAGS_pn-lib32-system-core = "${SECURITY_PIC_CFLAGS}"
+# libutils needs -fPIC
+SECURITY_CFLAGS_pn_libutils = "${SECURITY_PIC_CFLAGS}"
 
 # BT OSS packages
 SECURITY_CFLAGS_pn-event-observer = "${SECURITY_PIC_CFLAGS}"
