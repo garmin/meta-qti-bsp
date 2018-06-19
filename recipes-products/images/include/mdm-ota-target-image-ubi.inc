@@ -117,15 +117,14 @@ do_recovery_ubi() {
 }
 
 # Task to generate OTA zip files
-python do_gen_otazip_ubi() {
-    import subprocess
+do_gen_otazip_ubi() {
 
-    cmd1 = "cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ubi && zip -qry -FS ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ubi.zip *"
-    subprocess.call(cmd1, shell=True)
+    # Clean up any existing target-files*.zip as this can lead to incorrect content getting packed in the zip.
+    rm -f ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ubi.zip
 
-    cmd2 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ubi.zip ${IMAGE_ROOTFS} ubi"
-    subprocess.call(cmd2, shell=True)
+    cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ubi && zip -qry -FS ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ubi.zip *
 
-    cmd3 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ubi.zip target-files-ubi.zip ${DEPLOY_DIR_IMAGE}"
-    subprocess.call(cmd3, shell=True)
+    cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ubi.zip ${IMAGE_ROOTFS} ubi
+
+    cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ubi.zip target-files-ubi.zip ${DEPLOY_DIR_IMAGE}
 }
