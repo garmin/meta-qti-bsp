@@ -21,6 +21,8 @@ SRC_URI_append += "file://systemd/data-ubi.mount"
 SRC_URI_append += "file://systemd/systemrw-ubi.mount"
 SRC_URI_append += "file://systemd/firmware-ubi-mount.sh"
 SRC_URI_append += "file://systemd/firmware-ubi-mount.service"
+SRC_URI_append += "file://systemd/bluetooth.mount"
+SRC_URI_append += "file://systemd/bluetooth-mount.service"
 
 dirs755 += "/media/cf /media/net /media/ram \
             /media/union /media/realroot /media/hdd \
@@ -29,7 +31,7 @@ dirs755 += "/media/cf /media/net /media/ram \
 dirs755_append_apq8053 +="/firmware /persist /cache /dsp "
 dirs755_append_apq8009 += "/firmware /persist /cache"
 dirs755_append_apq8017 += "/firmware /persist /cache /dsp"
-dirs755_append_qcs605 += "/firmware /persist /cache /dsp"
+dirs755_append_qcs605 += "/firmware /persist /cache /dsp /bluetooth"
 dirs755_append_qcs405-som1 += "/firmware /persist"
 dirs755_append_qcs403-som2 += "/firmware /cache"
 # Remove sepolicy entries from various files when selinux is not present.
@@ -38,6 +40,8 @@ do_fix_sepolicies () {
         # For mount services
         sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware.mount
         sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware-mount.service
+        sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/bluetooth.mount
+        sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/bluetooth-mount.service
         sed -i "s#,rootcontext=system_u:object_r:var_t:s0##g"  ${WORKDIR}/systemd/var-volatile.mount
         sed -i "s#,rootcontext=system_u:object_r:system_data_t:s0##g"  ${WORKDIR}/systemd/systemrw.mount
         sed -i "s#,rootcontext=system_u:object_r:data_t:s0##g"  ${WORKDIR}/systemd/data.mount
@@ -111,6 +115,10 @@ do_install_append_msm() {
                     install -m 0644 ${WORKDIR}/systemd/dsp-mount.service ${D}${sysconfdir}/systemd/system/dsp-mount.service
                     ln -sf  ../dsp-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp-mount.service
                 fi
+                if [ "$d" == "/bluetooth" ]; then
+                    install -m 0644 ${WORKDIR}/systemd/bluetooth-mount.service ${D}${sysconfdir}/systemd/system/bluetooth-mount.service
+                    ln -sf  ../bluetooth-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/bluetooth-mount.service
+               fi
             # non-AB boot
             else
                 if [ "$d" == "/firmware" ]; then
@@ -127,6 +135,10 @@ do_install_append_msm() {
                 if [ "$d" == "/dsp" ]; then
                     install -m 0644 ${WORKDIR}/systemd/dsp.mount ${D}${sysconfdir}/systemd/system/dsp.mount
                     ln -sf  ../dsp.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp.mount
+                fi
+                if [ "$d" == "/bluetooth" ]; then
+                    install -m 0644 ${WORKDIR}/systemd/bluetooth.mount ${D}${sysconfdir}/systemd/system/bluetooth.mount
+                    ln -sf  ../bluetooth.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/bluetooth.mount
                 fi
             fi
             # systemrw is applicable only when rootfs is read only.
