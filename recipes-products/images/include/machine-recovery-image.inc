@@ -79,10 +79,12 @@ do_makesystem() {
             simg2img ${DEPLOY_DIR_IMAGE}/${RECOVERYIMAGE_TARGET} ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4
         fi
     fi
+}
 
-    #rename machine-recovery-image.ubi if exists
+do_rename_recovery_ubi_image() {
+    #rename machine-recovery-image.ubi if it exists
     if [ -f "${DEPLOY_DIR_IMAGE}/machine-recovery-image-${MACHINE}.ubi" ]; then
-        mv ${DEPLOY_DIR_IMAGE}/machine-recovery-image-${MACHINE}.ubi ${DEPLOY_DIR_IMAGE}/${MACHINE}-recovery.ubi
+        mv ${DEPLOY_DIR_IMAGE}/machine-recovery-image-${MACHINE}.ubi ${DEPLOY_DIR_IMAGE}/${MACHINE}-recoveryfs.ubi
     fi
 }
 
@@ -90,3 +92,6 @@ ROOTFS_POSTPROCESS_COMMAND += "do_fsconfig; "
 
 # Call function makesystem to generate sparse ext4 image
 addtask makesystem after do_rootfs before do_build
+
+# rename recovery images only after they are copied to DEPLOY_DIR
+addtask rename_recovery_ubi_image after do_image_complete before do_build
