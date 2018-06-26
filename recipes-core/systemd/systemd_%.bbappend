@@ -9,6 +9,7 @@ SRC_URI_append_batcam = " file://pre_hibernate.sh"
 SRC_URI_append_batcam = " file://post_hibernate.sh"
 SRC_URI += "file://sysctl-core.conf"
 SRC_URI += "file://limit-core.conf"
+SRC_URI += "file://logind.conf"
 
 EXTRA_OECONF += " --disable-efi"
 
