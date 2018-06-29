@@ -46,3 +46,4 @@ m2:5:respawn:/usr/bin/mbimd
 m3:5:respawn:/usr/bin/diagrebootapp
 m4:5:respawn:/usr/bin/loc_launcher
 m5:5:respawn:/usr/bin/qmuxbridge
+m6:5:respawn:/usr/bin/location_hal_daemon
