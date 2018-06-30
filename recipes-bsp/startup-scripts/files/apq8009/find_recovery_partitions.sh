@@ -132,6 +132,7 @@ then
     eval FindAndMountEXT4 cache    /cache    0 relatime,data=ordered,noauto_da_alloc,discard,noexec,
 nodev
     eval FindAndMountEXT4 misc     /misc     1
+    eval FindAndMountEXT4 systemrw /systemrw 1
 else
     fstype="UBI"
     eval FindAndAttachUBI modem
