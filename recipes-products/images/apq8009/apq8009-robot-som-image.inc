@@ -19,6 +19,8 @@ IMAGE_INSTALL += "${@base_conditional('PRODUCT','robot-rome', 'libcap', '', d)}"
 IMAGE_INSTALL += "${@base_conditional('PRODUCT','robot-rome', 'attr', '', d)}"
 IMAGE_INSTALL += "mtd-utils-ubifs"
 IMAGE_INSTALL += "kernel-modules"
+IMAGE_INSTALL += "security-tests"
+IMAGE_INSTALL += "sat-module"
 # Following packages support audio-dlkm enabled
 
 AUDIOMODULE_FLAG = "${@bb.utils.contains('DISTRO_FEATURES', 'audio-dlkm', 'True', 'False', d)}"
