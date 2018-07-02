@@ -36,7 +36,7 @@ do_install() {
     STAGING_LIBDIR=${STAGING_LIBDIR} \
     PYTHONPATH=${D}${PYTHON_SITEPACKAGES_DIR} \
     BUILD_SYS=${BUILD_SYS} HOST_SYS=${HOST_SYS} \
-    ${STAGING_BINDIR_NATIVE}/${PYTHON_PN}-native/${PYTHON_PN} setup.py install || \
+    ${STAGING_BINDIR_NATIVE}/${PYTHON_PN}-native/${PYTHON_PN} setup.py install --install-lib=${D}/${PYTHON_SITEPACKAGES_DIR} || \
         bbfatal "${PYTHON_PN} setup.py install execution failed."
 
     # the above fails to add the path, just install that into ${D}
