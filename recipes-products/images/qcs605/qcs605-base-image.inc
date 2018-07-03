@@ -1,5 +1,5 @@
 # Enable Bootloader
-DEPENDS += "edk2"
+DEPENDS += "${@bb.utils.contains('TARGET_ARCH', 'arm','lib64-edk2','edk2',d)}"
 
 # Packages to be included in rootfs creation.
 IMAGE_INSTALL += "packagegroup-core-boot"
