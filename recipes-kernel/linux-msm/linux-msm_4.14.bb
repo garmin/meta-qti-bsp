@@ -1,5 +1,7 @@
 require recipes-kernel/linux-msm/linux-msm.inc
 
+inherit sdllvm
+
 COMPATIBLE_MACHINE = "(qcs40x|sdxprairie)"
 
 KERNEL_IMAGEDEST = "boot"
@@ -8,7 +10,7 @@ SRC_DIR   =  "${WORKSPACE}/kernel/msm-4.14"
 S         =  "${WORKDIR}/kernel/msm-4.14"
 PR = "r0"
 
-DEPENDS += "dtc-native"
+DEPENDS += "dtc-native llvm-arm-toolchain-native"
 
 LDFLAGS_aarch64 = "-O1 --hash-style=gnu --as-needed"
 TARGET_CXXFLAGS += "-Wno-format"
