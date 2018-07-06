@@ -2,7 +2,7 @@
 # Default properties to be set for apq8053
 #
 
-ro.product.board=msm8953
+ro.product.board=qcs605
 
 vendor.audio.hw.aac.encoder=true
 
@@ -62,3 +62,4 @@ persist.qmmf.timestamp.adjust=-150000
 
 #isp clock optimization enable(1)/disable(0)
 persist.camera.isp.clock.optmz=0
+
