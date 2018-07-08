@@ -23,3 +23,6 @@ IMAGE_INSTALL += "kernel-modules"
 
 AUDIOMODULE_FLAG = "${@bb.utils.contains('DISTRO_FEATURES', 'audio-dlkm', 'True', 'False', d)}"
 IMAGE_INSTALL += "${@base_conditional('AUDIOMODULE_FLAG', 'True', bb.utils.contains('MULTILIB_VARIANTS', 'lib32', 'lib32-audiodlkm', 'audiodlkm', d), '', d)}"
+
+# Add required som packages specific to apq8009
+IMAGE_INSTALL += "kernel-tests-internal"
