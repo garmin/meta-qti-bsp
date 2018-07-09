@@ -32,8 +32,9 @@ dirs755_append_apq8053 +="/firmware /persist /cache /dsp "
 dirs755_append_apq8009 += "/firmware /persist /cache"
 dirs755_append_apq8017 += "/firmware /persist /cache /dsp"
 dirs755_append_qcs605 += "/firmware /persist /cache /dsp /bluetooth"
-dirs755_append_qcs405-som1 += "/firmware /persist"
-dirs755_append_qcs403-som2 += "/firmware /cache"
+dirs755_append_qcs405-som1 += "/firmware /persist /dsp"
+dirs755_append_qcs403-som2 += "/firmware /cache /dsp"
+
 # Remove sepolicy entries from various files when selinux is not present.
 do_fix_sepolicies () {
     if ${@bb.utils.contains('DISTRO_FEATURES','selinux','false','true',d)}; then
