@@ -31,4 +31,4 @@ Before=local-fs.target
 [Mount]
 What=/dev/disk/by-partlabel/userdata
 Where=/data
-Options=relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev
+Options=relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,rootcontext=system_u:object_r:data_t:s0

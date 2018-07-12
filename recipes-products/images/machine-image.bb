@@ -18,8 +18,8 @@ require ${BASEMACHINE}/${@get_img_inc_file(d)}
 
 require include/mdm-bootimg.inc
 
-#require include/mdm-ota-target-image-ubi.inc
-#require include/mdm-ota-target-image-ext4.inc
+require include/mdm-ota-target-image-ubi.inc
+require include/mdm-ota-target-image-ext4.inc
 
 inherit core-image
 

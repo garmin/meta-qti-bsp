@@ -1,4 +1,4 @@
-inherit autotools-brokensep
+inherit autotools-brokensep externalsrc
 
 DESCRIPTION = "Powerapp tools"
 HOMEPAGE = "http://codeaurora.org/"
@@ -6,9 +6,7 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
 ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI = "file://system/core/powerapp/"
-S = "${WORKDIR}/system/core/powerapp/"
+EXTERNALSRC = "${WORKSPACE}/system/core/powerapp/"
 
 PACKAGES =+ "${PN}-reboot ${PN}-shutdown ${PN}-powerconfig"
 FILES_${PN}-reboot = "${sysconfdir}/init.d/reboot"
@@ -22,7 +20,7 @@ PROVIDES =+ "${PN}-reboot ${PN}-shutdown ${PN}-powerconfig"
 PR = "r9"
 
 do_install() {
-        install -m 0755 ${S}/powerapp -D ${D}/sbin/powerapp
+        install -m 0755 ${B}/powerapp -D ${D}/sbin/powerapp
         install -m 0755 ${S}/reboot -D ${D}${sysconfdir}/init.d/reboot
         install -m 0755 ${S}/reboot-bootloader -D ${D}/sbin/reboot-bootloader
         install -m 0755 ${S}/reboot-recovery -D ${D}/sbin/reboot-recovery

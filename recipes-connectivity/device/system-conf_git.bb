@@ -60,6 +60,8 @@ EXTRA_OECONF += "${@bb.utils.contains('BASEPRODUCT', 'qsap', '--enable-qsap-wlan
 EXTRA_OECONF_remove = "${@bb.utils.contains('PRODUCT', 'robot-rome', '--enable-pronto-wlan=yes', '', d)}"
 EXTRA_OECONF += "${@bb.utils.contains('PRODUCT', 'robot-rome', '--enable-robot-wlan=yes', '', d)}"
 EXTRA_OECONF += "${@bb.utils.contains('BASEPRODUCT', 'qsap', '--enable-naples-wlan=yes', '', d)}"
+EXTRA_OECONF_remove = "${@bb.utils.contains('PRODUCT', 'robot-som', '--enable-pronto-wlan=yes', '', d)}"
+EXTRA_OECONF += "${@bb.utils.contains('PRODUCT', 'robot-som', '--enable-robot-som-wlan=yes', '', d)}"
 
 INITSCRIPT_NAME   = "wlan_daemon"
 INITSCRIPT_PARAMS = "remove"

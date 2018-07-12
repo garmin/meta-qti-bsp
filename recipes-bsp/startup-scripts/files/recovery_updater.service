@@ -25,16 +25,19 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+# The trigger-recovery-updater script should be triggered
+# only once cache partition has been mounted.
 
 [Unit]
-Description= Recovery-Updater Service
-SourcePath=/etc/initscripts/recovery-updater.sh
-DefaultDependencies=no
+Description= Recovery(fs) Updater Service
+SourcePath=/etc/initscripts/trigger-recovery-updater.sh
+After=cache.mount
 
 [Service]
-Restart=no
+Type=forking
+PIDFile=/var/run/recovery-updater.pid
 RemainAfterExit=yes
-ExecStart=/etc/initscripts/recovery-updater.sh start
+ExecStart=/etc/initscripts/trigger-recovery-updater.sh start
 
 [Install]
-WantedBy=sysinit.target
+WantedBy=multi-user.target

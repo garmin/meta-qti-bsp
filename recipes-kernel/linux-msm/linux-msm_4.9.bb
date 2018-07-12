@@ -1,11 +1,8 @@
 require recipes-kernel/linux-msm/linux-msm.inc
 
-COMPATIBLE_MACHINE = "(apq8053|qcs605|sdxpoorwills|mdm9650|mdm9607)"
+COMPATIBLE_MACHINE = "(apq8009|apq8053|qcs605|sdxpoorwills|mdm9650|mdm9607)"
 
 KERNEL_IMAGEDEST = "boot"
-
-SRC_URI_append_batcam = " file://msm8953-batcam_defconfig"
-SRC_URI_append_batcam = " file://msm8953-batcam-perf_defconfig"
 
 SRC_DIR   =  "${WORKSPACE}/kernel/msm-4.9"
 S         =  "${WORKDIR}/kernel/msm-4.9"
@@ -13,20 +10,6 @@ GITVER    =  "${@base_get_metadata_git_revision('${SRC_DIR}',d)}"
 PR = "r5"
 
 DEPENDS += "dtc-native"
-
-python copy_local_defconfig() {
-    import shutil
-    defcfg   = d.getVar('WORKDIR', True) + '/' + d.getVar('KERNEL_CONFIG', True) 
-    destfile = "%s/arch/arm/configs/%s" % (d.getVar('S', True), d.getVar('KERNEL_CONFIG', True))
-    shutil.copyfile(defcfg, destfile)
-}
-
-python do_local_config_batcam() {
-    if bb.utils.contains('DISTRO', 'batcam', True, False, d):
-        bb.build.exec_func('copy_local_defconfig',d)
-}
-
-addtask local_config_batcam before do_kernel_metadata after do_unpack
 
 do_shared_workdir_append () {
         cp Makefile $kerneldir/

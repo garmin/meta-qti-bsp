@@ -46,7 +46,11 @@ vendor.audio.offload.gapless.enabled=true
 vendor.audio.offload.multiple.enabled=false
 
 #multiple compress record
+vendor.audio.apptype.multirec.enabled=true
 vendor.audio.record.multiple.enabled=true
+
+#32bit record
+vendor.audio.capture.pcm.32bit.enable=false
 
 #enable pbe effects
 vendor.audio.safx.pbe.enabled=true

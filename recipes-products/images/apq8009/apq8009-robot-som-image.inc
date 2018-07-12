@@ -8,6 +8,7 @@ IMAGE_INSTALL_remove = "packagegroup-ss-mgr"
 IMAGE_INSTALL += "reboot-daemon"
 IMAGE_INSTALL += "e2fsprogs"
 IMAGE_INSTALL += "start-scripts-userfs-reset"
+IMAGE_INSTALL += "start-script-ab-slot-util"
 IMAGE_INSTALL += "chrony"
 IMAGE_INSTALL += "chronyc"
 
@@ -17,4 +18,10 @@ IMAGE_INSTALL += "${@base_conditional('PRODUCT','robot-rome', 'sigma-dut', '', d
 IMAGE_INSTALL += "${@base_conditional('PRODUCT','robot-rome', 'libcap', '', d)}"
 IMAGE_INSTALL += "${@base_conditional('PRODUCT','robot-rome', 'attr', '', d)}"
 IMAGE_INSTALL += "mtd-utils-ubifs"
-IMAGE_INSTALL += "start-scripts-storage-mount"
+IMAGE_INSTALL += "kernel-modules"
+IMAGE_INSTALL += "security-tests"
+IMAGE_INSTALL += "sat-module"
+# Following packages support audio-dlkm enabled
+
+AUDIOMODULE_FLAG = "${@bb.utils.contains('DISTRO_FEATURES', 'audio-dlkm', 'True', 'False', d)}"
+IMAGE_INSTALL += "${@base_conditional('AUDIOMODULE_FLAG', 'True', bb.utils.contains('MULTILIB_VARIANTS', 'lib32', 'lib32-audiodlkm', 'audiodlkm', d), '', d)}"

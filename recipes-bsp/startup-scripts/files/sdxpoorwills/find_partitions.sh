@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2014-2015, The Linux Foundation. All rights reserved.
+# Copyright (c) 2014-2015,2018, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -44,6 +44,7 @@ FindAndMountUBI () {
         if [ -c $device ]
         then
             mount -t ubifs /dev/ubi1_0 $dir -o bulk_read
+            test -x /sbin/restorecon && /sbin/restorecon -R $dir
             break
         else
             sleep 0.010
@@ -59,6 +60,7 @@ FindAndMountVolumeUBI () {
        mkdir -p $dir
    fi
    mount -t ubifs ubi0:$volume_name $dir -o bulk_read
+   test -x /sbin/restorecon && /sbin/restorecon -R $dir
 }
 
 FindAndMountEXT4 () {
@@ -71,6 +73,7 @@ FindAndMountEXT4 () {
        mkdir -p $dir
    fi
    mount -t ext4 $mmc_block_device $dir -o relatime,data=ordered,noauto_da_alloc,discard
+   test -x /sbin/restorecon && /sbin/restorecon -R $dir
    echo "EMMC : Mounting of $mmc_block_device on $dir done"
 }
 

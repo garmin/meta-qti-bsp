@@ -40,14 +40,22 @@ if [ "$#" -lt 3 ]; then
     exit 1
 fi
 
-export PATH=.:${STAGING_BINDIR_NATIVE}:$PATH
+FSCONFIG_PATH=../../../../../sysroots-components/x86_64/fsconfig-native/usr/bin
+IMGDIFF_PATH=../../../../../sysroots-components/x86_64/applypatch-native/usr/bin
+export PATH=.:${STAGING_BINDIR_NATIVE}:$FSCONFIG_PATH:$IMGDIFF_PATH:$PATH:/usr/bin
 export OUT_HOST_ROOT=.
-export LD_LIBRARY_PATH=${STAGING_LIBDIR_NATIVE}
+
+LIBSELINUX_PATH=../../../../../sysroots-components/x86_64/libselinux-native/usr/lib
+LIBCUTILS_PATH=../../../../../sysroots-components/x86_64/libcutils-native/usr/lib
+LIBPCRE_PATH=../../../../../sysroots-components/x86_64/libpcre-native/usr/lib
+LIBLOG_PATH=../../../../../sysroots-components/x86_64/liblog-native/usr/lib
+export LD_LIBRARY_PATH=${STAGING_LIBDIR_NATIVE}:$LIBSELINUX_PATH:$LIBCUTILS_PATH:$LIBPCRE_PATH:$LIBLOG_PATH
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8
 export FSCONFIGFOPTS=" "
 block_based=" "
+python_version="python3"
 
 if [ "$#" -gt 3 ]; then
     IFS=' ' read -a allopts <<< "$@"
@@ -69,6 +77,13 @@ rm -rf $target_files
 unzip -qo $1 -d $target_files
 mkdir -p $target_files/META
 mkdir -p $target_files/SYSTEM
+mkdir -p target_files/BOOT/RAMDISK
+touch target_files/BOOT/RAMDISK/empty
+
+#Needed for block based OTA.
+if [ "${block_based}" = "--block" ]; then
+    python_version="python2"
+fi
 
 # Generate selabel rules only if file_contexts is packed in target-files
 if grep "selinux_fc" $target_files/META/misc_info.txt
@@ -78,9 +93,10 @@ else
     zipinfo -1 $1 |  awk 'BEGIN { FS="SYSTEM/" } /^SYSTEM\// {print "system/" $2}' | fs_config ${FSCONFIGFOPTS} -D ${2} > $target_files/META/filesystem_config.txt
 fi
 
-cd $target_files && zip -q ../$1 META/*filesystem_config.txt SYSTEM/build.prop && cd ..
+cd $target_files && zip -q ../$1 META/*filesystem_config.txt SYSTEM/build.prop BOOT/RAMDISK/empty && cd ..
 
-./ota_from_target_files $block_based -n -v -d $device_type -p . -s "${WORKSPACE}/android_compat/device/qcom/common" --no_signing  $1 update_$3.zip > ota_debug.txt 2>&1
+
+$python_version ./ota_from_target_files $block_based -n -v -d $device_type -p . -m linux_embedded --no_signing  $1 update_$3.zip > ota_debug.txt 2>&1
 
 if [[ $? = 0 ]]; then
     echo "update.zip generation was successful"

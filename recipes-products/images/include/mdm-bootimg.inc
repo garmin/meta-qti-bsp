@@ -28,7 +28,7 @@ IMAGE_DEV_MANAGER ?= "busybox-static-mdev"
 IMAGE_INIT_MANAGER ?= "sysvinit sysvinit-pidof"
 IMAGE_INITSCRIPTS ?= ""
 
-IMAGE_PREPROCESS_COMMAND_prepend = " gen_buildprop;"
+ROOTFS_POSTPROCESS_COMMAND_append = " gen_buildprop;"
 EXTRA_IMAGE_FEATURES += "${@bb.utils.contains('DISTRO_FEATURES','ro-rootfs','read-only-rootfs','',d)}"
 gen_buildprop() {
    mkdir -p ${IMAGE_ROOTFS}/cache

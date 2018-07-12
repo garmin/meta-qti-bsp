@@ -17,9 +17,11 @@ S = "${WORKDIR}/OTA/recovery/"
 
 EXTRA_OECONF = "--with-glib --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include \
                 --with-core-headers=${STAGING_INCDIR}"
-CFLAGS += "-lsparse -lfs_mgr -llog"
+CFLAGS += "-lsparse -llog"
 
 SYSTEMD_SUPPORT = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemd', '', d)}"
+
+SELINUX_SUPPORT = "${@bb.utils.contains('DISTRO_FEATURES', 'selinux', 'selinux', '', d)}"
 
 PARALLEL_MAKE = ""
 INITSCRIPT_NAME = "recovery"
@@ -56,7 +58,12 @@ do_install_append() {
               ln -sf ${systemd_unitdir}/system/recovery.service \
                             ${D}${systemd_unitdir}/system/multi-user.target.wants/recovery.service
         else
-              install -m  0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/fstab -D ${D}${sysconfdir}/fstab
-              install -m 0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/fstab -D ${D}/res/recovery_volume_config
+              if [ "${SELINUX_SUPPORT}" == "selinux" ]; then
+                  install -m  0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/fstab -D ${D}${sysconfdir}/fstab
+                  install -m 0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/fstab -D ${D}/res/recovery_volume_config
+              else
+                  install -m 0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/fstab_noselinux -D ${D}${sysconfdir}/fstab
+                  install -m 0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/fstab_noselinux -D ${D}/res/recovery_volume_config
+              fi
         fi
 }

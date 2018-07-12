@@ -7,3 +7,4 @@ umount /etc/data/ipa/*
 umount /etc/data/iproute2/rt_tables
 umount /etc/usb/boot_hsusb_comp
 umount /etc/usb/boot_hsic_comp
+umount /etc/bluetooth/*

@@ -28,13 +28,13 @@
 
 [Unit]
 Description= Find-Partitions Service
-SourcePath=/etc/initscripts/find-partitions.sh
+SourcePath=/etc/initscripts/find_partitions.sh
 DefaultDependencies=no
 
 [Service]
 Restart=no
 RemainAfterExit=yes
-ExecStart=/etc/initscripts/find-partitions.sh start
+ExecStart=/etc/initscripts/find_partitions.sh start
 
 [Install]
 WantedBy=sysinit.target

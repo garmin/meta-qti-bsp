@@ -21,10 +21,10 @@ Supported combinations are listed below.
       |mdm9650        |                | debug perf       |
       +---------------+----------------+------------------+
       |qcs403-som2    | qsap           | debug            |
+      |qcs405-som1    |                |                  |
       +---------------+----------------+------------------+
-      |qcs405-som1    | qsap           | debug            |
-      +---------------+----------------+------------------+
-      |qcs605         | concam         | debug perf user  |
+      |qcs605-32      | concam         | debug perf user  |
+      |qcs605-64      |                |                  |
       +---------------+----------------+------------------+
       |sdxpoorwills   |                | debug perf       |
       +---------------+----------------+------------------+
@@ -36,3 +36,5 @@ run 'bitbake machine-image' to build complete image.
 
 Alternatively you may also use convenience commands to build images.
 Run 'list-build-commands' to list these.
+
+

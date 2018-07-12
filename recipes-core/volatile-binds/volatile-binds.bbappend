@@ -36,12 +36,14 @@ VOLATILE_BINDS = "\
 /systemrw/boot_hsusb_comp /etc/usb/boot_hsusb_comp\n\
 /systemrw/boot_hsic_comp /etc/usb/boot_hsic_comp\n\
 /systemrw/misc/wifi /etc/misc/wifi/\n\
+/systemrw/bluetooth /etc/bluetooth/\n\
+/systemrw/allplay /etc/allplay/\n\
 "
 VOLATILE_BINDS_append_apq8017 = "\
 /systemrw/AlexaClientSDKConfig.json  /etc/AlexaClientSDKConfig.json \n\
 "
 VOLATILE_BINDS_append_apq8009 = "\
-/systemrw/AlexaClientSDKConfig.json  /etc/alexa/AlexaClientSDKConfig.json \n\
+/systemrw/alexa /etc/alexa/ \n\
 "
 
 INITSCRIPT_PACKAGES =+ "${PN}"

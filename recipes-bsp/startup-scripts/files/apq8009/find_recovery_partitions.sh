@@ -31,7 +31,7 @@
 
 emmc_dir=/dev/block/bootdevice/by-name
 mtd_file=/proc/mtd
-fstab_file=/res/recovery_volume_detected
+fstab_file=/tmp/recovery_volume_detected
 
 
 ubi_device_number=1
@@ -132,6 +132,7 @@ then
     eval FindAndMountEXT4 cache    /cache    0 relatime,data=ordered,noauto_da_alloc,discard,noexec,
 nodev
     eval FindAndMountEXT4 misc     /misc     1
+    eval FindAndMountEXT4 systemrw /systemrw 1
 else
     fstype="UBI"
     eval FindAndAttachUBI modem

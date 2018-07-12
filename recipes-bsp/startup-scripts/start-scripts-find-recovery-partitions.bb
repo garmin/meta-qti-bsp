@@ -12,8 +12,8 @@ PR = "r3"
 inherit update-rc.d
 
 INITSCRIPT_NAME = "find_recovery_partitions.sh"
-INITSCRIPT_PARAMS = "start 36 S ."
-INITSCRIPT_PARAMS_mdm = "start 30 S ."
+INITSCRIPT_PARAMS = "start 38 S ."
+INITSCRIPT_PARAMS_mdm = "start 38 S ."
 
 do_install() {
     install -m 0755 ${WORKDIR}/${BASEMACHINE}/find_recovery_partitions.sh -D ${D}${sysconfdir}/init.d/find_recovery_partitions.sh

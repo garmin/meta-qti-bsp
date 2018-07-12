@@ -35,7 +35,7 @@ IMAGE_INSTALL += "libext2fs"
 
 # utils and scripts needed for SELinux
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','packagegroup-core-selinux',' ',d)}"
-IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','selinux-config',' ',d)}"
+#IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','selinux-config',' ',d)}"
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux','refpolicy-mls',' ',d)}"
 
 # Needed for generating recovery.ubi ignored for ext4
@@ -70,19 +70,21 @@ do_makesystem() {
         if [[ "${DISTRO_FEATURES}" =~ "selinux" ]]; then
             make_ext4fs -s -a / -S ${SELINUX_FILE_CONTEXTS} -l ${RECOVERYFS_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${RECOVERYIMAGE_TARGET} ${IMAGE_ROOTFS}
 
-            # Create an unsparse image as well to be included as part ota target-files
-            make_ext4fs -a / -S ${SELINUX_FILE_CONTEXTS} -l ${RECOVERYFS_SIZE_EXT4} ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4 ${IMAGE_ROOTFS}
+            # Create an unsparse image as well to be included as part of ota target-files
+            simg2img ${DEPLOY_DIR_IMAGE}/${RECOVERYIMAGE_TARGET} ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4
         else
             make_ext4fs -s -l ${RECOVERYFS_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${RECOVERYIMAGE_TARGET} ${IMAGE_ROOTFS}
 
-            # Create an unsparse image as well to be included as part ota target-files
-            make_ext4fs -l ${RECOVERYFS_SIZE_EXT4} ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4 ${IMAGE_ROOTFS}
+            # Create an unsparse image as well to be included as part of ota target-files
+            simg2img ${DEPLOY_DIR_IMAGE}/${RECOVERYIMAGE_TARGET} ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4
         fi
     fi
+}
 
-    #rename machine-recovery-image.ubi if exists
+do_rename_recovery_ubi_image() {
+    #rename machine-recovery-image.ubi if it exists
     if [ -f "${DEPLOY_DIR_IMAGE}/machine-recovery-image-${MACHINE}.ubi" ]; then
-        mv ${DEPLOY_DIR_IMAGE}/machine-recovery-image-${MACHINE}.ubi ${DEPLOY_DIR_IMAGE}/${MACHINE}-recovery.ubi
+        mv ${DEPLOY_DIR_IMAGE}/machine-recovery-image-${MACHINE}.ubi ${DEPLOY_DIR_IMAGE}/${MACHINE}-recoveryfs.ubi
     fi
 }
 
@@ -90,3 +92,6 @@ ROOTFS_POSTPROCESS_COMMAND += "do_fsconfig; "
 
 # Call function makesystem to generate sparse ext4 image
 addtask makesystem after do_rootfs before do_build
+
+# rename recovery images only after they are copied to DEPLOY_DIR
+addtask rename_recovery_ubi_image after do_image_complete before do_build

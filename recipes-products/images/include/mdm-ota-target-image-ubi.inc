@@ -68,6 +68,11 @@ do_recovery_ubi() {
 
     cp   ${OTA_TARGET_IMAGE_ROOTFS_UBI}/RECOVERY/usr/bin/updater ${OTA_TARGET_IMAGE_ROOTFS_UBI}/OTA/bin/.
 
+    # Pack releasetools.py into META folder itself.
+    # This could also have been done by passing "--device_specific" to
+    # ota_from_target_files.py but it would be hacky to find the absolute path there.
+    cp ${WORKSPACE}/OTA/device/qcom/common/releasetools.py ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/.
+
     #cp and modify file_contexts to BOOT/RAMDISK folder
     if [[ "${DISTRO_FEATURES}" =~ "selinux" ]]; then
         cp ${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_contexts ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/.
@@ -112,15 +117,14 @@ do_recovery_ubi() {
 }
 
 # Task to generate OTA zip files
-python do_gen_otazip_ubi() {
-    import subprocess
+do_gen_otazip_ubi() {
 
-    cmd1 = "cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ubi && zip -qry -FS ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ubi.zip *"
-    subprocess.call(cmd1, shell=True)
+    # Clean up any existing target-files*.zip as this can lead to incorrect content getting packed in the zip.
+    rm -f ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ubi.zip
 
-    cmd2 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ubi.zip ${IMAGE_ROOTFS} ubi"
-    subprocess.call(cmd2, shell=True)
+    cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ubi && zip -qry -FS ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ubi.zip *
 
-    cmd3 = "cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ubi.zip target-files-ubi.zip ${DEPLOY_DIR_IMAGE}"
-    subprocess.call(cmd3, shell=True)
+    cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ubi.zip ${IMAGE_ROOTFS} ubi
+
+    cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ubi.zip target-files-ubi.zip ${DEPLOY_DIR_IMAGE}
 }

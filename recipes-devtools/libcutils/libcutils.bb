@@ -1,4 +1,4 @@
-inherit autotools pkgconfig
+inherit autotools pkgconfig externalsrc
 
 DESCRIPTION = "Build Android libcutils"
 HOMEPAGE = "http://developer.android.com/"
@@ -12,20 +12,14 @@ DEPENDS += "liblog"
 
 BBCLASSEXTEND = "native"
 
-FILESPATH =+ "${WORKSPACE}/system/core/:"
-SRC_URI   = "file://libcutils"
-
-S = "${WORKDIR}/libcutils"
+EXTERNALSRC = "${WORKSPACE}/system/core/libcutils/"
 
 EXTRA_OECONF += " --with-core-includes=${WORKSPACE}/system/core/include"
 EXTRA_OECONF += " --with-host-os=${HOST_OS}"
 EXTRA_OECONF += " --disable-static"
-EXTRA_OECONF += "${@bb.utils.contains('BASEMACHINE', 'apq8017', ' LE_PROPERTIES_ENABLED=true', '', d)}"
-EXTRA_OECONF += "${@bb.utils.contains('BASEMACHINE', 'apq8009', ' LE_PROPERTIES_ENABLED=true', '', d)}"
-EXTRA_OECONF += "${@bb.utils.contains('BASEMACHINE', 'apq8053', ' LE_PROPERTIES_ENABLED=true', '', d)}"
 
-EXTRA_OECONF += "${@bb.utils.contains('BASEMACHINE', 'apq8096', ' LE_PROPERTIES_ENABLED=true', '', d)}"
-EXTRA_OECONF += "${@bb.utils.contains('BASEMACHINE', 'apq8098', ' LE_PROPERTIES_ENABLED=true', '', d)}"
+EXTRA_OECONF_append_msm = " --enable-leproperties"
+EXTRA_OECONF_append_msm = " LE_PROPERTIES_ENABLED=true"
 
 FILES_${PN}-dbg    = "${libdir}/.debug/libcutils.*"
 FILES_${PN}        = "${libdir}/libcutils.so.* ${libdir}/pkgconfig/*"

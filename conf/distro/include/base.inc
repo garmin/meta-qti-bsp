@@ -33,6 +33,9 @@ USE_NLS_glib-2.0 = "yes"
 USE_NLS_glib-2.0-native = "yes"
 USE_NLS_gcc-cross = "no"
 
+# Disable GIO module cache creation
+GIO_MODULE_PACKAGES=""
+
 # Disable binary locale generation
 ENABLE_BINARY_LOCALE_GENERATION = "0"
 
@@ -105,6 +108,7 @@ EXTRA_USERS_PARAMS = "\
  groupadd -g 3005 net_admin; \
  groupadd -g 3009 readproc; \
  groupadd -g 3010 wakelock; \
+ groupadd -g 3012 powermgr; \
 "
 
 EXTRA_USERS_PARAMS_append = " ${@['', 'usermod -L -e 1 root;'][d.getVar('VARIANT', True) == 'user']}"

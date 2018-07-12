@@ -8,8 +8,9 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 PR = "r1"
 
-DEPENDS += "libhardware system-media"
 DEPENDS += "binder"
+DEPENDS += "camera-metadata"
+DEPENDS += "libhardware"
 DEPENDS += "liblog"
 
 FILESPATH =+ "${WORKSPACE}:"

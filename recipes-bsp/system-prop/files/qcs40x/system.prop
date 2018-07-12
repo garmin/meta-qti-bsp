@@ -1,0 +1,5 @@
+#
+# Default properties to be set for qcs40x
+#
+
+ro.product.board=qcs40x

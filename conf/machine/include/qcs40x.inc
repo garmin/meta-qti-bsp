@@ -17,7 +17,7 @@ MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
 
 SERIAL_CONSOLE ?= "${@['', '115200 ttyMSM0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
-
+LLVM_VERSION = "6.0"
 DISTRO ?= "msm"
 
 DISTRO_FEATURES_append = " ro-rootfs"
@@ -40,7 +40,7 @@ MACHINE_FEATURES += "kernel26 keyboard"
 
 KERNEL_DTS_NAME = "qcs405-rumi"
 KERNEL_BASE = "0x80000000"
-KERNEL_TAGS_OFFSET = "0x82000000"
+KERNEL_TAGS_OFFSET = "0x1e00000"
 KERNEL_CONFIG = "${@['qcs405-perf_defconfig', 'qcs405_defconfig'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
 
-KERNEL_CMD_PARAMS = "noinitrd ro rootwait console=ttyMSM0,115200,n8 no_console_suspend=1 androidboot.hardware=qcom androidboot.console=ttyMSM0 lpm_levels.sleep_disabled=1"
+KERNEL_CMD_PARAMS ?= "noinitrd ro rootwait console=ttyMSM0,115200,n8 no_console_suspend=1 androidboot.hardware=qcom androidboot.console=ttyMSM0 lpm_levels.sleep_disabled=1 service_locator.enable=1"
