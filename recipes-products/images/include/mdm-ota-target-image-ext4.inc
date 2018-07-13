@@ -138,9 +138,15 @@ do_recovery_ext4() {
     # set block img diff version to v4
     echo "blockimgdiff_versions=3" >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
 
-    if [ "${BASEMACHINE}" == "apq8053" ] || [ "${BASEMACHINE}" == "apq8009" ]; then
-        echo recovery_upgrade_supported=1 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
+    # Targets that support A/B boot do not need recovery(fs)-updater
+    if ${@bb.utils.contains('DISTRO_FEATURES','ab-boot-support','true','false',d)}; then
+        echo le_target_supports_ab=1 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
+    else
+        if [ "${BASEMACHINE}" == "apq8053" ] || [ "${BASEMACHINE}" == "apq8009" ]; then
+            echo recovery_upgrade_supported=1 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
+        fi
     fi
+
 }
 
 # Generate OTA zip files

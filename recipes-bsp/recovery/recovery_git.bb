@@ -23,6 +23,11 @@ SYSTEMD_SUPPORT = "${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'systemd',
 
 SELINUX_SUPPORT = "${@bb.utils.contains('DISTRO_FEATURES', 'selinux', 'selinux', '', d)}"
 
+AB_SUPPORT = "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', 'TARGET_SUPPORTS_AB=true', '', d)}"
+NEED_ABCTL = "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', 'abctl', '', d)}"
+EXTRA_OECONF += " ${AB_SUPPORT}"
+DEPENDS += " ${NEED_ABCTL}"
+
 PARALLEL_MAKE = ""
 INITSCRIPT_NAME = "recovery"
 INITSCRIPT_PARAMS = "start 99 5 . stop 80 0 1 6 ."
@@ -48,7 +53,11 @@ do_install_append() {
         install -d ${D}/system/
         install -m 0755 ${S}/start_recovery -D ${D}${sysconfdir}/init.d/recovery
 
-        if [ "${SYSTEMD_SUPPORT}" == "systemd" ]; then
+        if [ "${AB_SUPPORT}" == "TARGET_SUPPORTS_AB=true" ]; then
+              # If A/B boot is supported, recovery is just an executable and not a service
+              # Just install the fstab for recovery
+              install -m 0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/fstab_AB -D ${D}/res/recovery_volume_config
+        elif [ "${SYSTEMD_SUPPORT}" == "systemd" ]; then
               install -m  0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/recovery/files/fstab -D ${D}${sysconfdir}/fstab
               install -m 0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/fstab -D ${D}/res/recovery_volume_config
               install -d ${D}${systemd_unitdir}/system/
