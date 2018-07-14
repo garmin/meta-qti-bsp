@@ -41,6 +41,9 @@ PAGE_SIZE ?= '4096'
 
 MACHINE_FEATURES += "kernel26 keyboard"
 
+# Enable LE Verified Boot
+DISTRO_FEATURES_append = " vble"
+
 KERNEL_DTS_NAME = "qcs405-rumi"
 KERNEL_BASE = "0x80000000"
 KERNEL_TAGS_OFFSET = "0x1e00000"
