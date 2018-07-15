@@ -23,6 +23,10 @@ endif
 # Export headers
 sync_includedir=$(includedir)/sync
 sync_include_HEADERS := $(top_srcdir)/include/sync/sync.h
+ndk_includedir=$(includedir)/ndk
+ndk_include_HEADERS := $(top_srcdir)/include/ndk/sync.h
+android_includedir=$(includedir)/android
+android_include_HEADERS := $(top_srcdir)/include/android/sync.h
 
 pkgconfigdir := $(libdir)/pkgconfig
 pkgconfig_DATA := libsync.pc
