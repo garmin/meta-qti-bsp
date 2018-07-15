@@ -19,10 +19,9 @@ S = "${WORKDIR}/binder"
 
 EXTRA_OECONF += " --with-glib"
 
-# Following machines compile kernel in 32bit. So enable binder IPC also in 32bit mode.
-EXTRA_OECONF_append_apq8009    += " --enable-32bit-binder-ipc"
-EXTRA_OECONF_append_apq8053-32 += " --enable-32bit-binder-ipc"
-EXTRA_OECONF_append_mdm9650    += " --enable-32bit-binder-ipc"
+# Both kernel and userspace are assumed to be compiled in 32bit here.
+# If kernel is 64bit and userspace is 32bit then below flag is not valid.
+EXTRA_OECONF_append_arm    += " --enable-32bit-binder-ipc"
 
 CFLAGS += "-I${STAGING_INCDIR}/libselinux"
 
