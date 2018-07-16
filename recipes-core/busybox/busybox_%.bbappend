@@ -19,7 +19,6 @@ SRC_URI += "\
             file://iio.sh \
             file://0001-Support-MTP-function.patch \
             file://fix-mdev-crash.patch \
-            file://fix_uninitialized_memory.patch \
 "
 SRC_URI_append_apq8053 += "file://apq8053/mdev.conf"
 
