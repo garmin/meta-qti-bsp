@@ -31,7 +31,7 @@ dirs755 += "/media/cf /media/net /media/ram \
 dirs755_append_apq8053 +="/firmware /persist /cache /dsp "
 dirs755_append_apq8009 += "/firmware /persist /cache"
 dirs755_append_apq8017 += "/firmware /persist /cache /dsp"
-dirs755_append_qcs605 += "/firmware /persist /cache /dsp /bluetooth"
+dirs755_append_qcs605 += "/firmware /persist /cache /dsp /bt_firmware"
 dirs755_append_qcs405-som1 += "/firmware /persist /dsp"
 dirs755_append_qcs403-som2 += "/firmware /cache /dsp"
 
@@ -116,7 +116,7 @@ do_install_append_msm() {
                     install -m 0644 ${WORKDIR}/systemd/dsp-mount.service ${D}${sysconfdir}/systemd/system/dsp-mount.service
                     ln -sf  ../dsp-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp-mount.service
                 fi
-                if [ "$d" == "/bluetooth" ]; then
+                if [ "$d" == "/bt_firmware" ]; then
                     install -m 0644 ${WORKDIR}/systemd/bluetooth-mount.service ${D}${sysconfdir}/systemd/system/bluetooth-mount.service
                     ln -sf  ../bluetooth-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/bluetooth-mount.service
                fi
@@ -137,7 +137,7 @@ do_install_append_msm() {
                     install -m 0644 ${WORKDIR}/systemd/dsp.mount ${D}${sysconfdir}/systemd/system/dsp.mount
                     ln -sf  ../dsp.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp.mount
                 fi
-                if [ "$d" == "/bluetooth" ]; then
+                if [ "$d" == "/bt_firmware" ]; then
                     install -m 0644 ${WORKDIR}/systemd/bluetooth.mount ${D}${sysconfdir}/systemd/system/bluetooth.mount
                     ln -sf  ../bluetooth.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/bluetooth.mount
                 fi

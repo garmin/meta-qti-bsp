@@ -26,12 +26,12 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 
 [Unit]
-Description=Mount bluetooth partition to /bluetooth mount point
+Description=Mount bluetooth partition to /bt_firmware mount point
 SourcePath=/etc/initscripts/ab_mount.sh
 
 [Service]
 Restart=on-failure
-ExecStart=/etc/initscripts/ab_mount.sh "noexec,nodev,ro,context=system_u:object_r:firmware_t:s0" vfat /dev/disk/by-partlabel/bluetooth /bluetooth
+ExecStart=/etc/initscripts/ab_mount.sh "noexec,nodev,ro,context=system_u:object_r:firmware_t:s0" vfat /dev/disk/by-partlabel/bluetooth /bt_firmware
 
 [Install]
 WantedBy=local-fs.target
