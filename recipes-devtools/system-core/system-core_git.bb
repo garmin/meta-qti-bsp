@@ -17,6 +17,7 @@ EXTRA_OECONF_append = " --with-logd-logging"
 EXTRA_OECONF_append = "${@bb.utils.contains('USER_BUILD','1',' --disable-debuggerd','',d)}"
 EXTRA_OECONF_append_apq8053 = " --enable-logd-privs"
 EXTRA_OECONF_append_qcs40x = " --disable-libsync"
+EXTRA_OECONF_append_sdxprairie = " --disable-libsync"
 
 # Disable adb root privileges in USER builds for msm targets
 EXTRA_OECONF_append_msm = "${@bb.utils.contains('USER_BUILD','1',' --disable-adb-root','',d)}"
