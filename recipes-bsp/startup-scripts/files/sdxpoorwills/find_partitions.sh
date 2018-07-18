@@ -43,6 +43,7 @@ FindAndMountUBI () {
     do
         if [ -c $device ]
         then
+            test -x /sbin/restorecon && /sbin/restorecon $device
             mount -t ubifs /dev/ubi1_0 $dir -o bulk_read
             test -x /sbin/restorecon && /sbin/restorecon -R $dir
             break
