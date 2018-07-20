@@ -22,6 +22,7 @@ DISTRO ?= "msm"
 
 DISTRO_FEATURES += "persist-image"
 DISTRO_FEATURES += "ab-boot-support"
+DISTRO_FEATURES += "gbm"
 
 PAGE_SIZE ?= '4096'
 
