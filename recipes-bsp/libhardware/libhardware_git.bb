@@ -1,4 +1,4 @@
-inherit autotools-brokensep
+inherit autotools pkgconfig
 
 DESCRIPTION = "hardware libhardware headers"
 HOMEPAGE = "http://codeaurora.org/"
@@ -12,27 +12,8 @@ S = "${WORKDIR}/hardware/libhardware"
 
 PR = "r6"
 
-DEPENDS = "system-core"
+DEPENDS += "libcutils liblog system-core"
 
-do_install_append () {
-        install -d ${D}${includedir}
-        install -m 0644 ${S}/include/hardware/gps.h -D ${D}${includedir}/hardware/gps.h
-        install -m 0644 ${S}/include/hardware/hardware.h -D ${D}${includedir}/hardware/hardware.h
-        install -m 0644 ${S}/include/hardware/hwcomposer.h -D ${D}${includedir}/hardware/hwcomposer.h
-        install -m 0644 ${S}/include/hardware/hwcomposer_defs.h -D ${D}${includedir}/hardware/hwcomposer_defs.h
-        install -m 0644 ${S}/include/hardware/gralloc.h -D ${D}${includedir}/hardware/gralloc.h
-        install -m 0644 ${S}/include/hardware/fused_location.h -D ${D}${includedir}/hardware/fused_location.h
-        install -m 0644 ${S}/include/hardware/camera.h -D ${D}${includedir}/hardware/camera.h
-        install -m 0644 ${S}/include/hardware/camera3.h -D ${D}${includedir}/hardware/camera3.h
-        install -m 0644 ${S}/include/hardware/camera_common.h -D ${D}${includedir}/hardware/camera_common.h
-        install -m 0644 ${S}/include/hardware/fb.h -D ${D}${includedir}/hardware/fb.h
-        install -m 0644 ${S}/include/hardware/power.h -D ${D}${includedir}/hardware/power.h
-        install -m 0644 ${S}/include/hardware/audio.h -D ${D}${includedir}/hardware/audio.h
-        install -m 0644 ${S}/include/hardware/sound_trigger.h -D ${D}${includedir}/hardware/sound_trigger.h
-        install -m 0644 ${S}/include/hardware/audio_alsaops.h -D ${D}${includedir}/hardware/audio_alsaops.h
-        install -m 0644 ${S}/include/hardware/audio_effect.h -D ${D}${includedir}/hardware/audio_effect.h
-        install -m 0644 ${S}/include/hardware/audio_policy.h -D ${D}${includedir}/hardware/audio_policy.h
-        install -m 0644 ${S}/include/hardware/sensors.h -D ${D}${includedir}/hardware/sensors.h
-        install -m 0644 ${S}/include/hardware/qemu_pipe.h -D ${D}${includedir}/hardware/qemu_pipe.h
-        install -m 0644 ${S}/modules/gralloc/gralloc_priv.h -D ${D}${includedir}/libhardware/gralloc_priv.h
-}
+EXTRA_OECONF_append_apq8053 = " --enable-sensors"
+EXTRA_OECONF_append_apq8053 = " --enable-camera"
+EXTRA_OECONF_append_qcs605  = " --enable-camera"
