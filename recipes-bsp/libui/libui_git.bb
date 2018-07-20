@@ -9,6 +9,7 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 PR = "r1"
 
 DEPENDS = "binder liblog libcutils libhardware libselinux system-core glib-2.0"
+DEPENDS_append_robot-som += "libsync"
 
 FILESPATH =+ "${WORKSPACE}:"
 SRC_URI   = "file://frameworks/libui"
