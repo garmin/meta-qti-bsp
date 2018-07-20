@@ -27,6 +27,8 @@ prefix = ""
 
 BUSYBOX_SPLIT_SUID = "0"
 
+FILES_${PN} += "/usr/bin/env"
+
 do_compile_append_mdm() {
     sed -i '/modprobe/d' ./busybox.links
 }
