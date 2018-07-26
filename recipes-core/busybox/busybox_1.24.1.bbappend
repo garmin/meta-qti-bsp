@@ -60,4 +60,7 @@ do_install_append() {
     ln -s /bin/env ${D}/usr/bin/env
 }
 
+# util-linux installs dmesg with priority 80. Use higher priority than util-linux to get busybox dmesg installed.
+ALTERNATIVE_PRIORITY[dmesg] = "100"
+
 #FILES_${PN}-mdev += "${sysconfdir}/mdev/* "
