@@ -30,6 +30,8 @@ EXTRA_OEMAKE = "'CLANG_BIN=${STAGING_BINDIR_NATIVE}/llvm-arm-toolchain/bin/' \
                 'INIT_BIN_LE=\"/sbin/init\"'\
                 'EDK_TOOLS_PATH=${S}/BaseTools'"
 
+EXTRA_OEMAKE_append_qcs40x = " 'DISABLE_PARALLEL_DOWNLOAD_FLASH=1'"
+
 do_compile () {
     export CC=${BUILD_CC}
     export CXX=${BUILD_CXX}
