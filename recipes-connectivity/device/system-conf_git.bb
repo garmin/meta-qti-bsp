@@ -46,6 +46,7 @@ EXTRA_OECONF += "${@base_conditional('BASEMACHINE', 'apq8017', '--enable-target-
 EXTRA_OECONF += "${@base_conditional('BASEMACHINE', 'sdx20', '--enable-target-sdx20=yes', '', d)}"
 EXTRA_OECONF += "${@base_conditional('BASEMACHINE', 'sdxpoorwills', '--enable-target-sdxpoorwills=yes', '', d)}"
 EXTRA_OECONF += "${@base_conditional('BASEMACHINE', 'qcs40x', '--enable-target-qcs405-som1=yes', '', d)}"
+EXTRA_OECONF += "${@base_conditional('BASEMACHINE', 'qcs605', '--enable-target-qcs605=yes', '', d)}"
 
 EXTRA_OECONF += "${@base_conditional('BASEMACHINE', 'apq8053', '--enable-pronto-wlan=yes', '', d)}"
 EXTRA_OECONF += "${@base_conditional('BASEMACHINE', 'apq8017', '--enable-pronto-wlan=yes', '', d)}"
