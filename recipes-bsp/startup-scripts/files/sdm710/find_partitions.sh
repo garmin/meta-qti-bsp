@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2014-2015,2018, The Linux Foundation. All rights reserved.
+# Copyright (c) 2016-2018, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -29,69 +29,31 @@
 # find_partitions        init.d script to dynamically find partitions
 #
 
-FindAndMountUBI () {
-   partition=$1
-   dir=$2
-
-   mtd_block_number=`cat $mtd_file | grep -i $partition | sed 's/^mtd//' | awk -F ':' '{print $1}'`
-   echo "MTD : Detected block device : $dir for $partition"
-   mkdir -p $dir
-
-   ubiattach -m $mtd_block_number -d 1 /dev/ubi_ctrl
-   device=/dev/ubi1_0
-   while [ 1 ]
-    do
-        if [ -c $device ]
-        then
-            test -x /sbin/restorecon && /sbin/restorecon $device
-            mount -t ubifs /dev/ubi1_0 $dir -o bulk_read
-            test -x /sbin/restorecon && /sbin/restorecon -R $dir
-            break
-        else
-            sleep 0.010
-        fi
-    done
-}
-
-FindAndMountVolumeUBI () {
-   volume_name=$1
-   dir=$2
-   if [ ! -d $dir ]
-   then
-       mkdir -p $dir
-   fi
-   mount -t ubifs ubi0:$volume_name $dir -o bulk_read
-   test -x /sbin/restorecon && /sbin/restorecon -R $dir
-}
-
 FindAndMountEXT4 () {
    partition=$1
    dir=$2
+   flags=$3
    mmc_block_device=/dev/block/bootdevice/by-name/$partition
-   echo "EMMC : Detected block device : $dir for $partition"
-   if [ ! -d $dir ]
-   then
-       mkdir -p $dir
+   mkdir -p $dir
+   mount -t ext4 $mmc_block_device $dir -o $flags
+   if [ -x /sbin/restorecon ]; then
+       /sbin/restorecon -R $dir
    fi
-   mount -t ext4 $mmc_block_device $dir -o relatime,data=ordered,noauto_da_alloc,discard
-   test -x /sbin/restorecon && /sbin/restorecon -R $dir
-   echo "EMMC : Mounting of $mmc_block_device on $dir done"
 }
 
-emmc_dir=/dev/block/bootdevice/by-name
-mtd_file=/proc/mtd
+FindAndMountVFAT () {
+   partition=$1
+   dir=$2
+   selinux=$3
+   mmc_block_device=/dev/block/bootdevice/by-name/$partition
+   mkdir -p $dir
+   if [ -x /sbin/restorecon ]; then
+       mount -t vfat $mmc_block_device $dir -o context=$selinux
+   else
+       mount -t vfat $mmc_block_device $dir
+   fi
+}
+FindAndMountEXT4 userdata /data relatime,data=ordered,noauto_da_alloc,discard,nodev,nosuid
+FindAndMountEXT4 persist /persist relatime,data=ordered,noauto_da_alloc,discard,noexec,nodev,nosuid
 
-if [ -d $emmc_dir ]
-then
-        fstype="EXT4"
-        eval FindAndMount${fstype} userdata /data
-        eval FindAndMount${fstype} cache /cache
-        eval FindAndMount${fstype} systemrw /systemrw
-else
-        fstype="UBI"
-        eval FindAndMountVolume${fstype} usrfs /data
-        eval FindAndMountVolume${fstype} systemrw /systemrw
-fi
-
-eval FindAndMount${fstype} modem /firmware
 exit 0

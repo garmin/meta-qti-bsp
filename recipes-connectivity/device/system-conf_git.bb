@@ -33,7 +33,7 @@ do_install_append_msm(){
 
 FILES_${PN} += "${userfsdatadir}/misc/wifi/*"
 FILES_${PN} += "${base_libdir}/firmware/wlan/qca_cld/*"
-FILES_${PN} += "${nonarch_base_libdir}/firmware/wlan/qca_cld/* ${sysconfdir}/init.d/* "
+FILES_${PN} += "/lib/firmware/wlan/qca_cld/* ${sysconfdir}/init.d/* "
 
 BASEPRODUCT = "${@d.getVar('PRODUCT', False)}"
 
@@ -47,21 +47,22 @@ EXTRA_OECONF += "${@bb.utils.contains('BASEMACHINE', 'sdx20', '--enable-target-s
 EXTRA_OECONF += "${@bb.utils.contains('BASEMACHINE', 'sdxpoorwills', '--enable-target-sdxpoorwills=yes', '', d)}"
 EXTRA_OECONF += "${@bb.utils.contains('BASEMACHINE', 'sdxprairie', '--enable-target-sdxprairie=yes', '', d)}"
 
-EXTRA_OECONF += "${@bb.utils.contains('BASEMACHINE', 'apq8009', '--enable-pronto-wlan=yes', '', d)}"
 EXTRA_OECONF += "${@bb.utils.contains('BASEMACHINE', 'apq8053', '--enable-pronto-wlan=yes', '', d)}"
 EXTRA_OECONF += "${@bb.utils.contains('BASEMACHINE', 'apq8017', '--enable-pronto-wlan=yes', '', d)}"
+EXTRA_OECONF += "${@bb.utils.contains('BASEMACHINE', 'qcs40x', '--enable-target-qcs405-som1=yes', '', d)}"
+
+# Enable qsap-wlan in place of pronto-wlan for Drones
+EXTRA_OECONF_append_qsap += "--enable-snap-wlan=yes --enable-qsap-wlan=yes --enable-naples-wlan=yes"
 
 # Enable drone-wlan in place of pronto-wlan for Drones
-EXTRA_OECONF_remove = "${@bb.utils.contains('BASEPRODUCT', 'drone', '--enable-pronto-wlan=yes', '', d)}"
-EXTRA_OECONF += "${@bb.utils.contains('BASEPRODUCT', 'drone', '--enable-drone-wlan=yes', '', d)}"
-EXTRA_OECONF_remove = "${@bb.utils.contains('BASEPRODUCT', 'qsap', '--enable-pronto-wlan=yes', '', d)}"
-EXTRA_OECONF += "${@bb.utils.contains('BASEPRODUCT', 'qsap', '--enable-snap-wlan=yes', '', d)}"
-EXTRA_OECONF += "${@bb.utils.contains('BASEPRODUCT', 'qsap', '--enable-qsap-wlan=yes', '', d)}"
-EXTRA_OECONF_remove = "${@bb.utils.contains('PRODUCT', 'robot-rome', '--enable-pronto-wlan=yes', '', d)}"
-EXTRA_OECONF += "${@bb.utils.contains('PRODUCT', 'robot-rome', '--enable-robot-wlan=yes', '', d)}"
-EXTRA_OECONF += "${@bb.utils.contains('BASEPRODUCT', 'qsap', '--enable-naples-wlan=yes', '', d)}"
-EXTRA_OECONF_remove = "${@bb.utils.contains('PRODUCT', 'robot-som', '--enable-pronto-wlan=yes', '', d)}"
-EXTRA_OECONF += "${@bb.utils.contains('PRODUCT', 'robot-som', '--enable-robot-som-wlan=yes', '', d)}"
+EXTRA_OECONF_append_drone += "'--enable-drone-wlan=yes"
+
+# Enable robot-wlan according to variants
+EXTRA_OECONF_append_robot-som += "--enable-robot-som-wlan=yes"
+EXTRA_OECONF_remove_robot-rome += "--enable-robot-som-wlan=yes"
+EXTRA_OECONF_append_robot-rome += "--enable-robot-wlan=yes"
+EXTRA_OECONF_remove_robot-pronto += "--enable-robot-som-wlan=yes"
+EXTRA_OECONF_append_robot-pronto += "--enable-pronto-wlan=yes"
 
 INITSCRIPT_NAME   = "wlan_daemon"
 INITSCRIPT_PARAMS = "remove"

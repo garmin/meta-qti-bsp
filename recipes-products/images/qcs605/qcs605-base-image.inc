@@ -1,12 +1,12 @@
 # Enable Bootloader
-DEPENDS += "${@bb.utils.contains('TARGET_ARCH', 'arm','lib64-edk2','edk2',d)}"
+RDEPENDS += "${@bb.utils.contains('TARGET_ARCH', 'arm','lib64-edk2','edk2',d)}"
 
 # Packages to be included in rootfs creation.
 IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
 
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux', 'packagegroup-core-selinux', '', d)}"
-IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux', 'selinux-config', '', d)}"
+#IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux', 'selinux-config', '', d)}"
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES','selinux', 'refpolicy-mls', '', d)}"
 
 IMAGE_INSTALL += "start-scripts-firmware-links"
