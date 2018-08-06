@@ -1,5 +1,5 @@
 #
-# Default properties to be set for apq8053
+# Default properties to be set for qcs605
 #
 
 ro.product.board=qcs605

@@ -40,7 +40,7 @@ do_install_append () {
    install -m 0644 ${WORKDIR}/limit-core.conf -D ${D}/etc/security/limits.d/core.conf
    install -d /etc/sysctl.d/
    install -m 0644 ${WORKDIR}/sysctl-core.conf -D ${D}/etc/sysctl.d/core.conf
-
+   install -m 0644 ${WORKDIR}/logind.conf -D ${D}/etc/systemd/logind.conf
    #  Mask journaling services by default.
    #  'systemctl unmask' can be used on device to enable them if needed.
    ln -sf /dev/null ${D}/etc/systemd/system/systemd-journald.service

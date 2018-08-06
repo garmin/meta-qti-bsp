@@ -27,6 +27,8 @@ prefix = ""
 
 BUSYBOX_SPLIT_SUID = "0"
 
+FILES_${PN} += "/usr/bin/env"
+
 do_compile_append_mdm() {
     sed -i '/modprobe/d' ./busybox.links
 }
@@ -57,5 +59,8 @@ do_install_append() {
     mkdir -p ${D}/usr/bin
     ln -s /bin/env ${D}/usr/bin/env
 }
+
+# util-linux installs dmesg with priority 80. Use higher priority than util-linux to get busybox dmesg installed.
+ALTERNATIVE_PRIORITY[dmesg] = "100"
 
 #FILES_${PN}-mdev += "${sysconfdir}/mdev/* "

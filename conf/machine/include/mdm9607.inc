@@ -20,7 +20,7 @@ BBMASK = ".*/*/recipes-devtools/mtd/"
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
 
-SERIAL_CONSOLE ?= "${@['', '115200 ttyHSL0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
+SERIAL_CONSOLE ?= "115200 ttyHSL0"
 
 DISTRO ?= "mdm"
 
@@ -36,8 +36,8 @@ UBINIZE_ARGS ?= "-m 4096 -p 256KiB -s 4096"
 #MKUBIFS Arg
 MKUBIFS_ARGS ?= "-m 4096 -e 253952 -c 2146 -F"
 #Volume sizes
-SYSTEM_VOLUME_SIZE ?= "100MiB"
-CACHE_VOLUME_SIZE ?= "37MiB"
+SYSTEM_VOLUME_SIZE ?= "140MiB"
+CACHE_VOLUME_SIZE ?= "10MiB"
 SYSTEMRW_VOLUME_SIZE ?= "6MiB"
 
 # Formats of root filesystem images.
