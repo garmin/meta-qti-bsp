@@ -14,7 +14,7 @@ def get_img_inc_file(d):
         img_inc_file = basemachine + "-base-image.inc"
     return img_inc_file
 
-require ${BASEMACHINE}/${@get_img_inc_file(d)}
+include ${BASEMACHINE}/${@get_img_inc_file(d)}
 
 require include/mdm-bootimg.inc
 
