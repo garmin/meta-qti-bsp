@@ -40,7 +40,7 @@ RECOVERYFS_SIZE_EXT4 ?= "136000000"
 require conf/multilib.conf
 MULTILIBS = "multilib:lib32"
 DEFAULTTUNE_virtclass-multilib-lib32 = "armv7a-neon"
-
+TARGET_VENDOR_virtclass-multilib-lib32="-oe"
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4"
 python __anonymous () {
