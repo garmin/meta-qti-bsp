@@ -31,7 +31,7 @@
 
 emmc_dir=/dev/block/bootdevice/by-name
 mtd_file=/proc/mtd
-fstab_file=/res/recovery_volume_detected
+fstab_file=/tmp/recovery_volume_detected
 
 
 ubi_device_number=1
@@ -152,7 +152,6 @@ FindAndMountMTD () {
    UpdateRecoveryVolume $1 $2 "mtd" /dev/$mtd_block_device
 }
 
-mount -o remount,rw /
 echo -n > $fstab_file
 
 if [ -d $emmc_dir ]
@@ -163,7 +162,6 @@ then
     eval FindAndMountEXT4 cache    /cache
 else
     fstype="UBI"
-    eval FindAndAttachUBI modem
     eval FindAndAttachUBI system 4
     eval FindAndMountUBI rootfs  /system  1
     eval FindAndMountUBI usrfs   /data    1
@@ -171,6 +169,5 @@ else
 fi
 
 FindAndMountMTD misc /misc
-eval FindAndMount${fstype} modem /firmware
 
 exit

@@ -93,6 +93,7 @@ else
         eval FindAndMountVolume${fstype} usrfs /data
         eval FindAndMountVolume${fstype} systemrw /systemrw
         test -x /sbin/restorecon && /sbin/restorecon -RD /data /systemrw
+        eval FindAndMountVolume${fstype} cachefs /cache
 fi
 
 if [ -x /sbin/restorecon ]; then
