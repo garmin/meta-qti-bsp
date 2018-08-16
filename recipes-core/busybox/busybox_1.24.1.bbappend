@@ -40,7 +40,7 @@ do_install_append() {
     # systemd is udev compatible.
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d ${D}${sysconfdir}/udev/scripts/
-        install -m 0755 ${WORKDIR}/automountsdcard.sh \
+        install -m 0744 ${WORKDIR}/automountsdcard.sh \
             ${D}${sysconfdir}/udev/scripts/automountsdcard.sh
         install -d ${D}${systemd_unitdir}/system/
         install -m 0644 ${WORKDIR}/busybox-syslog.service -D ${D}${systemd_unitdir}/system/busybox-syslog.service

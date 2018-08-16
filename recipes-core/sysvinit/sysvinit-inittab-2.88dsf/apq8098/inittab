@@ -16,6 +16,9 @@ si::sysinit:/etc/init.d/rcS
 dvsk:2345:wait:mkdir -p -m 777 /dev/socket
 lprp:2345:respawn:/sbin/leprop-service
 
+# update max dgram length
+log1:2345:wait:echo 600 > /proc/sys/net/unix/max_dgram_qlen
+
 #Set the storage daemons to respawn
 rmts:2345:respawn:/sbin/rmt_storage
 tftp:2345:respawn:/sbin/tftp_server

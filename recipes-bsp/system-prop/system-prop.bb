@@ -24,7 +24,7 @@ do_compile() {
 
 do_install() {
     install -d ${D}
-    install ${S}/build.prop ${D}/build.prop
+    install -o 5002 -g 5002  -m 0644 ${S}/build.prop ${D}/build.prop
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
        install -m 0755 ${WORKDIR}/persist-prop.sh -D ${D}${base_sbindir}/persist-prop.sh
        install -d ${D}${systemd_unitdir}/system
