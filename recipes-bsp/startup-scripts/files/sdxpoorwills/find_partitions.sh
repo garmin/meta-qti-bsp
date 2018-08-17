@@ -96,7 +96,7 @@ else
 fi
 
 if [ -x /sbin/restorecon ]; then
-    firmware_selinux_opt=",rootcontext=system_u:object_r:firmware_t:s0"
+    firmware_selinux_opt=",context=system_u:object_r:firmware_t:s0"
 else
     firmware_selinux_opt=""
 fi
