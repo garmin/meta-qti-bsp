@@ -29,42 +29,38 @@ SRC_URI_append += "file://systemd/bluetooth.mount"
 SRC_URI_append += "file://systemd/bluetooth-mount.service"
 SRC_URI_append += "file://systemd/non-hlos-squash.sh"
 
-dirs755 += "/media/cf /media/net /media/ram \
-            /media/union /media/realroot /media/hdd \
-            /media/mmc1 /systemrw"
+dirs755_append = " /media/cf /media/net /media/ram \
+            /media/union /media/realroot /media/hdd /media/mmc1"
 
-dirs755_append_apq8053 +="/firmware /persist /cache /dsp "
-dirs755_append_apq8009 += "/firmware /persist /cache"
-dirs755_append_apq8017 += "/firmware /persist /cache /dsp"
-dirs755_append_qcs605 += "/firmware /persist /cache /dsp /bt_firmware"
-dirs755_append_sdm845 += "/firmware /persist /cache /dsp /bt_firmware"
-dirs755_append_qcs405-som1 += "/firmware /cache /persist /dsp /bt_firmware"
-dirs755_append_qcs403-som2 += "/firmware /persist /cache /dsp /bt_firmware"
-dirs755_append_mdm9607 +=" /persist"
-dirs755_append_sdmsteppe += "/firmware /persist /cache /dsp /bt_firmware"
+# userdata mount point is present by default in all machines.
+# TODO: Add this path to MACHINE_MNT_POINTS in machine conf.
+dirs755_append = " ${userfsdatadir}"
 
-# Remove sepolicy entries from various files when selinux is not present.
-do_fix_sepolicies () {
-    if ${@bb.utils.contains('DISTRO_FEATURES','selinux', 'false', 'true', d)}; then
-        # For mount services
-        sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware.mount
-        sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware-mount.service
-        sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/bluetooth.mount
-        sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/bluetooth-mount.service
-        sed -i "s#,context=system_u:object_r:adsprpcd_t:s0##g" ${WORKDIR}/systemd/dsp-mount.service
-        sed -i "s#,rootcontext=system_u:object_r:var_t:s0##g"  ${WORKDIR}/systemd/var-volatile.mount
-        sed -i "s#,rootcontext=system_u:object_r:system_data_t:s0##g"  ${WORKDIR}/systemd/systemrw.mount
-        sed -i "s#,rootcontext=system_u:object_r:data_t:s0##g"  ${WORKDIR}/systemd/data.mount
+dirs755_append = " ${MACHINE_MNT_POINTS}"
 
-        # Remove selinux entries from fstab
-        #For /run
-        sed -i "s#,rootcontext=system_u:object_r:var_run_t:s0##g" ${WORKDIR}/fstab
-        # For /var/volatile
-        sed -i "s#,rootcontext=system_u:object_r:var_t:s0##g" ${WORKDIR}/fstab
-    fi
+# /systemrw partition is needed only when system is RO.
+# Otherwise files can be directly written to / itself.
+dirs755_append = " ${@bb.utils.contains('DISTRO_FEATURES','ro-rootfs','/systemrw','',d)}"
+
+# Various mount related files added here assume selinux support by default.
+# Explicitly remove sepolicy entries when selinux is not present.
+fix_sepolicies () {
+    sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware.mount
+    sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware-mount.service
+    sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/bluetooth.mount
+    sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/bluetooth-mount.service
+    sed -i "s#,context=system_u:object_r:adsprpcd_t:s0##g" ${WORKDIR}/systemd/dsp-mount.service
+    sed -i "s#,rootcontext=system_u:object_r:var_t:s0##g"  ${WORKDIR}/systemd/var-volatile.mount
+    sed -i "s#,rootcontext=system_u:object_r:system_data_t:s0##g"  ${WORKDIR}/systemd/systemrw.mount
+    sed -i "s#,rootcontext=system_u:object_r:data_t:s0##g"  ${WORKDIR}/systemd/data.mount
+
+    # Remove selinux entries from fstab
+    #For /run
+    sed -i "s#,rootcontext=system_u:object_r:var_run_t:s0##g" ${WORKDIR}/fstab
+    # For /var/volatile
+    sed -i "s#,rootcontext=system_u:object_r:var_t:s0##g" ${WORKDIR}/fstab
 }
-
-addtask fix_sepolicies before do_install after do_compile
+do_install[prefuncs] += " ${@bb.utils.contains('DISTRO_FEATURES', 'selinux', '', 'fix_sepolicies', d)}"
 
 do_install_append(){
     install -m 755 -o diag -g diag -d ${D}/media
@@ -92,21 +88,23 @@ do_install_append_msm() {
         install -d 0644 ${D}${systemd_unitdir}/system/local-fs.target.requires
         install -d 0644 ${D}${systemd_unitdir}/system/sysinit.target.wants
 
-        # userdata is present by default.
-        if ${@bb.utils.contains('DISTRO_FEATURES', 'full-disk-encryption', 'false', 'true', d)}; then
-            if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
-                install -m 0644 ${WORKDIR}/systemd/data.mount ${D}${systemd_unitdir}/system/data.mount
-
-                # Run fsck at boot
-                install -d 0644 ${D}${systemd_unitdir}/system/local-fs-pre.target.requires
-                ln -sf ${systemd_unitdir}/system/systemd-fsck@.service \
-                       ${D}${systemd_unitdir}/system/local-fs-pre.target.requires/systemd-fsck@dev-disk-by\\x2dpartlabel-userdata.service
-            else
-                install -m 0644 ${WORKDIR}/systemd/data-ubi.mount ${D}${systemd_unitdir}/system/data.mount
-            fi
-            ln -sf  ${systemd_unitdir}/system/data.mount ${D}${systemd_unitdir}/system/sysinit.target.wants/data.mount
-        fi
         for d in ${dirs755}; do
+            if [ "$d" == "$userfsdatadir" ]; then
+                if ${@bb.utils.contains('DISTRO_FEATURES', 'full-disk-encryption', 'false', 'true', d)}; then
+                    if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
+                        install -m 0644 ${WORKDIR}/systemd/data.mount ${D}${systemd_unitdir}/system/data.mount
+
+                        # Run fsck at boot
+                        install -d 0644 ${D}${systemd_unitdir}/system/local-fs-pre.target.requires
+                        ln -sf ${systemd_unitdir}/system/systemd-fsck@.service \
+                           ${D}${systemd_unitdir}/system/local-fs-pre.target.requires/systemd-fsck@dev-disk-by\\x2dpartlabel-userdata.service
+                    else
+                        install -m 0644 ${WORKDIR}/systemd/data-ubi.mount ${D}${systemd_unitdir}/system/data.mount
+                    fi
+                    ln -sf  ${systemd_unitdir}/system/data.mount ${D}${systemd_unitdir}/system/sysinit.target.wants/data.mount
+                fi
+            fi
+
             if [ "$d" == "/cache" ]; then
                 if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
                     install -m 0644 ${WORKDIR}/systemd/cache.mount ${D}${systemd_unitdir}/system/cache.mount
@@ -129,7 +127,7 @@ do_install_append_msm() {
 
             # If the AB boot feature is enabled, then instead of <partition>.mount,
             # a <partition-mount>.service invokes mounting the A/B partition as detected at the time of boot.
-            if ${@bb.utils.contains('DISTRO_FEATURES','ab-boot-support','true','false',d)};then
+            if ${@bb.utils.contains('DISTRO_FEATURES','ab-boot-support','true','false',d)}; then
                 if [ "$d" == "/firmware" ]; then
                     install -m 0644 ${WORKDIR}/systemd/firmware-mount.service ${D}${sysconfdir}/systemd/system/firmware-mount.service
                     ln -sf  ../firmware-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware-mount.service
@@ -201,4 +199,3 @@ do_install_append_msm() {
         done
     fi
 }
-
