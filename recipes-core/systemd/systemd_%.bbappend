@@ -14,7 +14,7 @@ SRC_URI += "file://logind.conf"
 EXTRA_OECONF += " --disable-efi"
 
 # Don't use systemd network name resolution manager
-EXTRA_OECONF += " --disable-resolved"
+EXTRA_OECONF += " --disable-resolved --disable-hwdb"
 PACKAGECONFIG_remove = "resolved"
 ALTERNATIVE_LINK_NAME[resolv-conf] = "${sysconfdir}/resolv-systemd.conf"
 
@@ -55,6 +55,8 @@ do_install_append_batcam () {
    install -m 0755 ${WORKDIR}/post_hibernate.sh -D ${D}${systemd_unitdir}/system-sleep/post_hibernate.sh
 
 }
+RRECOMMENDS_${PN}_remove += "systemd-extra-utils"
+PACKAGES_remove += "${PN}-extra-utils"
 PACKAGES +="${PN}-coredump"
 FILES_${PN} += "/etc/initscripts"
 FILES_${PN}-coredump = "/etc/sysctl.d/core.conf /etc/security/limits.d/core.conf"
