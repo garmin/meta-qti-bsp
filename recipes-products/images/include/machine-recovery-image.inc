@@ -1,6 +1,3 @@
-DEPENDS_append_aarch64 += " lib32-lk"
-DEPENDS_append_arm += " lk"
-
 DEPENDS += "virtual/kernel"
 
 DEPENDS += "pkgconfig-native gtk-doc-native gettext-native mkbootimg-native"
@@ -36,6 +33,7 @@ IMAGE_INSTALL += "libext2fs"
 # Needed for generating recovery.ubi ignored for ext4
 MKUBIFS_ARGS = "${@bb.utils.contains('IMAGE_FSTYPES', 'ubi', '-m 4096 -e 253952 -c 83 -F', '', d)}"
 UBI_VOLNAME  = "${@bb.utils.contains('IMAGE_FSTYPES', 'ubi', 'rootfs', '', d)}"
+EXT4_IMAGET_TYPE  = "${@bb.utils.contains('IMAGE_FSTYPES', 'ext4', True, False, d)}"
 
 do_fsconfig() {
  chmod go-r ${IMAGE_ROOTFS}/etc/passwd
@@ -57,8 +55,7 @@ do_makesystem[cleandirs] += "${UNSPARSED_RECOVERYFS_DEST}"
 
 # Below is to generate sparse ext4 recovery image (OE by default supports raw ext4 images)
 do_makesystem() {
-    if [ "${MACHINE}" != "mdm9607" ]; then
-
+	if ${@bb.utils.contains('IMAGE_FSTYPES', 'ext4', 'true', 'false', d)}; then
         # SELinux feature is enabled
         if [[ "${DISTRO_FEATURES}" =~ "selinux" ]]; then
             make_ext4fs -s ${IMAGE_EXT4_SELINUX_OPTIONS} -l ${RECOVERYFS_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${RECOVERYIMAGE_TARGET} ${IMAGE_ROOTFS}
@@ -71,7 +68,7 @@ do_makesystem() {
             # Create an unsparse image as well to be included as part of ota target-files
             simg2img ${DEPLOY_DIR_IMAGE}/${RECOVERYIMAGE_TARGET} ${UNSPARSED_RECOVERYFS_DEST}/recovery-unsparsed.ext4
         fi
-    fi
+	fi
 }
 
 do_rename_recovery_ubi_image() {
