@@ -1,8 +1,9 @@
+#compile abl
+RDEPENDS  += "${@bb.utils.contains('TARGET_ARCH', 'arm','lib64-edk2','edk2',d)}"
+
 # Packages to be included in rootfs creation.
 IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
-IMAGE_INSTALL += "${@bb.utils.contains('TARGET_ARCH', 'arm','lib64-edk2','edk2',d)}"
-
 IMAGE_INSTALL += "start-scripts-misc-daemon"
 
 IMAGE_INSTALL += "base-files"
