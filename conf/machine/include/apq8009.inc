@@ -44,4 +44,4 @@ RECOVERY_IMAGE ?= "1"
 IMAGE_FSTYPES += "ext4"
 
 #Enable SDK feature
-SDK_IMAGE ?= "1"
+# SDK_IMAGE ?= "1"

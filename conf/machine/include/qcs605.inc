@@ -40,7 +40,7 @@ RECOVERYFS_SIZE_EXT4 ?= "136000000"
 DISTRO_FEATURES_append = " vble"
 
 #Enable SDK feature
-SDK_IMAGE ?= "1"
+# SDK_IMAGE ?= "1"
 
 #Enable Recovery image generation
 RECOVERY_IMAGE ?= "0"

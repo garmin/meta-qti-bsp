@@ -35,7 +35,7 @@ IMAGE_INIT_MANAGER = "systemd"
 IMAGE_INITSCRIPTS = ""
 
 #Enable SDK feature
-SDK_IMAGE ?= "1"
+# SDK_IMAGE ?= "1"
 
 PAGE_SIZE ?= '4096'
 
