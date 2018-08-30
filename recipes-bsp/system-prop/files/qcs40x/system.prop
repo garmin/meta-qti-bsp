@@ -15,6 +15,7 @@ persist.vendor.audio.fluence.audiorec=false
 vendor.audio.tunnel.encode = false
 #Buffer size in kbytes for compress offload playback
 vendor.audio.offload.buffer.size.kb=64
+vendor.audio.adm.buffering.ms=2
 #Enable offload audio video playback by default
 audio.offload.video=true
 #enable voice path for PCM VoIP by default
@@ -37,3 +38,5 @@ ro.qc.sdk.fwk.mic_support=6
 
 #property to enable audio HAL server
 persist.vendor.audio.qas.enabled=true
+
+ro.board.platform=qcs40x
