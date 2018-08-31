@@ -45,10 +45,6 @@ USERDATA_SIZE_EXT4 ?= "1048576000"
 CACHE_SIZE_EXT4 ?= "262144000"
 RECOVERYFS_SIZE_EXT4 ?= "136000000"
 
-# FEC_SIZE depends on SYSTEM_SIZE_EXT4; command: fec -s "<SYSTEM_SIZE>"
-# If fec enable :  "6172672" ; fec disable : 0 bytes of image size
-FEC_SIZE ?= "6172672"
-
 #Enable SDK feature
 SDK_IMAGE ?= "1"
 
