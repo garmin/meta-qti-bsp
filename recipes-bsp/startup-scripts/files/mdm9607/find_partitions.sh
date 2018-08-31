@@ -32,23 +32,36 @@
 FindAndMountUBI () {
    partition=$1
    dir=$2
+   basedev=$3
+   mnttype=$4
+   volnum="_0"
 
    mtd_block_number=`cat $mtd_file | grep -i $partition | sed 's/^mtd//' | awk -F ':' '{print $1}'`
+
+   if test -z "$mtd_block_number";then
+     return
+   fi
+
    echo "MTD : Detected block device : $dir for $partition"
    mkdir -p $dir
 
-   ubiattach -m $mtd_block_number -d 1 /dev/ubi_ctrl
-   device=/dev/ubi1_0
+   ubiattach -m $mtd_block_number -d $basedev /dev/ubi_ctrl
+   device=/dev/ubi$basedev$volnum
    while [ 1 ]
     do
         if [ -c $device ]
         then
-            mount -t ubifs -o ro /dev/ubi1_0 $dir -o bulk_read
+            mount -t ubifs -o $mnttype $device $dir -o bulk_read
             break
         else
             sleep 0.010
         fi
     done
+
+   if [ "$partition" == "persist" ];then
+	chown root:system /persist
+	chmod 0775 /persist
+   fi
 }
 
 FindAndMountVolumeUBI () {
@@ -65,8 +78,8 @@ mtd_file=/proc/mtd
 
 fstype="UBI"
 eval FindAndMountVolume${fstype} usrfs /data
-
 eval FindAndMountVolume${fstype} systemrw /systemrw
-eval FindAndMount${fstype} modem /firmware
 
+eval FindAndMount${fstype} modem /firmware 1 ro
+eval FindAndMount${fstype} persist /persist 2 rw
 exit 0
