@@ -3,7 +3,7 @@ DEPENDS += "${@["","machine-recovery-image releasetools-native"][(d.getVar('RECO
 # Add tasks to generate recovery image, OTA zip files
 python __anonymous () {
     if d.getVar('RECOVERY_IMAGE', True) == '1' and bb.utils.contains('IMAGE_FSTYPES', 'ubi', True, False, d):
-        bb.build.addtask('do_recovery_ubi', 'do_build', 'do_rootfs', d)
+        bb.build.addtask('do_recovery_ubi', 'do_build', 'do_image_ubi', d)
         bb.build.addtask('do_gen_otazip_ubi', 'do_build', 'do_recovery_ubi', d)
 }
 
@@ -118,11 +118,10 @@ do_recovery_ubi() {
 
 # Task to generate OTA zip files
 do_gen_otazip_ubi() {
-
     # Clean up any existing target-files*.zip as this can lead to incorrect content getting packed in the zip.
     rm -f ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ubi.zip
 
-    cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ubi && zip -qry -FS ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ubi.zip *
+    cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ubi && /usr/bin/zip -qry -FS ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ubi.zip *
 
     cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ubi.zip ${IMAGE_ROOTFS} ubi
 

@@ -20,6 +20,8 @@ INSANE_SKIP_${PN} = "arch"
 
 VBLE = "${@bb.utils.contains('DISTRO_FEATURES', 'vble','1', '0', d)}"
 
+VERITY_ENABLED = "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity','1', '0', d)}"
+
 EXTRA_OEMAKE = "'CLANG_BIN=${STAGING_BINDIR_NATIVE}/llvm-arm-toolchain/bin/' \
                 'CLANG_PREFIX=${STAGING_BINDIR_NATIVE}/${TARGET_SYS}/${TARGET_PREFIX}' \
                 'TARGET_ARCHITECTURE=${TARGET_ARCH}'\
@@ -27,8 +29,11 @@ EXTRA_OEMAKE = "'CLANG_BIN=${STAGING_BINDIR_NATIVE}/llvm-arm-toolchain/bin/' \
                 'BOOTLOADER_OUT=${S}/out'\
                 'ENABLE_LE_VARIANT=true'\
                 'VERIFIED_BOOT_LE=${VBLE}'\
+                'VERITY_LE=${VERITY_ENABLED}'\
                 'INIT_BIN_LE=\"/sbin/init\"'\
                 'EDK_TOOLS_PATH=${S}/BaseTools'"
+
+EXTRA_OEMAKE_append_qcs40x = " 'DISABLE_PARALLEL_DOWNLOAD_FLASH=1'"
 
 do_compile () {
     export CC=${BUILD_CC}

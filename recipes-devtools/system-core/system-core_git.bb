@@ -14,13 +14,16 @@ DEPENDS = "virtual/kernel openssl glib-2.0 libselinux ext4-utils libunwind libcu
 EXTRA_OECONF = " --with-host-os=${HOST_OS} --with-glib"
 EXTRA_OECONF_append = " --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
 EXTRA_OECONF_append = " --with-logd-logging"
-EXTRA_OECONF_append = "${@bb.utils.contains('USER_BUILD','1',' --disable-debuggerd','',d)}"
+EXTRA_OECONF_append = "${@bb.utils.contains('VARIANT','user',' --disable-debuggerd','',d)}"
 EXTRA_OECONF_append_apq8053 = " --enable-logd-privs"
 EXTRA_OECONF_append_qcs40x = " --disable-libsync"
 EXTRA_OECONF_append_sdxprairie = " --disable-libsync"
 
+#Disable default libsync in system/core/ when robot-som use 4.9 kernel
+EXTRA_OECONF_append_robot-som += "--disable-libsync"
+
 # Disable adb root privileges in USER builds for msm targets
-EXTRA_OECONF_append_msm = "${@bb.utils.contains('USER_BUILD','1',' --disable-adb-root','',d)}"
+EXTRA_OECONF_append_msm = "${@bb.utils.contains('VARIANT','user',' --disable-adb-root','',d)}"
 
 # Pass on system partition size to adb
 EXTRA_OECONF_append = " --with-system-size=${SYSTEM_SIZE_EXT4}"

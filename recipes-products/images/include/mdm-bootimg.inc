@@ -33,7 +33,7 @@ EXTRA_IMAGE_FEATURES += "${@bb.utils.contains('DISTRO_FEATURES','ro-rootfs','rea
 gen_buildprop() {
    mkdir -p ${IMAGE_ROOTFS}/cache
    echo ro.build.version.release=`cat ${IMAGE_ROOTFS}/etc/version ` >> ${IMAGE_ROOTFS}/build.prop
-   echo ro.product.name=${BASEMACHINE}-${PRODUCT} >> ${IMAGE_ROOTFS}/build.prop
+   echo ro.product.name=${BASEMACHINE}-${DISTRO} >> ${IMAGE_ROOTFS}/build.prop
    echo ${MACHINE} >> ${IMAGE_ROOTFS}/target
 }
 

@@ -42,9 +42,17 @@ IMAGE_INSTALL += "system-core-usb"
 IMAGE_INSTALL += "system-core-post-boot"
 IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "system-prop"
+IMAGE_INSTALL += "systemd-machine-units"
 IMAGE_INSTALL += "wireless-tools"
 IMAGE_INSTALL += "volatile-binds"
-IMAGE_INSTALL += "start-scripts-recovery-updater"
+
+# Install recovery(fs)-updater only for non-A/B variants
+IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', '', 'start-scripts-recovery-updater', d)}"
+
+# Install recovery and its libs in system image if A/B boot is supported
+IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', 'recovery-bin', '', d)}"
+IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', 'recovery', '', d)}"
+#IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', 'lib32-recovery', '', d)}"
 
 # Don't install GDB and related pacakges in production builds.
 DEPENDS += "${@base_conditional('USER_BUILD', '1', '', 'gdb-cross-arm', d)}"

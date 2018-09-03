@@ -27,11 +27,12 @@
 
 [Unit]
 Description=Mount bluetooth partition to /bt_firmware mount point
-SourcePath=/etc/initscripts/ab_mount.sh
 
 [Service]
-Restart=on-failure
-ExecStart=/etc/initscripts/ab_mount.sh "noexec,nodev,ro,context=system_u:object_r:firmware_t:s0" vfat /dev/disk/by-partlabel/bluetooth /bt_firmware
+Type=oneshot
+RemainAfterExit=yes
+PassEnvironment="SLOT_SUFFIX"
+ExecStart=/bin/mount -o noexec,nodev,ro,context=system_u:object_r:firmware_t:s0 -t vfat /dev/disk/by-partlabel/bluetooth${SLOT_SUFFIX} /bt_firmware
 
 [Install]
 WantedBy=local-fs.target

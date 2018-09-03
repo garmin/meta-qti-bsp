@@ -45,4 +45,4 @@ CACHE_SIZE_EXT4 ?= "80000000"
 DISTRO_FEATURES_append = " vble"
 
 # Formats of root filesystem images.
-IMAGE_FSTYPES += "ext4 ubi"
+IMAGE_FSTYPES += "ubi"

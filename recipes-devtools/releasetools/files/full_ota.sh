@@ -40,16 +40,14 @@ if [ "$#" -lt 3 ]; then
     exit 1
 fi
 
-FSCONFIG_PATH=../../../../../sysroots-components/x86_64/fsconfig-native/usr/bin
-IMGDIFF_PATH=../../../../../sysroots-components/x86_64/applypatch-native/usr/bin
-export PATH=.:${STAGING_BINDIR_NATIVE}:$FSCONFIG_PATH:$IMGDIFF_PATH:$PATH:/usr/bin
+USR_LIB=../recipe-sysroot-native/usr/lib
+LIB=../recipe-sysroot-native/lib
+USR_BIN=../recipe-sysroot-native/usr/bin
+
+export PATH=.:${USR_LIB}:${LIB}:${USR_BIN}:$PATH:/usr/bin
 export OUT_HOST_ROOT=.
 
-LIBSELINUX_PATH=../../../../../sysroots-components/x86_64/libselinux-native/usr/lib
-LIBCUTILS_PATH=../../../../../sysroots-components/x86_64/libcutils-native/usr/lib
-LIBPCRE_PATH=../../../../../sysroots-components/x86_64/libpcre-native/usr/lib
-LIBLOG_PATH=../../../../../sysroots-components/x86_64/liblog-native/usr/lib
-export LD_LIBRARY_PATH=${STAGING_LIBDIR_NATIVE}:$LIBSELINUX_PATH:$LIBCUTILS_PATH:$LIBPCRE_PATH:$LIBLOG_PATH
+export LD_LIBRARY_PATH=${USR_LIB}:${LIB}:${USR_BIN}
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US.UTF-8

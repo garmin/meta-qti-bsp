@@ -10,7 +10,7 @@ SECTION = "console/tools"
 LICENSE = "Zlib"
 LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=9db4b73a55a3994384112efcdb37c01f"
 
-DEPENDS = "protobuf-native nanopb-native"
+DEPENDS = "protobuf protobuf-native nanopb-native python-protobuf-native"
 DEPENDS_append_class-native = " python-protobuf-native"
 
 SRCREV = "cc74b9f200176edc5524aa00ba45fa90a5e87d27"

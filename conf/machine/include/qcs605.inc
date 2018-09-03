@@ -37,10 +37,10 @@ CACHE_SIZE_EXT4 ?= "65536000"
 RECOVERYFS_SIZE_EXT4 ?= "136000000"
 
 # Enable LE Verified Boot
-#DISTRO_FEATURES_append = " vble"
+DISTRO_FEATURES_append = " vble"
 
 #Enable SDK feature
-SDK_IMAGE ?= "1"
+# SDK_IMAGE ?= "1"
 
 #Enable Recovery image generation
 RECOVERY_IMAGE ?= "0"

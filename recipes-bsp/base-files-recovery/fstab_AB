@@ -1,5 +1,4 @@
-#!/bin/sh
-# Copyright (c) 2014, The Linux Foundation. All rights reserved.
+# Copyright (c) 2018, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -26,60 +25,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-# find_partitions        init.d script to dynamically find partitions
-#
-
-FindAndMountUBI () {
-   partition=$1
-   dir=$2
-   basedev=$3
-   mnttype=$4
-   volnum="_0"
-
-   mtd_block_number=`cat $mtd_file | grep -i $partition | sed 's/^mtd//' | awk -F ':' '{print $1}'`
-
-   if test -z "$mtd_block_number";then
-     return
-   fi
-
-   echo "MTD : Detected block device : $dir for $partition"
-   mkdir -p $dir
-
-   ubiattach -m $mtd_block_number -d $basedev /dev/ubi_ctrl
-   device=/dev/ubi$basedev$volnum
-   while [ 1 ]
-    do
-        if [ -c $device ]
-        then
-            mount -t ubifs -o $mnttype $device $dir -o bulk_read
-            break
-        else
-            sleep 0.010
-        fi
-    done
-
-   if [ "$partition" == "persist" ];then
-	chown root:system /persist
-	chmod 0775 /persist
-   fi
-}
-
-FindAndMountVolumeUBI () {
-   volume_name=$1
-   dir=$2
-   if [ ! -d $dir ]
-   then
-       mkdir -p $dir
-   fi
-   mount -t ubifs ubi0:$volume_name $dir -o bulk_read
-}
-
-mtd_file=/proc/mtd
-
-fstype="UBI"
-eval FindAndMountVolume${fstype} usrfs /data
-eval FindAndMountVolume${fstype} systemrw /systemrw
-
-eval FindAndMount${fstype} modem /firmware 1 ro
-eval FindAndMount${fstype} persist /persist 2 rw
-exit 0
+# In A/B mode, recovery/updater primarily needs
+# cache and userdata entries only
+/dev/block/bootdevice/by-name/cache       /cache     ext4     defaults     0  0
+/dev/block/bootdevice/by-name/userdata    /data      ext4     defaults     0  0

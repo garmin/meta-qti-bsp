@@ -19,12 +19,15 @@ S = "${WORKDIR}/binder"
 
 EXTRA_OECONF += " --with-glib"
 
-# Both kernel and userspace are assumed to be compiled in 32bit here.
-# If kernel is 64bit and userspace is 32bit then below flag is not valid.
-EXTRA_OECONF_append_arm    += " --enable-32bit-binder-ipc"
+# This recipe assumes kernel always compile for default arch even when
+# multilib compilation is enabled. If kernel is 64bit and binder is compiled
+# for 32bit due to multilib settings default 64bit IPC need to be supported
+# as kernel is 64bit. Only when kernel is 32bit, 32bit IPC need to be enabled.
+EXTRA_OECONF_append_arm = " \
+    ${@bb.utils.contains('MULTILIB_VARIANTS', 'lib32','','--enable-32bit-binder-ipc',d)} \
+"
 
 CFLAGS += "-I${STAGING_INCDIR}/libselinux"
-
 
 FILES_${PN}-dbg    = "${libdir}/.debug/libbinder.* ${bindir}/.debug/servicemanager ${bindir}/test_binder"
 FILES_${PN}        = "${libdir}/libbinder.so.* ${libdir}/pkgconfig/* ${bindir}/servicemanager"
