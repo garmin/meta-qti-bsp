@@ -23,11 +23,6 @@ EXTRA_OECONF_append_robot-som += "--disable-libsync"
 # Disable adb root privileges in USER builds for msm targets
 EXTRA_OECONF_append_msm = "${@bb.utils.contains('VARIANT','user',' --disable-adb-root','',d)}"
 
-# Pass on system partition size to adb
-EXTRA_OECONF_append = " --with-system-size=${SYSTEM_SIZE_EXT4}"
-
-#Pass on fec image size to adb
-EXTRA_OECONF_append = " --with-fec-size=${FEC_SIZE}"
 
 CPPFLAGS += "-I${STAGING_INCDIR}/ext4_utils"
 CPPFLAGS += "-I${STAGING_INCDIR}/libselinux"
