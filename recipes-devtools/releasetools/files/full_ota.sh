@@ -78,9 +78,12 @@ mkdir -p $target_files/SYSTEM
 mkdir -p target_files/BOOT/RAMDISK
 touch target_files/BOOT/RAMDISK/empty
 
-#Needed for block based OTA.
 if [ "${block_based}" = "--block" ]; then
+    # python2 is needed for block based OTA.
     python_version="python2"
+else
+    # File-based OTA needs this to assign the correct context to '/' after OTA upgrade
+    echo "/system -d system_u:object_r:root_t:s0" >> $target_files/BOOT/RAMDISK/file_contexts
 fi
 
 # Generate selabel rules only if file_contexts is packed in target-files
