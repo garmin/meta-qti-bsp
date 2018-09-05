@@ -13,8 +13,8 @@ inherit cmake
 FILES_${PN}-dev += "${libdir}/cmake"
 
 EXTRA_OECMAKE = "-DCMAKE_INSTALL_PREFIX=/usr \
-		${@base_conditional("libdir", "/usr/lib64", "-DLIB_SUFFIX=64", "", d)} \
-		${@base_conditional("libdir", "/usr/lib32", "-DLIB_SUFFIX=32", "", d)} \
+		${@oe.utils.conditional("libdir", "/usr/lib64", "-DLIB_SUFFIX=64", "", d)} \
+		${@oe.utils.conditional("libdir", "/usr/lib32", "-DLIB_SUFFIX=32", "", d)} \
 		-DLWS_WITH_STATIC=OFF \
 		-DLWS_WITHOUT_TESTAPPS=ON \
 		-DLWS_WITHOUT_TEST_SERVER=ON \
