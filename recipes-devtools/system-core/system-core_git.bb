@@ -1,4 +1,4 @@
-inherit autotools pkgconfig systemd update-rc.d qperf externalsrc
+inherit autotools pkgconfig systemd update-rc.d qperf
 
 DESCRIPTION = "Android system/core components"
 HOMEPAGE = "http://developer.android.com/"
@@ -6,7 +6,10 @@ LICENSE = "Apache-2.0"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
 ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
-EXTERNALSRC = "${WORKSPACE}/system/core/"
+FILESPATH =+ "${WORKSPACE}:"
+SRC_URI = "file://system/core/"
+S = "${WORKDIR}/system/core/"
+
 PR = "r19"
 
 DEPENDS += "virtual/kernel openssl glib-2.0 libselinux ext4-utils libunwind libcutils libmincrypt libbase libutils"
