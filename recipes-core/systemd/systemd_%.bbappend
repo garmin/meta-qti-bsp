@@ -55,8 +55,14 @@ do_install_append_batcam () {
    install -m 0755 ${WORKDIR}/post_hibernate.sh -D ${D}${systemd_unitdir}/system-sleep/post_hibernate.sh
 
 }
+
 RRECOMMENDS_${PN}_remove += "systemd-extra-utils"
 PACKAGES_remove += "${PN}-extra-utils"
+
+do_install_append_robot-som-ros () {
+    rm ${D}/etc/sysctl.d/core.conf
+}
+
 PACKAGES +="${PN}-coredump"
 FILES_${PN} += "/etc/initscripts"
 FILES_${PN}-coredump = "/etc/sysctl.d/core.conf /etc/security/limits.d/core.conf"
