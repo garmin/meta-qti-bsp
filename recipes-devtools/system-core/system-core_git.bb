@@ -9,7 +9,8 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 EXTERNALSRC = "${WORKSPACE}/system/core/"
 PR = "r19"
 
-DEPENDS = "virtual/kernel openssl glib-2.0 libselinux ext4-utils libunwind libcutils libmincrypt libbase libutils"
+DEPENDS += "virtual/kernel openssl glib-2.0 libselinux ext4-utils libunwind libcutils libmincrypt libbase libutils"
+DEPENDS_append_qcs605 = "libsync"
 
 EXTRA_OECONF = " --with-host-os=${HOST_OS} --with-glib"
 EXTRA_OECONF_append = " --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
