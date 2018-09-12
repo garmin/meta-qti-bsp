@@ -1,3 +1,38 @@
+inherit core-image
+
+#  Function to get most suitable .inc file with list of packages
+#  to be installed into root filesystem from layer it is called.
+#  Following is the order of priority.
+#  P1: <basemachine>/<basemachine>-<distro>-<layerkey>-image.inc
+#  P2: <basemachine>/<basemachine>-<layerkey>-image.inc
+#  P3: common/common-<layerkey>-image.inc
+def get_bblayer_img_inc(layerkey, d):
+    distro      = d.getVar('DISTRO', True)
+    basemachine = d.getVar('BASEMACHINE', True)
+
+    lkey = ''
+    if layerkey != '':
+        lkey = layerkey + "-"
+
+    common_inc  = "common-"+ lkey + "image.inc"
+    machine_inc = basemachine + "-" + lkey + "image.inc"
+    distro_inc  = machine_inc
+    if distro != 'base' or '':
+        distro_inc = basemachine + "-" + distro +"-" + lkey + "image.inc"
+
+    distro_inc_path  = os.path.join(d.getVar('THISDIR'), basemachine, distro_inc)
+    machine_inc_path = os.path.join(d.getVar('THISDIR'), basemachine, machine_inc)
+    common_inc_path  = os.path.join(d.getVar('THISDIR'), "common", common_inc)
+
+    if os.path.exists(distro_inc_path):
+        img_inc_path = distro_inc_path
+    elif os.path.exists(machine_inc_path):
+        img_inc_path = machine_inc_path
+    else:
+        img_inc_path = common_inc_path
+    bb.note(" Incuding packages from %s" % (img_inc_path))
+    return img_inc_path
+
 IMAGE_INSTALL_ATTEMPTONLY ?= ""
 IMAGE_INSTALL_ATTEMPTONLY[type] = "list"
 
