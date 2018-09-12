@@ -1,3 +1,5 @@
+inherit qimage
+
 # Get list of packages to be installed onto the root filesystem.
 # If product is specified try to include product inc otherwise include base inc.
 def get_img_inc_file(d):
