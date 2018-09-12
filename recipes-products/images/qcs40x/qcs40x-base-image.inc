@@ -1,3 +1,4 @@
+inherit dm-verity
 #compile abl
 RDEPENDS  += "${@bb.utils.contains('TARGET_ARCH', 'arm','lib64-edk2','edk2',d)}"
 
