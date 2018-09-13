@@ -75,6 +75,14 @@ unzip -qo $2 -d target_files
 mkdir -p target_files/META
 mkdir -p target_files/SYSTEM
 
+if [ "${block_based}" = "--block" ]; then
+    # python2 is needed for block based OTA.
+    python_version="python2"
+else
+    # File-based OTA needs this to assign the correct context to '/' after OTA upgrade
+    echo "/system -d system_u:object_r:root_t:s0" >> target_files/BOOT/RAMDISK/file_contexts
+fi
+
 # Generate selabel rules only if file_contexts is packed in target-files
 if grep "selinux_fc" target_files/META/misc_info.txt
 then
@@ -85,9 +93,5 @@ fi
 
 
 cd target_files && zip -q ../$2 META/*filesystem_config.txt SYSTEM/build.prop && cd ..
-
-if [ "${block_based}" = "--block" ]; then
-    python_version="python2"
-fi
 
 $python_version ./ota_from_target_files $block_based -n -v -d $device_type -v -p . -m linux_embedded --no_signing -i $1 $2 update_incr_$4.zip

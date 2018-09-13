@@ -75,8 +75,16 @@ do_recovery_ubi() {
 
     #cp and modify file_contexts to BOOT/RAMDISK folder
     if [[ "${DISTRO_FEATURES}" =~ "selinux" ]]; then
-        cp ${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_contexts ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/.
+        cp -a ${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/. ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/.
         sed -i 's#^/#/system/#g' ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/file_contexts
+        # Keep a copy of file_context.subs_dist & file_contexts.homedirs
+        # in the same folder as file_contexts
+        # Also append "/system" to each absolute path entry in these files
+        sed -i 's#^/#/system/#g' ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/homedir_template
+        grep -v -e '^$' ${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_contexts.subs_dist | \
+            grep -v '^[#]' | awk '{print "/system"$1,"/system"$2}' > \
+            ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/file_contexts.subs_dist
+        sed -i 's#^/#/system/#g' ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/file_contexts.homedirs
         #set selinux_fc
         echo selinux_fc=BOOT/RAMDISK/file_contexts >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
         #set use_set_metadata to 1 so that updater-script
