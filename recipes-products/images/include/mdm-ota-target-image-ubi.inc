@@ -73,6 +73,12 @@ do_recovery_ubi() {
     # ota_from_target_files.py but it would be hacky to find the absolute path there.
     cp ${WORKSPACE}/OTA/device/qcom/common/releasetools.py ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/.
 
+    # Since /dev is populated at compile-time, pack the device_table used by 'makedevs'
+    # into target-files.zip also so that 'makedevs' can be run during OTA upgrade as well.
+    # This only applies for file-based OTA and since nand/ubifs targets use file-based OTA
+    # by default, this mechanism is limited to nand targets and not emmc.
+    cp ${COREBASE}/meta/files/device_table-minimal.txt ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/device_table.txt
+
     #cp and modify file_contexts to BOOT/RAMDISK folder
     if [[ "${DISTRO_FEATURES}" =~ "selinux" ]]; then
         cp -a ${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/. ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/.
