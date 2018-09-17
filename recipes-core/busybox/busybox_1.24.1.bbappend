@@ -22,6 +22,8 @@ SRC_URI += "\
             file://fix_uninitialized_memory.patch \
 "
 SRC_URI_append_apq8053 += "file://apq8053/mdev.conf"
+SRC_URI_append_mdm9607 += "file://mdm9607/mdev.conf"
+SRC_URI_append_mdm9607 += "file://mdm9607/sensors.sh"
 
 prefix = ""
 
@@ -52,7 +54,9 @@ do_install_append() {
         install -m 0755 ${WORKDIR}/usb.sh ${D}${sysconfdir}/mdev/
         install -m 0755 ${WORKDIR}/iio.sh ${D}${sysconfdir}/mdev/
     fi
-    if [ ${BASEMACHINE} == "apq8053"];then
+    if [ ${BASEMACHINE} == "mdm9607" ]; then
+     install -m 0755 ${WORKDIR}/mdm9607/sensors.sh ${D}${sysconfdir}/mdev/
+    elif [ ${BASEMACHINE} == "apq8053"];then
      install -m 0644 ${WORKDIR}/apq8053/mdev.conf ${D}${sysconfdir}/
     fi
     chmod -R go-x ${D}${sysconfdir}/mdev/
