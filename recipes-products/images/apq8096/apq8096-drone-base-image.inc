@@ -5,7 +5,6 @@ require apq8096-base-image.inc
 
 IMAGE_INSTALL += "chrony"
 IMAGE_INSTALL += "chronyc"
-IMAGE_INSTALL += "lib32-live555-qti"
 IMAGE_INSTALL += "iw"
 IMAGE_INSTALL += "av-frameworks"
 IMAGE_INSTALL += "sigma-dut"

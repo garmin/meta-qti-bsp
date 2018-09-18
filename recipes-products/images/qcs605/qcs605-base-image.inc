@@ -43,8 +43,6 @@ IMAGE_INSTALL += "media-headers"
 IMAGE_INSTALL += "protobuf"
 IMAGE_INSTALL += "kptr-restrict"
 
-IMAGE_INSTALL += "${@bb.utils.contains('MULTILIB_VARIANTS', 'lib32', 'lib32-live555-qti', 'live555-qti', d)}"
-
 #Install virtualization support packages
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'docker docker-registry python3-docker-compose', '', d)}"
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'cgroup-lite aufs-util xz ca-certificates chrony', '', d)}"
