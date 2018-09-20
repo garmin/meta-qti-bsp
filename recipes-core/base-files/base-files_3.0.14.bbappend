@@ -20,6 +20,10 @@ SRC_URI_append += "file://systemd/data-ubi.mount"
 SRC_URI_append += "file://systemd/systemrw-ubi.mount"
 SRC_URI_append += "file://systemd/firmware-ubi-mount.sh"
 SRC_URI_append += "file://systemd/firmware-ubi-mount.service"
+SRC_URI_append += "file://systemd/dsp-ubi-mount.sh"
+SRC_URI_append += "file://systemd/dsp-ubi-mount.service"
+SRC_URI_append += "file://systemd/bluetooth-ubi-mount.sh"
+SRC_URI_append += "file://systemd/bluetooth-ubi-mount.service"
 SRC_URI_append += "file://systemd/bluetooth.mount"
 SRC_URI_append += "file://systemd/bluetooth-mount.service"
 
@@ -129,12 +133,26 @@ do_install_append_msm() {
                     fi
                 fi
                 if [ "$d" == "/dsp" ]; then
+                    if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
                     install -m 0644 ${WORKDIR}/systemd/dsp.mount ${D}${sysconfdir}/systemd/system/dsp.mount
                     ln -sf  ../dsp.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp.mount
+                    else
+                    install -d 0644 ${D}${sysconfdir}/initscripts
+                    install -m 0644 ${WORKDIR}/systemd/dsp-ubi-mount.service ${D}${sysconfdir}/systemd/system/dsp-mount.service
+                    install -m 0744 ${WORKDIR}/systemd/dsp-ubi-mount.sh ${D}${sysconfdir}/initscripts/dsp-ubi-mount.sh
+                    ln -sf  ../dsp-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp-mount.service
+                    fi
                 fi
                 if [ "$d" == "/bt_firmware" ]; then
+                    if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
                     install -m 0644 ${WORKDIR}/systemd/bluetooth.mount ${D}${sysconfdir}/systemd/system/bluetooth.mount
                     ln -sf  ../bluetooth.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/bluetooth.mount
+                    else
+                    install -d 0644 ${D}${sysconfdir}/initscripts
+                    install -m 0644 ${WORKDIR}/systemd/bluetooth-ubi-mount.service ${D}${sysconfdir}/systemd/system/bluetooth-mount.service
+                    install -m 0744 ${WORKDIR}/systemd/bluetooth-ubi-mount.sh ${D}${sysconfdir}/initscripts/bluetooth-ubi-mount.sh
+                    ln -sf  ../bluetooth-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/bluetooth-mount.service
+                    fi
                 fi
             fi
             # systemrw is applicable only when rootfs is read only.
