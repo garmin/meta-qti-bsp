@@ -1,4 +1,4 @@
-inherit autotools pkgconfig externalsrc
+inherit autotools pkgconfig
 
 DESCRIPTION = "Build Android libcutils"
 HOMEPAGE = "http://developer.android.com/"
@@ -12,7 +12,10 @@ DEPENDS += "liblog"
 
 BBCLASSEXTEND = "native"
 
-EXTERNALSRC = "${WORKSPACE}/system/core/libcutils/"
+FILESPATH =+ "${WORKSPACE}/system/core/:"
+SRC_URI   = "file://libcutils"
+
+S = "${WORKDIR}/libcutils"
 
 EXTRA_OECONF += " --with-core-includes=${WORKSPACE}/system/core/include"
 EXTRA_OECONF += " --with-host-os=${HOST_OS}"
