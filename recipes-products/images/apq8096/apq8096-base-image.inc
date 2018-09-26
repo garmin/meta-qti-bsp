@@ -33,7 +33,6 @@ IMAGE_INSTALL += "system-prop"
 IMAGE_INSTALL += "wireless-tools"
 
 # 32-bit packages
-IMAGE_INSTALL += "lib32-live555-qti"
 IMAGE_INSTALL += "lib32-gtest"
 
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
