@@ -28,7 +28,6 @@ IMAGE_INSTALL += "systemd-machine-units"
 
 IMAGE_INSTALL += "liblog"
 IMAGE_INSTALL += "libcutils"
-IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "system-prop"
 IMAGE_INSTALL += "wireless-tools"
 

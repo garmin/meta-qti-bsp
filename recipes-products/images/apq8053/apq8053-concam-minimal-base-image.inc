@@ -41,7 +41,6 @@ IMAGE_INSTALL += "system-core-leprop"
 IMAGE_INSTALL += "system-core-usb"
 IMAGE_INSTALL += "${@base_conditional('USER_BUILD','1','','system-core-debuggerd',d)}"
 IMAGE_INSTALL += "system-core-post-boot"
-IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "system-prop"
 IMAGE_INSTALL += "wireless-tools"
 

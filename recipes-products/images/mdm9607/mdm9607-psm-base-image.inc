@@ -2,7 +2,6 @@
 require mdm9607-base-image.inc
 
 PACKAGE_EXCLUDE += "openssl"
-PACKAGE_EXCLUDE += "system-conf"
 
 PACKAGE_EXCLUDE += "wireless-tools"
 #Excluding Flouride BT packages
