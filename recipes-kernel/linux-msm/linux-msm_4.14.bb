@@ -12,7 +12,7 @@ DEPENDS += "dtc-native"
 
 LDFLAGS_aarch64 = "-O1 --hash-style=gnu --as-needed"
 TARGET_CXXFLAGS += "-Wno-format"
-
+EXTRA_OEMAKE_append += "INSTALL_MOD_STRIP=1"
 do_compile () {
     oe_runmake CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS} $use_alternate_initrd
 }
@@ -93,3 +93,4 @@ do_deploy() {
         --ramdisk_offset 0x0 \
         ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${BOOTIMAGE_TARGET}
 }
+INHIBIT_PACKAGE_STRIP = "1"
