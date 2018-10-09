@@ -41,6 +41,8 @@ IMAGE_INSTALL += "powerapp-shutdown"
 IMAGE_INSTALL += "start-scripts-firmware-links"
 IMAGE_INSTALL += "systemd-coredump"
 IMAGE_INSTALL += "coreutils"
+IMAGE_INSTALL += "kptr-restrict"
+
 IMAGE_EXT4_SELINUX_OPTIONS = "${@bb.utils.contains('DISTRO_FEATURES','selinux',' -S ${SELINUX_FILE_CONTEXTS} ','',d)}"
 
 IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', 'start-script-ab-slot-util', '', d)}"
