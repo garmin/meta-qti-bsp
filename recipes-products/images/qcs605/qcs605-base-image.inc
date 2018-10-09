@@ -42,6 +42,7 @@ IMAGE_INSTALL += "libstdc++"
 IMAGE_INSTALL += "coreutils"
 IMAGE_INSTALL += "media-headers"
 IMAGE_INSTALL += "protobuf"
+IMAGE_INSTALL += "kptr-restrict"
 
 IMAGE_INSTALL += "${@bb.utils.contains('MULTILIB_VARIANTS', 'lib32', 'lib32-live555-qti', 'live555-qti', d)}"
 
