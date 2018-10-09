@@ -29,6 +29,7 @@ VOLATILE_BINDS = "\
 /systemrw/adb_devid  /etc/adb_devid\n\
 /systemrw/build.prop /etc/build.prop\n\
 /systemrw/data /etc/data/\n\
+/systemrw/data/adpl /etc/data/adpl/\n\
 /systemrw/data/usb /etc/data/usb/\n\
 /systemrw/data/miniupnpd /etc/data/miniupnpd/\n\
 /systemrw/data/ipa /etc/data/ipa/\n\
