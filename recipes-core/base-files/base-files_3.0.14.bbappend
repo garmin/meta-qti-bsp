@@ -36,7 +36,7 @@ dirs755_append_apq8053 +="/firmware /persist /cache /dsp "
 dirs755_append_apq8009 += "/firmware /persist /cache"
 dirs755_append_apq8017 += "/firmware /persist /cache /dsp"
 dirs755_append_qcs605 += "/firmware /persist /cache /dsp /bt_firmware"
-dirs755_append_qcs405-som1 += "/firmware /persist /dsp /bt_firmware"
+dirs755_append_qcs405-som1 += "/firmware /cache /persist /dsp /bt_firmware"
 dirs755_append_qcs403-som2 += "/firmware /persist /cache /dsp /bt_firmware"
 dirs755_append_mdm9607 +=" /persist"
 
