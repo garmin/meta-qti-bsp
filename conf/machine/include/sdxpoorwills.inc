@@ -19,6 +19,8 @@ SERIAL_CONSOLE ?= "115200 ttyMSM0"
 
 DISTRO ?= "mdm"
 
+DISTRO_FEATURES_append = " persist-volume"
+
 MACHINE_FEATURES += "kernel26 keyboard ipa-offload"
 
 PAGE_SIZE ?= '4096'
@@ -34,6 +36,7 @@ MKUBIFS_ARGS ?= "-m 4096 -e 253952 -c 2146 -F"
 SYSTEM_VOLUME_SIZE ?= "90MiB"
 CACHE_VOLUME_SIZE ?= "70MiB"
 SYSTEMRW_VOLUME_SIZE ?= "6MiB"
+PERSIST_VOLUME_SIZE ?= "6MiB"
 
 # Sizes for EXT4 (in bytes)
 SYSTEM_SIZE_EXT4 ?= "100000000"
