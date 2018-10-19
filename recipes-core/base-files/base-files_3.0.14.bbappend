@@ -16,10 +16,15 @@ SRC_URI_append += "file://systemd/var-volatile.mount"
 SRC_URI_append += "file://systemd/proc-bus-usb.mount"
 SRC_URI_append += "file://systemd/dash.mount"
 SRC_URI_append += "file://systemd/cache-ubi.mount"
+SRC_URI_append += "file://systemd/persist-ubi.mount"
 SRC_URI_append += "file://systemd/data-ubi.mount"
 SRC_URI_append += "file://systemd/systemrw-ubi.mount"
 SRC_URI_append += "file://systemd/firmware-ubi-mount.sh"
 SRC_URI_append += "file://systemd/firmware-ubi-mount.service"
+SRC_URI_append += "file://systemd/dsp-ubi-mount.sh"
+SRC_URI_append += "file://systemd/dsp-ubi-mount.service"
+SRC_URI_append += "file://systemd/bluetooth-ubi-mount.sh"
+SRC_URI_append += "file://systemd/bluetooth-ubi-mount.service"
 SRC_URI_append += "file://systemd/bluetooth.mount"
 SRC_URI_append += "file://systemd/bluetooth-mount.service"
 
@@ -32,7 +37,7 @@ dirs755_append_apq8009 += "/firmware /persist /cache"
 dirs755_append_apq8017 += "/firmware /persist /cache /dsp"
 dirs755_append_qcs605 += "/firmware /persist /cache /dsp /bt_firmware"
 dirs755_append_qcs405-som1 += "/firmware /persist /dsp /bt_firmware"
-dirs755_append_qcs403-som2 += "/firmware /cache /dsp /bt_firmware"
+dirs755_append_qcs403-som2 += "/firmware /persist /cache /dsp /bt_firmware"
 dirs755_append_mdm9607 +=" /persist"
 
 # Remove sepolicy entries from various files when selinux is not present.
@@ -81,23 +86,30 @@ do_install_append_msm() {
         install -d 0644 ${D}${sysconfdir}/systemd/system/local-fs.target.requires
         # userdata is present by default.
         if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
-        install -m 0644 ${WORKDIR}/systemd/data.mount ${D}${sysconfdir}/systemd/system/data.mount
+            install -m 0644 ${WORKDIR}/systemd/data.mount ${D}${sysconfdir}/systemd/system/data.mount
         else
-        install -m 0644 ${WORKDIR}/systemd/data-ubi.mount ${D}${sysconfdir}/systemd/system/data.mount
+            install -m 0644 ${WORKDIR}/systemd/data-ubi.mount ${D}${sysconfdir}/systemd/system/data.mount
         fi
         ln -sf  ../data.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/data.mount
         for d in ${dirs755}; do
             if [ "$d" == "/cache" ]; then
                 if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
-                install -m 0644 ${WORKDIR}/systemd/cache.mount ${D}${sysconfdir}/systemd/system/cache.mount
+                    install -m 0644 ${WORKDIR}/systemd/cache.mount ${D}${sysconfdir}/systemd/system/cache.mount
                 else
-                install -m 0644 ${WORKDIR}/systemd/cache-ubi.mount ${D}${sysconfdir}/systemd/system/cache.mount
+                    install -m 0644 ${WORKDIR}/systemd/cache-ubi.mount ${D}${sysconfdir}/systemd/system/cache.mount
                 fi
                 ln -sf  ../cache.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/cache.mount
             fi
             if [ "$d" == "/persist" ]; then
-                install -m 0644 ${WORKDIR}/systemd/persist.mount ${D}${sysconfdir}/systemd/system/persist.mount
-                ln -sf  ../persist.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/persist.mount
+                if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
+                    install -m 0644 ${WORKDIR}/systemd/persist.mount ${D}${sysconfdir}/systemd/system/persist.mount
+                    ln -sf  ../persist.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/persist.mount
+                else
+                    if ${@bb.utils.contains('DISTRO_FEATURES','persist-volume','true','false',d)}; then
+                        install -m 0644 ${WORKDIR}/systemd/persist-ubi.mount ${D}${sysconfdir}/systemd/system/persist.mount
+                        ln -sf  ../persist.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/persist.mount
+                fi
+                fi
             fi
 
             # If the AB boot feature is enabled, then instead of <partition>.mount,
@@ -114,38 +126,52 @@ do_install_append_msm() {
                 if [ "$d" == "/bt_firmware" ]; then
                     install -m 0644 ${WORKDIR}/systemd/bluetooth-mount.service ${D}${sysconfdir}/systemd/system/bluetooth-mount.service
                     ln -sf  ../bluetooth-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/bluetooth-mount.service
-               fi
+                fi
             # non-AB boot
             else
                 if [ "$d" == "/firmware" ]; then
                     if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
-                    install -m 0644 ${WORKDIR}/systemd/firmware.mount ${D}${sysconfdir}/systemd/system/firmware.mount
-                    ln -sf  ../firmware.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware.mount
+                        install -m 0644 ${WORKDIR}/systemd/firmware.mount ${D}${sysconfdir}/systemd/system/firmware.mount
+                        ln -sf  ../firmware.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware.mount
                     else
-                    install -d 0644 ${D}${sysconfdir}/initscripts
-                    install -m 0644 ${WORKDIR}/systemd/firmware-ubi-mount.service ${D}${sysconfdir}/systemd/system/firmware-mount.service
-                    install -m 0744 ${WORKDIR}/systemd/firmware-ubi-mount.sh ${D}${sysconfdir}/initscripts/firmware-ubi-mount.sh
-                    ln -sf  ../firmware-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware-mount.service
+                        install -d 0644 ${D}${sysconfdir}/initscripts
+                        install -m 0644 ${WORKDIR}/systemd/firmware-ubi-mount.service ${D}${sysconfdir}/systemd/system/firmware-mount.service
+                        install -m 0744 ${WORKDIR}/systemd/firmware-ubi-mount.sh ${D}${sysconfdir}/initscripts/firmware-ubi-mount.sh
+                        ln -sf  ../firmware-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware-mount.service
                     fi
                 fi
                 if [ "$d" == "/dsp" ]; then
-                    install -m 0644 ${WORKDIR}/systemd/dsp.mount ${D}${sysconfdir}/systemd/system/dsp.mount
-                    ln -sf  ../dsp.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp.mount
+                    if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
+                        install -m 0644 ${WORKDIR}/systemd/dsp.mount ${D}${sysconfdir}/systemd/system/dsp.mount
+                        ln -sf  ../dsp.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp.mount
+                    else
+                        install -d 0644 ${D}${sysconfdir}/initscripts
+                        install -m 0644 ${WORKDIR}/systemd/dsp-ubi-mount.service ${D}${sysconfdir}/systemd/system/dsp-mount.service
+                        install -m 0744 ${WORKDIR}/systemd/dsp-ubi-mount.sh ${D}${sysconfdir}/initscripts/dsp-ubi-mount.sh
+                        ln -sf  ../dsp-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/dsp-mount.service
+                    fi
                 fi
                 if [ "$d" == "/bt_firmware" ]; then
-                    install -m 0644 ${WORKDIR}/systemd/bluetooth.mount ${D}${sysconfdir}/systemd/system/bluetooth.mount
-                    ln -sf  ../bluetooth.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/bluetooth.mount
+                    if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
+                        install -m 0644 ${WORKDIR}/systemd/bluetooth.mount ${D}${sysconfdir}/systemd/system/bluetooth.mount
+                        ln -sf  ../bluetooth.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/bluetooth.mount
+                    else
+                        install -d 0644 ${D}${sysconfdir}/initscripts
+                        install -m 0644 ${WORKDIR}/systemd/bluetooth-ubi-mount.service ${D}${sysconfdir}/systemd/system/bluetooth-mount.service
+                        install -m 0744 ${WORKDIR}/systemd/bluetooth-ubi-mount.sh ${D}${sysconfdir}/initscripts/bluetooth-ubi-mount.sh
+                        ln -sf  ../bluetooth-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/bluetooth-mount.service
+                    fi
                 fi
             fi
             # systemrw is applicable only when rootfs is read only.
             if ${@bb.utils.contains('DISTRO_FEATURES','ro-rootfs','true','false',d)}; then
                 if [ "$d" == "/systemrw" ]; then
                     if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
-                    install -m 0644 ${WORKDIR}/systemd/systemrw.mount ${D}${sysconfdir}/systemd/system/systemrw.mount
+                        install -m 0644 ${WORKDIR}/systemd/systemrw.mount ${D}${sysconfdir}/systemd/system/systemrw.mount
                     else
-                    install -m 0644 ${WORKDIR}/systemd/systemrw-ubi.mount ${D}${sysconfdir}/systemd/system/systemrw.mount
+                        install -m 0644 ${WORKDIR}/systemd/systemrw-ubi.mount ${D}${sysconfdir}/systemd/system/systemrw.mount
                     fi
-                    ln -sf  ../systemrw.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/systemrw.mount
+                        ln -sf  ../systemrw.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/systemrw.mount
                 fi
             fi
         done

@@ -15,6 +15,8 @@ persist.vendor.audio.fluence.audiorec=false
 vendor.audio.tunnel.encode = false
 #Buffer size in kbytes for compress offload playback
 vendor.audio.offload.buffer.size.kb=64
+vendor.audio.offload.multiple.enabled=true
+vendor.audio.adm.buffering.ms=2
 #Enable offload audio video playback by default
 audio.offload.video=true
 #enable voice path for PCM VoIP by default
@@ -26,14 +28,8 @@ vendor.audio.offload.gapless.enabled=true
 vendor.voice.playback.conc.disabled=true
 vendor.voice.record.conc.disabled=true
 vendor.voice.voip.conc.disabled=true
-#Audio VoIP / playback record concurrency flags
-vendor.rec.playback.conc.disabled=true
-
-#property to enable DS2 dap
-vendor.audio.dolby.ds2.enabled=true
 
 #property to select 3/6 MICS
 ro.qc.sdk.fwk.mic_support=6
 
-#property to enable audio HAL server
-persist.vendor.audio.qas.enabled=true
+ro.board.platform=qcs40x

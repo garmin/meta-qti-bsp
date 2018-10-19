@@ -8,12 +8,11 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 PR = "r1"
 
-DEPENDS = "binder liblog libcutils libhardware libselinux system-core glib-2.0"
-DEPENDS_append_robot-som += "libsync"
+DEPENDS = "binder liblog libcutils libhardware libselinux glib-2.0"
+DEPENDS += " ${@oe.utils.version_less_or_equal('PREFERRED_VERSION_linux-msm', '4.4', '', 'libsync', d)}"
 
 FILESPATH =+ "${WORKSPACE}:"
 SRC_URI   = "file://frameworks/libui"
-
 
 S = "${WORKDIR}/frameworks/libui"
 

@@ -1,27 +1,15 @@
-# Get list of packages to be installed onto the root filesystem.
-# If product is specified try to include product inc otherwise include base inc.
-def get_img_inc_file(d):
-    product     = d.getVar('PRODUCT', True)
-    basemachine = d.getVar('BASEMACHINE', True)
-    if product != 'base' or '':
-        inc_file_name = basemachine + "-" + product + "-image.inc"
-    else:
-        inc_file_name = basemachine + "-" + "base-image.inc"
-    img_inc_file_path = os.path.join(d.getVar('THISDIR'), basemachine, inc_file_name)
-    if os.path.exists(img_inc_file_path):
-        img_inc_file = inc_file_name
-    else:
-        img_inc_file = basemachine + "-base-image.inc"
-    return img_inc_file
+inherit qimage
 
-include ${BASEMACHINE}/${@get_img_inc_file(d)}
+#  Defined in qimage.bbclass. Following is the order of priority.
+#  P1: <basemachine>/<basemachine>-<distro>-base-image.inc
+#  P2: <basemachine>/<basemachine>-base-image.inc
+#  P3: common/common-base-image.inc
+include ${@get_bblayer_img_inc('base', d)}
 
 require include/mdm-bootimg.inc
 
 require include/mdm-ota-target-image-ubi.inc
 require include/mdm-ota-target-image-ext4.inc
-
-inherit core-image
 
 MULTILIBRE_ALLOW_REP =. "/usr/include/python2.7/*|${base_bindir}|${base_sbindir}|${bindir}|${sbindir}|${libexecdir}|${sysconfdir}|${nonarch_base_libdir}/udev|/lib/modules/[^/]*/modules.*|"
 

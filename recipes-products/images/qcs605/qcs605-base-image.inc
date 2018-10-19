@@ -1,3 +1,4 @@
+inherit dm-verity
 # Enable Bootloader
 RDEPENDS += "${@bb.utils.contains('TARGET_ARCH', 'arm','lib64-edk2','edk2',d)}"
 
@@ -41,6 +42,8 @@ IMAGE_INSTALL += "libstdc++"
 IMAGE_INSTALL += "coreutils"
 IMAGE_INSTALL += "media-headers"
 IMAGE_INSTALL += "protobuf"
+
+IMAGE_INSTALL += "${@bb.utils.contains('MULTILIB_VARIANTS', 'lib32', 'lib32-live555-qti', 'live555-qti', d)}"
 
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
 do_makesystem() {

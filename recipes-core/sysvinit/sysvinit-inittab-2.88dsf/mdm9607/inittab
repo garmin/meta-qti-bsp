@@ -18,6 +18,7 @@ dvsk:2345:wait:mkdir -p -m 777 /dev/socket
 rmts:2345:respawn:/sbin/rmt_storage
 tftp:2345:respawn:/sbin/tftp_server
 scrb:2345:respawn:/sbin/fs-scrub-daemon
+qwes:2345:respawn:/usr/bin/qwesd
 
 # /etc/init.d executes the S and K scripts upon change
 # of runlevel.

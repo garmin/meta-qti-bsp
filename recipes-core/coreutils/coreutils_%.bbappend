@@ -8,4 +8,4 @@ do_install_append_mdm(){
 	mv ${D}/cp.coreutils ${D}${base_bindir}/cp.coreutils;
 	mv ${D}/chcon ${D}${bindir}/chcon;
 }
-
+FILES_${PN}_qcs403-som2 = "${base_bindir}/*  ${bindir}/chcon.coreutils"

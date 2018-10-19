@@ -1,3 +1,5 @@
+inherit qimage
+
 # List of packages installed onto the root file system as specified by the user.
 include include/machine-recovery-image.inc
 

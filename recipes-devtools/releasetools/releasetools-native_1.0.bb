@@ -19,12 +19,11 @@ S = "${WORKDIR}/releasetools"
 
 
 do_configure_append() {
-    mv ${WORKDIR}/full_ota.sh ${S}
+    cp ${WORKDIR}/full_ota.sh ${S}
     chmod 755 ${S}/full_ota.sh
-    mv ${WORKDIR}/incremental_ota.sh ${S}
+    cp ${WORKDIR}/incremental_ota.sh ${S}
     chmod 755 ${S}/incremental_ota.sh
 }
 
 do_compile[noexec] = "1"
 do_install[noexec] = "1"
-

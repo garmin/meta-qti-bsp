@@ -7,6 +7,9 @@ FILES_${PN}-dev += "/lib/lib*.so"
 
 PACKAGECONFIG = "avdevice avfilter avcodec avformat swresample swscale postproc bzlib gpl theora"
 
+# Support multilib compilation for libav
+PROVIDES += "${MLPREFIX}libav"
+
 EXTRA_CFLAGS_append += " -fPIC"
 EXTRA_CFLAGS_append += " ${@ bb.utils.contains('TUNE_FEATURES', 'callconvention-hard', '-mfloat-abi=hard', '', d)}"
 EXTRA_CFLAGS_append += " ${@ bb.utils.contains('TUNE_FEATURES', 'neon', '-mfpu=neon', '', d)}"
@@ -16,10 +19,9 @@ EXTRA_CFLAGS_append += " ${@ bb.utils.contains('TUNE_FEATURES', 'cortexa8', '-mt
 EXTRA_OECONF_append += " \
     --target-os=linux --sysroot=${STAGING_DIR_TARGET} --arch=${TARGET_ARCH} --disable-mmx \
     --enable-shared --disable-doc --disable-htmlpages --disable-manpages --disable-podpages \
-    --disable-txtpages --disable-avdevice --disable-swresample --disable-swscale \
-    --disable-postproc --enable-small --disable-avfilter --disable-debug --disable-ffserver --disable-ffplay \
-    --extra-cflags="${EXTRA_CFLAGS}" --enable-gpl --disable-network --disable-zlib --disable-ffmpeg --disable-encoders \
-    --disable-decoders --disable-muxers --disable-bsfs --disable-devices --disable-protocol=udp \
+    --disable-txtpages --enable-small --disable-debug --disable-ffserver --disable-ffplay \
+    --extra-cflags="${EXTRA_CFLAGS}" --disable-network --disable-zlib --disable-ffmpeg \
+    --disable-muxers --disable-bsfs --disable-devices --disable-protocol=udp \
     --disable-protocol=tcp --disable-protocol=rtp --disable-protocol=pipe --disable-protocol=http \
     --disable-parser=cavsvideo --disable-parser=dca --disable-parser=dirac --disable-parser=dnxhd --disable-parser=mjpeg \
     --disable-parser=mlp --disable-parser=pnm --disable-parser=vp3 --disable-demuxer=amr --disable-demuxer=apc \
