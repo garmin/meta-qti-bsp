@@ -1,6 +1,3 @@
-#compile abl
-#RDEPENDS  += "${@bb.utils.contains('TARGET_ARCH', 'arm','lib64-edk2','edk2',d)}"
-
 # Packages to be included in rootfs creation.
 IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
@@ -17,10 +14,7 @@ IMAGE_INSTALL += "system-core-logd"
 IMAGE_INSTALL += "system-core-leprop"
 IMAGE_INSTALL += "system-core-usb"
 IMAGE_INSTALL += "system-core-post-boot"
-IMAGE_INSTALL += "system-conf"
-#IMAGE_INSTALL += "system-prop"
 IMAGE_INSTALL += "systemd-machine-units"
-#IMAGE_INSTALL += "wireless-tools"
 
 # The MSM Linux minimal boot image files.
 IMAGE_INSTALL += "kernel-modules"
@@ -30,7 +24,6 @@ IMAGE_INSTALL += "libstdc++"
 IMAGE_INSTALL += "openssl"
 IMAGE_INSTALL += "powerapp-reboot"
 IMAGE_INSTALL += "powerapp-shutdown"
-#IMAGE_INSTALL += "start-scripts-firmware-links"
 IMAGE_INSTALL += "systemd-coredump"
 IMAGE_INSTALL += "coreutils"
 IMAGE_EXT4_SELINUX_OPTIONS = "${@bb.utils.contains('DISTRO_FEATURES','selinux',' -S ${SELINUX_FILE_CONTEXTS} ','',d)}"

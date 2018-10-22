@@ -1,6 +1,6 @@
 require recipes-kernel/linux-msm/linux-msm.inc
 
-COMPATIBLE_MACHINE = "(qcs40x)"
+COMPATIBLE_MACHINE = "(qcs40x|sdmsteppe)"
 
 KERNEL_IMAGEDEST = "boot"
 
