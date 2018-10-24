@@ -45,6 +45,7 @@ COMPOSITION_apq8096 = "901D"
 COMPOSITION_apq8098 = "901D"
 COMPOSITION_qcs605 = "901D"
 COMPOSITION_sdxpoorwills = "90DB"
+COMPOSITION_sdmsteppe = "901D"
 
 do_install_append() {
    install -m 0755 ${S}/adb/launch_adbd -D ${D}${sysconfdir}/launch_adbd
