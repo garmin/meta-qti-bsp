@@ -1,7 +1,7 @@
 require ${COREBASE}/meta-qti-bsp/recipes-products/images/common/common-base-image.inc
 
 #compile abl
-DEPENDS  += "${@bb.utils.contains('MULTILIB_VARIANTS', 'lib64','lib32-edk2','edk2',d)}"
+RDEPENDS  += "edk2"
 
 #install userspace packages
 IMAGE_INSTALL += "wireless-tools"
