@@ -29,6 +29,9 @@ CPPFLAGS += "-I${STAGING_INCDIR}/camera"
 CPPFLAGS += "-fpermissive"
 LDFLAGS += "-llog"
 
+# When kernel is built using sstate, the STAGING_KERNEL_DIR is not populated because do_shared_workdir is non-sstatable. Hence, to ensure the task executes, add an explicit dependency on it.
+do_configure[depends] += "virtual/kernel:do_shared_workdir"
+
 do_install_append() {
    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
        install -d ${D}${sysconfdir}/udev/scripts/
