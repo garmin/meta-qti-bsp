@@ -1,14 +1,52 @@
-DEPENDS += "${@["","machine-recovery-image releasetools-native"][(d.getVar('RECOVERY_IMAGE', True) == '1')]}"
+# To add OTA upgrade support on an emmc/ufs target,
+# add the MACHINE name to this list.
+# This is the "only" list that will control whether
+# OTA upgrade will be supported on a target.
+OTA_SUPPORTED_EMMC_TARGET_LIST = "apq8009 qcs405-som1"
+
+def target_supports_OTA_upgrade(d):
+    list_of_supported_targets = d.getVar('OTA_SUPPORTED_EMMC_TARGET_LIST');
+
+    if d.getVar('MACHINE', True) in list_of_supported_targets:
+      return True
+
+    return False
+
+def set_vars_and_get_dependencies(d):
+    if not target_supports_OTA_upgrade(d):
+        d.setVar('RECOVERY_IMAGE', "0");
+        d.setVar('GENERATE_AB_OTA_PACKAGE', "0");
+        # Do not create machine-recovery-image or the OTA packages
+        return ""
+
+    if bb.utils.contains('DISTRO_FEATURES','ab-boot-support','true','false',d):
+        # if A/B support is supported, recovery image need not be generated.
+        # only A/B target will be generated
+        d.setVar('RECOVERY_IMAGE', "0");
+        d.setVar('GENERATE_AB_OTA_PACKAGE', "1");
+        return "releasetools-native"
+    else:
+        # for Non A/B target, set RECOVERY_IMAGE to "1"
+        # this will generate a non A/B update package as well.
+        d.setVar('RECOVERY_IMAGE', "1");
+        d.setVar('GENERATE_AB_OTA_PACKAGE', "0");
+        return "machine-recovery-image releasetools-native"
 
 # Add tasks to generate recovery image, OTA zip files
 python __anonymous () {
-    if d.getVar('RECOVERY_IMAGE', True) == '1' and bb.utils.contains('IMAGE_FSTYPES', 'ext4', True, False, d):
-        bb.build.addtask('do_recovery_ext4', 'do_build', 'do_makesystem', d)
-        bb.build.addtask('do_gen_otazip_ext4', 'do_build', 'do_recovery_ext4', d)
+    if bb.utils.contains('IMAGE_FSTYPES', 'ext4', True, False, d):
+        d.appendVar('DEPENDS', set_vars_and_get_dependencies(d));
+        if (d.getVar('RECOVERY_IMAGE', True) == '1' or
+                d.getVar('GENERATE_AB_OTA_PACKAGE', True) == '1'):
+            bb.build.addtask('do_recovery_ext4', 'do_build', 'do_makesystem', d)
+            bb.build.addtask('do_gen_otazip_ext4', 'do_build', 'do_recovery_ext4', d)
 }
 
 OTA_TARGET_IMAGE_ROOTFS_EXT4 = "${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4"
-RECOVERY_IMAGE_ROOTFS        = "$(echo ${IMAGE_ROOTFS} | sed 's#${PN}#machine-recovery-image#')"
+NON_AB_RECOVERY_IMAGE_ROOTFS = "$(echo ${IMAGE_ROOTFS} | sed 's#${PN}#machine-recovery-image#')"
+
+# If A/B package is to be generated, recoveryfs's rootfs is same as system's rootfs
+RECOVERY_IMAGE_ROOTFS = "${@["${NON_AB_RECOVERY_IMAGE_ROOTFS}", "${IMAGE_ROOTFS}"][(d.getVar('GENERATE_AB_OTA_PACKAGE', True) == '1')]}"
 
 #Create directory structure for targetfiles.zip
 do_recovery_ext4[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_EXT4}"
@@ -27,14 +65,14 @@ do_recovery_ext4[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_EXT4}/BOOT/RAMDISK"
 
 # recovery rootfs is required for generating OTA files.
 # Wait till all tasks of machine-recovery-image complete.
-do_recovery_ext4[depends] += "machine-recovery-image:do_build"
+do_recovery_ext4[depends] += "${@ 'machine-recovery-image:do_build' if d.getVar('RECOVERY_IMAGE') == '1' else ''}"
 
 do_recovery_ext4() {
     echo "base image rootfs: ${IMAGE_ROOTFS}"
     echo "recovery image rootfs: ${RECOVERY_IMAGE_ROOTFS}"
 
     # copy radio directory content into RADIO directory
-    cp -r ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/${BASEMACHINE}/radio/. ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/RADIO/.
+    cp -r ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/${MACHINE}/radio/. ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/RADIO/.
 
     # copy the boot\recovery images
     cp ${DEPLOY_DIR_IMAGE}/${BOOTIMAGE_TARGET} ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/BOOTABLE_IMAGES/boot.img
@@ -135,7 +173,7 @@ do_recovery_ext4() {
     #default_system_dev_certificate : Dummy location
     echo default_system_dev_certificate=build/abcd >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
 
-    # set block img diff version to v4
+    # set block img diff version to v3
     echo "blockimgdiff_versions=3" >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
 
     # Targets that support A/B boot do not need recovery(fs)-updater
@@ -157,12 +195,14 @@ do_gen_otazip_ext4() {
 
     cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ext4 && /usr/bin/zip -qry ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ext4.zip *
 
-    cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && zip -qry target-files-ext4.zip BOOTABLE_IMAGES/recovery-unsparsed.ext4
-
-    block_based=""
-    if [ "${BASEMACHINE}" == "apq8009" ]; then
-        block_based="--block"
+    # Pack recoveryfs images only for non A/B OTA
+    if [ "${RECOVERY_IMAGE}" == "1" ]; then
+        cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && zip -qry target-files-ext4.zip BOOTABLE_IMAGES/recovery-unsparsed.ext4
     fi
+
+    # Since ext4 filesystems are being used only on emmc/ufs devices,
+    # use block-based OTA by default.
+    block_based="--block"
 
     cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ext4.zip ${IMAGE_ROOTFS} ext4 $block_based
 
