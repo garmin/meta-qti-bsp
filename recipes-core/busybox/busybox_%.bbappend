@@ -24,8 +24,6 @@ SRC_URI_append_apq8053 += "file://apq8053/mdev.conf"
 SRC_URI_append_mdm9607 += "file://mdm9607/mdev.conf"
 SRC_URI_append_mdm9607 += "file://mdm9607/sensors.sh"
 
-prefix = ""
-
 BUSYBOX_SPLIT_SUID = "0"
 
 FILES_${PN} += "/usr/bin/env"
