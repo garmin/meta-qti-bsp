@@ -39,6 +39,7 @@ dirs755_append_qcs605 += "/firmware /persist /cache /dsp /bt_firmware"
 dirs755_append_qcs405-som1 += "/firmware /cache /persist /dsp /bt_firmware"
 dirs755_append_qcs403-som2 += "/firmware /persist /cache /dsp /bt_firmware"
 dirs755_append_mdm9607 +=" /persist"
+dirs755_append_sdmsteppe += "/firmware /persist /cache /dsp /bt_firmware"
 
 # Remove sepolicy entries from various files when selinux is not present.
 do_fix_sepolicies () {
