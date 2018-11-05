@@ -1,7 +1,7 @@
 require ${COREBASE}/meta-qti-bsp/recipes-products/images/common/common-base-image.inc
 
 #compile abl
-RDEPENDS  += "edk2"
+RDEPENDS  += "${@bb.utils.contains('MULTILIB_VARIANTS', 'lib64','lib64-edk2','edk2',d)}"
 
 #install userspace packages
 IMAGE_INSTALL += "abctl"
