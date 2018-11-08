@@ -4,7 +4,7 @@
 # OTA upgrade will be supported on a target.
 OTA_SUPPORTED_NAND_TARGET_LIST = "sdxpoorwills mdm9607"
 
-def target_supports_OTA_upgrade(d):
+def nand_target_supports_OTA_upgrade(d):
     list_of_supported_targets = d.getVar('OTA_SUPPORTED_NAND_TARGET_LIST');
 
     if d.getVar('MACHINE', True) in list_of_supported_targets:
@@ -12,14 +12,14 @@ def target_supports_OTA_upgrade(d):
 
     return False
 
-def set_vars_and_get_dependencies(d):
-    if not target_supports_OTA_upgrade(d):
+def nand_set_vars_and_get_dependencies(d):
+    if not nand_target_supports_OTA_upgrade(d):
         d.setVar('RECOVERY_IMAGE', "0");
         d.setVar('GENERATE_AB_OTA_PACKAGE', "0");
         # Do not create machine-recovery-image or the OTA packages
         return ""
 
-    if bb.utils.contains('DISTRO_FEATURES','ab-boot-support','true','false',d):
+    if bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', True, False, d):
         # if A/B support is supported, recovery image need not be generated.
         # only A/B target will be generated
         d.setVar('RECOVERY_IMAGE', "0");
@@ -37,7 +37,7 @@ def set_vars_and_get_dependencies(d):
 # Add tasks to generate recovery image, OTA zip files
 python __anonymous () {
     if bb.utils.contains('IMAGE_FSTYPES', 'ubi', True, False, d):
-        d.appendVar('DEPENDS', set_vars_and_get_dependencies(d));
+        d.appendVar('DEPENDS', nand_set_vars_and_get_dependencies(d));
         if (d.getVar('RECOVERY_IMAGE', True) == '1' or
                 d.getVar('GENERATE_AB_OTA_PACKAGE', True) == '1'):
             bb.build.addtask('do_recovery_ubi', 'do_build', 'do_image_ubi', d)
