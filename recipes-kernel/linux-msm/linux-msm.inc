@@ -1,4 +1,4 @@
-inherit kernel qperf kernel-yocto
+inherit kernel qperf kernel-yocto dm-verity
 
 DESCRIPTION = "CAF Linux Kernel"
 LICENSE = "GPLv2"
@@ -65,24 +65,17 @@ do_configure_append () {
     fi
 }
 
+do_deploy[depends] += " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'machine-image:do_makesystem', '', d)}"
+do_deploy[prefuncs] += "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'update_cmdline', '', d)}"
+
+
 # Update kernel cmdline for dm-verity.
-do_deploy[prefuncs] += "update_cmdline"
-
 python update_cmdline () {
-    if bb.utils.contains('DISTRO_FEATURES', 'dm-verity', True, False, d):
-        import subprocess
-
-        cmdline = d.getVar('KERNEL_CMD_PARAMS', True)
-        cmdline += " androidboot.veritymode=enforcing"
-        # add "buildvariant=userdebug" for non-user builds.
-        cmdline += " ${@['buildvariant=userdebug', ''][(d.getVar('VARIANT', True) == 'user')]}"
-        # generate and add verity key id.
-        keycmd = "openssl x509 -in ${SECURITY_TOOLS_DIR}/verity.x509.pem -text \
-                         | grep keyid | sed 's/://g' | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]' | sed 's/keyid//g'"
-        keyid = subprocess.check_output(keycmd, shell=True).strip()
-        cmdline += " veritykeyid=id:" + keyid
-
-        d.setVar('KERNEL_CMD_PARAMS', ''.join(cmdline))
+    import subprocess
+    bb.build.exec_func('adjust_system_size_for_verity', d)
+    bb.build.exec_func('make_verity_enabled_system_image', d)
+    cmdline = d.getVar('KERNEL_CMD_PARAMS', True)
+    d.setVar('KERNEL_CMD_PARAMS', ''.join(cmdline))
 }
 
 # Put the zImage in the kernel-dev pkg
