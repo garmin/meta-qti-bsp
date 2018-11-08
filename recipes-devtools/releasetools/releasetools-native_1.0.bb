@@ -7,7 +7,7 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 PR = "r0"
 
-DEPENDS += "libselinux libpcre2 liblog fsconfig-native applypatch-native libdivsufsort"
+DEPENDS += "libselinux libpcre2 liblog fsconfig-native applypatch-native libdivsufsort-native bsdiff-native"
 
 FILESPATH =+ "${WORKSPACE}/OTA/build/tools/:"
 
