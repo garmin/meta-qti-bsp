@@ -6,6 +6,7 @@ RDEPENDS  += "${@bb.utils.contains('TARGET_ARCH', 'arm','lib64-edk2','edk2',d)}"
 IMAGE_INSTALL += "packagegroup-core-boot"
 IMAGE_INSTALL += "${CORE_IMAGE_EXTRA_INSTALL}"
 IMAGE_INSTALL += "start-scripts-misc-daemon"
+IMAGE_INSTALL += "chrony"
 
 IMAGE_INSTALL += "base-files"
 IMAGE_INSTALL += "base-passwd"
