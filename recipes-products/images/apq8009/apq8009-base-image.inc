@@ -87,6 +87,7 @@ ROOTFS_POSTPROCESS_COMMAND += "do_process_recovery_images; "
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
 
 do_makesystem() {
-    make_ext4fs -B ${DEPLOY_DIR_IMAGE}/system.map -s ${IMAGE_EXT4_SELINUX_OPTIONS} -b 4096 -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET} ${IMAGE_ROOTFS}
+    cp ${THISDIR}/${BASEMACHINE}/apq8009-fsconfig.conf ${WORKDIR}/rootfs-fsconfig.conf
+    make_ext4fs -C ${WORKDIR}/rootfs-fsconfig.conf -B ${DEPLOY_DIR_IMAGE}/system.map -s ${IMAGE_EXT4_SELINUX_OPTIONS} -b 4096 -l ${SYSTEM_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET} ${IMAGE_ROOTFS}
     make_ext4fs  -b 4096 -a /systemrw ${IMAGE_EXT4_SELINUX_OPTIONS} -l ${SYSTEMRW_SIZE_EXT4} ${DEPLOY_DIR_IMAGE}/${SYSTEMRWIMAGE_TARGET}
 }
