@@ -1,6 +1,6 @@
 require recipes-kernel/linux-msm/linux-msm.inc
 
-COMPATIBLE_MACHINE = "(apq8009|apq8053|qcs605|sdxpoorwills|mdm9650|mdm9607)"
+COMPATIBLE_MACHINE = "(apq8009|apq8053|qcs605|sdxpoorwills|mdm9650|mdm9607|genericarmv8-64)"
 
 KERNEL_IMAGEDEST = "boot"
 
