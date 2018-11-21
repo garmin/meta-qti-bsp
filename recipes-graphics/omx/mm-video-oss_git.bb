@@ -50,3 +50,4 @@ do_install() {
 	mkdir -p ${STAGING_INCDIR}/mm-core
 	install -m 0644 ${S}/mm-core/inc/*.h ${STAGING_INCDIR}/mm-core
 }
+do_configure[depends] += "virtual/kernel:do_shared_workdir"
