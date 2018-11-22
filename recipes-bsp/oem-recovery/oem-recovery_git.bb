@@ -20,3 +20,4 @@ EXTRA_OECONF = "--with-glib --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/
 PARALLEL_MAKE = ""
 INITSCRIPT_NAME = "oem-recovery"
 INITSCRIPT_PARAMS = "start 27 5 . stop 80 0 1 6 ."
+do_configure[depends] += "virtual/kernel:do_shared_workdir"

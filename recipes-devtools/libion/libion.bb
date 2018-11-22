@@ -22,3 +22,4 @@ PACKAGES +="${PN}-test-bin"
 
 FILES_${PN}     = "${libdir}/pkgconfig/* ${libdir}/* ${sysconfdir}/*"
 FILES_${PN}-test-bin = "${base_bindir}/*"
+do_configure[depends] += "virtual/kernel:do_shared_workdir"

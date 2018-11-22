@@ -206,3 +206,4 @@ FILES_${PN}-leprop     += "${systemd_unitdir}/system/leprop.service ${systemd_un
 FILES_${PN}-dbg  = "${bindir}/.debug/* ${libdir}/.debug/*"
 FILES_${PN}      = "${bindir}/* ${libdir}/pkgconfig/* ${libdir}/*.so.* "
 FILES_${PN}-dev  = "${libdir}/*.so ${libdir}/*.la ${includedir}*"
+do_configure[depends] += "virtual/kernel:do_shared_workdir"
