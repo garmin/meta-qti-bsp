@@ -67,6 +67,10 @@ do_recovery_ext4[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_EXT4}/BOOT/RAMDISK"
 # Wait till all tasks of machine-recovery-image complete.
 do_recovery_ext4[depends] += "${@ 'machine-recovery-image:do_build' if d.getVar('RECOVERY_IMAGE') == '1' else ''}"
 
+# if dm-verity is enabled, boot image will be regenerated
+# again after system-image is generated with updated cmdline.
+do_recovery_ext4[depends] += "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'virtual/kernel:do_deploy', '', d)}"
+
 do_recovery_ext4() {
     echo "base image rootfs: ${IMAGE_ROOTFS}"
     echo "recovery image rootfs: ${RECOVERY_IMAGE_ROOTFS}"
