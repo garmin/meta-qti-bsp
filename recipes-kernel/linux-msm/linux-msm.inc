@@ -51,12 +51,10 @@ do_compile () {
     oe_runmake CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS} $use_alternate_initrd
 }
 
-do_install_append() {
-    oe_runmake_call -C ${STAGING_KERNEL_DIR} ARCH=${ARCH} CC="${KERNEL_CC}" LD="${KERNEL_LD}" headers_install O=${STAGING_KERNEL_BUILDDIR}
-}
-
 # keep this path in-sync with bouncycastle recipe.
 SECURITY_TOOLS_DIR = "${TMPDIR}/work-shared/security_tools"
+
+do_configure[depends] += "bouncycastle:do_unpack"
 
 # Copy verity certificate into ${S} to generate verity signed boot image
 do_configure_append () {
