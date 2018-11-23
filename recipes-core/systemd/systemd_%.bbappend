@@ -12,6 +12,48 @@ SRC_URI += "file://limit-core.conf"
 SRC_URI += "file://logind.conf"
 SRC_URI += "file://ion.rules"
 
+# Custom setup for PACKAGECONFIG to get a slimmer systemd.
+# Removed following:
+#   * timesyncd - Chronyd is being used instead for NTP timesync
+#                 Also timesyncd was resulting in higher boot KPI.
+#   * ldconfig  - configures dynamic linker run-time bindings.
+#                 ldconfig  creates  the  necessary links and cache to the most
+#                 recent shared libraries found in the directories specified on
+#                 the command line, in the file /etc/ld.so.conf, and in the
+#                 trusted directories (/lib and /usr/lib).  The cache (created
+#                 at /etc/ld.so.cache) is used by the run-time linker ld-linux.so.
+#                 system-ldconfig.service runs "ldconfig -X", but as / is RO
+#                 cache may not be created. Disabling this may introduce app
+#                 start time latency.
+#   * backlight - Loads/Saves Screen Backlight Brightness, not required.
+#   * localed   - systemd-localed is a system service that may be used as
+#                 mechanism to change the system locale settings
+#   * quotacheck  Not using Quota
+#   * vconsole  - Not used
+PACKAGECONFIG = " \
+    ${@bb.utils.filter('DISTRO_FEATURES', 'efi pam selinux usrmerge', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wifi', 'rfkill', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'xkbcommon', '', d)} \
+    binfmt \
+    firstboot \
+    hibernate \
+    hostnamed \
+    ima \
+    logind \
+    machined \
+    myhostname \
+    networkd \
+    nss \
+    polkit \
+    randomseed \
+    resolved \
+    smack \
+    sysusers \
+    timedated \
+    utmp \
+    xz \
+"
+
 EXTRA_OECONF += " --disable-efi"
 
 # Don't use systemd network name resolution manager
