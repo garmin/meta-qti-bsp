@@ -19,7 +19,7 @@ EXTRA_CFLAGS_append += " ${@ bb.utils.contains('TUNE_FEATURES', 'cortexa8', '-mt
 EXTRA_OECONF_append += " \
     --target-os=linux --sysroot=${STAGING_DIR_TARGET} --arch=${TARGET_ARCH} --disable-mmx \
     --enable-shared --disable-doc --disable-htmlpages --disable-manpages --disable-podpages \
-    --disable-txtpages --enable-small --disable-debug --disable-ffserver --disable-ffplay \
+    --disable-txtpages --enable-small --disable-debug --disable-ffplay  \
     --extra-cflags="${EXTRA_CFLAGS}" --disable-network --disable-zlib --disable-ffmpeg \
     --disable-muxers --disable-bsfs --disable-devices --disable-protocol=udp \
     --disable-protocol=tcp --disable-protocol=rtp --disable-protocol=pipe --disable-protocol=http \
