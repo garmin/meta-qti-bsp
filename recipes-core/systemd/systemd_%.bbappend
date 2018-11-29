@@ -30,10 +30,13 @@ SRC_URI += "file://ion.rules"
 #                 mechanism to change the system locale settings
 #   * quotacheck  Not using Quota
 #   * vconsole  - Not used
+#   * hostname  - No need to change the system's hostname
+#   * smack     - Not used
+#   * utmp      - No back fill for SysV runlevel changes needed
+#   * resolvd   - Use own network name resolution manager
 PACKAGECONFIG = " \
-    ${@bb.utils.filter('DISTRO_FEATURES', 'efi pam selinux usrmerge', d)} \
+    ${@bb.utils.filter('DISTRO_FEATURES', 'selinux', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wifi', 'rfkill', '', d)} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'x11', 'xkbcommon', '', d)} \
     binfmt \
     firstboot \
     hibernate \
@@ -41,25 +44,15 @@ PACKAGECONFIG = " \
     ima \
     logind \
     machined \
-    myhostname \
     networkd \
-    nss \
     polkit \
     randomseed \
-    resolved \
-    smack \
     sysusers \
     timedated \
-    utmp \
     xz \
 "
-
 EXTRA_OECONF += " --disable-efi"
-
-# Don't use systemd network name resolution manager
-EXTRA_OECONF += " --disable-resolved --disable-hwdb"
-PACKAGECONFIG_remove = "resolved"
-ALTERNATIVE_LINK_NAME[resolv-conf] = "${sysconfdir}/resolv-systemd.conf"
+EXTRA_OECONF += " --disable-hwdb"
 
 # In aarch64 targets systemd is not booting with -finline-functions -finline-limit=64 optimizations
 # So temporarily revert to default optimizations for systemd.
