@@ -11,9 +11,8 @@ PREFERRED_VERSION_linux-msm = "4.9"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
-#CONFIG_BUILD_ARM64_DT_OVERLAY = y
 
-SERIAL_CONSOLE ?= "${@['', '115200 ttyMSM0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
+SERIAL_CONSOLE ?= "${@['', '115200 ttyV0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
 
 DISTRO ?= "msm"
 
@@ -25,10 +24,10 @@ PAGE_SIZE ?= '4096'
 EXTRA_IMAGECMD ?= "-N 2048"
 
 # Sizes for EXT4 (in bytes)
-SYSTEM_SIZE_EXT4 ?= "3000000000"
-USERDATA_SIZE_EXT4 ?= "5000000000"
+SYSTEM_SIZE_EXT4 ?= "65536000"
+USERDATA_SIZE_EXT4 ?= "65536000"
 CACHE_SIZE_EXT4 ?= "65536000"
-RECOVERYFS_SIZE_EXT4 ?= "136000000"
+RECOVERYFS_SIZE_EXT4 ?= "65536000"
 
 # Multilib configuration
 # This sets any packages preprended with lib32- to be built with
