@@ -43,7 +43,7 @@ dirs755_append_sdmsteppe += "/firmware /persist /cache /dsp /bt_firmware"
 
 # Remove sepolicy entries from various files when selinux is not present.
 do_fix_sepolicies () {
-    if ${@bb.utils.contains('DISTRO_FEATURES','selinux','false','true',d)}; then
+    if ${@bb.utils.contains('DISTRO_FEATURES','selinux', 'false', 'true', d)}; then
         # For mount services
         sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware.mount
         sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware-mount.service
@@ -88,12 +88,14 @@ do_install_append_msm() {
         install -d 0644 ${D}${sysconfdir}/systemd/system/local-fs.target.requires
 
         # userdata is present by default.
-        if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
-            install -m 0644 ${WORKDIR}/systemd/data.mount ${D}${sysconfdir}/systemd/system/data.mount
-        else
-            install -m 0644 ${WORKDIR}/systemd/data-ubi.mount ${D}${sysconfdir}/systemd/system/data.mount
+        if ${@bb.utils.contains('DISTRO_FEATURES', 'full-disk-encryption', 'false', 'true', d)}; then
+            if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
+                install -m 0644 ${WORKDIR}/systemd/data.mount ${D}${sysconfdir}/systemd/system/data.mount
+            else
+                install -m 0644 ${WORKDIR}/systemd/data-ubi.mount ${D}${sysconfdir}/systemd/system/data.mount
+            fi
+            ln -sf  ../data.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/data.mount
         fi
-        ln -sf  ../data.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/data.mount
         for d in ${dirs755}; do
             if [ "$d" == "/cache" ]; then
                 if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
