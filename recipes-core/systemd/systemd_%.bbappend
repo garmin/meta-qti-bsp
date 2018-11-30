@@ -13,6 +13,8 @@ SRC_URI += "file://logind.conf"
 
 EXTRA_OECONF += " --disable-efi"
 
+CFLAGS_append = " -fPIC"
+
 # Don't use systemd network name resolution manager
 EXTRA_OECONF += " --disable-resolved --disable-hwdb"
 PACKAGECONFIG_remove = "resolved"
