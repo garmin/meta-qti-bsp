@@ -11,6 +11,14 @@ PR = "r5"
 
 DEPENDS += "dtc-native"
 
+do_compile () {
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'avble', 'true', 'false', d)}; then
+        oe_runmake CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS} $use_alternate_initrd DTC_EXT=${STAGING_DIR_NATIVE}/usr/bin/dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y
+    else
+        oe_runmake CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS} $use_alternate_initrd
+    fi
+}
+
 do_shared_workdir_append () {
         cp Makefile $kerneldir/
         cp -fR usr $kerneldir/
