@@ -1,14 +1,54 @@
-DEPENDS += "${@["","machine-recovery-image releasetools-native"][(d.getVar('RECOVERY_IMAGE', True) == '1')]}"
+# To add OTA upgrade support on a nand target,
+# add the MACHINE name to this list.
+# This is the "only" list that will control whether
+# OTA upgrade will be supported on a target.
+OTA_SUPPORTED_NAND_TARGET_LIST = "sdxpoorwills mdm9607"
+
+def nand_target_supports_OTA_upgrade(d):
+    list_of_supported_targets = d.getVar('OTA_SUPPORTED_NAND_TARGET_LIST');
+
+    if d.getVar('MACHINE', True) in list_of_supported_targets:
+        return True
+
+    return False
+
+def nand_set_vars_and_get_dependencies(d):
+    if not nand_target_supports_OTA_upgrade(d):
+        d.setVar('RECOVERY_IMAGE', "0");
+        d.setVar('GENERATE_AB_OTA_PACKAGE', "0");
+        # Do not create machine-recovery-image or the OTA packages
+        return ""
+
+    if bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', True, False, d):
+        # if A/B support is supported, recovery image need not be generated.
+        # only A/B target will be generated
+        d.setVar('RECOVERY_IMAGE', "0");
+        # For nand targets, A/B OTA support is not present currently
+        d.setVar('GENERATE_AB_OTA_PACKAGE', "0");
+        return "releasetools-native"
+    else:
+        # for Non A/B target, set RECOVERY_IMAGE to "1"
+        # this will generate a non A/B update package as well.
+        d.setVar('RECOVERY_IMAGE', "1");
+        d.setVar('GENERATE_AB_OTA_PACKAGE', "0");
+        return "machine-recovery-image releasetools-native"
+
 
 # Add tasks to generate recovery image, OTA zip files
 python __anonymous () {
-    if d.getVar('RECOVERY_IMAGE', True) == '1' and bb.utils.contains('IMAGE_FSTYPES', 'ubi', True, False, d):
-        bb.build.addtask('do_recovery_ubi', 'do_build', 'do_image_ubi', d)
-        bb.build.addtask('do_gen_otazip_ubi', 'do_build', 'do_recovery_ubi', d)
+    if bb.utils.contains('IMAGE_FSTYPES', 'ubi', True, False, d):
+        d.appendVar('DEPENDS', nand_set_vars_and_get_dependencies(d));
+        if (d.getVar('RECOVERY_IMAGE', True) == '1' or
+                d.getVar('GENERATE_AB_OTA_PACKAGE', True) == '1'):
+            bb.build.addtask('do_recovery_ubi', 'do_build', 'do_image_ubi', d)
+            bb.build.addtask('do_gen_otazip_ubi', 'do_build', 'do_recovery_ubi', d)
 }
 
 OTA_TARGET_IMAGE_ROOTFS_UBI = "${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ubi"
-RECOVERY_IMAGE_ROOTFS        = "$(echo ${IMAGE_ROOTFS} | sed 's#${PN}#machine-recovery-image#')"
+NON_AB_RECOVERY_IMAGE_ROOTFS = "$(echo ${IMAGE_ROOTFS} | sed 's#${PN}#machine-recovery-image#')"
+
+# If A/B package is to be generated, recoveryfs's rootfs is same as system's rootfs
+RECOVERY_IMAGE_ROOTFS = "${@["${NON_AB_RECOVERY_IMAGE_ROOTFS}", "${IMAGE_ROOTFS}"][(d.getVar('GENERATE_AB_OTA_PACKAGE', True) == '1')]}"
 
 #Create directory structure for targetfiles.zip
 do_recovery_ubi[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_UBI}"
@@ -33,7 +73,7 @@ do_recovery_ubi() {
     echo "recovery image rootfs: ${RECOVERY_IMAGE_ROOTFS}"
 
     # copy radio directory content into RADIO directory
-    cp -r ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/${BASEMACHINE}/radio/. ${OTA_TARGET_IMAGE_ROOTFS_UBI}/RADIO/.
+    cp -r ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/${MACHINE}/radio/. ${OTA_TARGET_IMAGE_ROOTFS_UBI}/RADIO/.
 
     # copy the boot\recovery images
     cp ${DEPLOY_DIR_IMAGE}/${BOOTIMAGE_TARGET} ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOTABLE_IMAGES/boot.img

@@ -36,9 +36,10 @@ dirs755_append_apq8053 +="/firmware /persist /cache /dsp "
 dirs755_append_apq8009 += "/firmware /persist /cache"
 dirs755_append_apq8017 += "/firmware /persist /cache /dsp"
 dirs755_append_qcs605 += "/firmware /persist /cache /dsp /bt_firmware"
-dirs755_append_qcs405-som1 += "/firmware /persist /dsp /bt_firmware"
+dirs755_append_qcs405-som1 += "/firmware /cache /persist /dsp /bt_firmware"
 dirs755_append_qcs403-som2 += "/firmware /persist /cache /dsp /bt_firmware"
 dirs755_append_mdm9607 +=" /persist"
+dirs755_append_sdmsteppe += "/firmware /persist /cache /dsp /bt_firmware"
 
 # Remove sepolicy entries from various files when selinux is not present.
 do_fix_sepolicies () {
@@ -48,6 +49,7 @@ do_fix_sepolicies () {
         sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware-mount.service
         sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/bluetooth.mount
         sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/bluetooth-mount.service
+        sed -i "s#,context=system_u:object_r:adsprpcd_t:s0##g" ${WORKDIR}/systemd/dsp-mount.service
         sed -i "s#,rootcontext=system_u:object_r:var_t:s0##g"  ${WORKDIR}/systemd/var-volatile.mount
         sed -i "s#,rootcontext=system_u:object_r:system_data_t:s0##g"  ${WORKDIR}/systemd/systemrw.mount
         sed -i "s#,rootcontext=system_u:object_r:data_t:s0##g"  ${WORKDIR}/systemd/data.mount
@@ -84,6 +86,7 @@ do_install_append_msm() {
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d 0644 ${D}${sysconfdir}/systemd/system
         install -d 0644 ${D}${sysconfdir}/systemd/system/local-fs.target.requires
+
         # userdata is present by default.
         if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
             install -m 0644 ${WORKDIR}/systemd/data.mount ${D}${sysconfdir}/systemd/system/data.mount

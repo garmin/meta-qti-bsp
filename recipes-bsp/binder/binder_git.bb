@@ -1,4 +1,4 @@
-inherit autotools pkgconfig
+inherit autotools pkgconfig useradd
 
 DESCRIPTION = "Android Binder support"
 HOMEPAGE = "http://developer.android.com/"
@@ -33,6 +33,8 @@ FILES_${PN}-dbg    = "${libdir}/.debug/libbinder.* ${bindir}/.debug/servicemanag
 FILES_${PN}        = "${libdir}/libbinder.so.* ${libdir}/pkgconfig/* ${bindir}/servicemanager"
 FILES_${PN}-dev    = "${libdir}/libbinder.so ${libdir}/libbinder.la ${includedir}"
 FILES_${PN}-static = "${libdir}/libbinder.a"
+
+QPERM_SERVICE = "${WORKDIR}/servicemanager.service"
 
 do_install_append() {
    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then

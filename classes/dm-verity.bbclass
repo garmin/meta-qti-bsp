@@ -4,7 +4,7 @@
 VERITY_ENABLED = "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', '1', '0', d)}"
 DEPENDS += " ${@bb.utils.contains('VERITY_ENABLED', '1', 'verity-utils-native', '', d)}"
 
-FIXED_SALT = "aee087a5be3b982978c923f566a94613496b417f"
+FIXED_SALT = "aee087a5be3b982978c923f566a94613496b417f2af592639bc80d141e34dfe7"
 BLOCK_SIZE = "4096"
 BLOCK_DEVICE_SYSTEM ?= "/dev/block/bootdevice/by-name/system"
 ORG_SYSTEM_SIZE_EXT4 ?= "0"
@@ -14,7 +14,7 @@ HASH_ALGO = "sha256"
 MAPPER_DEVICE = "verity"
 UPSTREAM_VERITY_VERSION = "1"
 DATA_BLOCK_START = "0"
-DM_KEY_PREFIX = '"system none ro,'
+DM_KEY_PREFIX = '"'
 DATA_BLOCKS_NUMBER ?= ""
 SIZE_IN_SECTORS ?= ""
 
@@ -166,26 +166,12 @@ def update_kernel_commandline_param_with_dmkey_value(d):
    cmdline = d.getVar('KERNEL_CMD_PARAMS', True)
    dm_key_args_list = []
    dm_prefix = d.getVar('DM_KEY_PREFIX', True)
-   dummy_blk_device = "/dev/mmcblk0p"
-   start = d.getVar('DATA_BLOCK_START', True)
    dm_key_args_list.append( d.getVar('SIZE_IN_SECTORS', True))
-   dm_key_args_list.append( d.getVar('MAPPER_DEVICE', True))
-   dm_key_args_list.append( d.getVar('UPSTREAM_VERITY_VERSION', True))
-   dm_key_args_list.append( dummy_blk_device)
-   dm_key_args_list.append( dummy_blk_device)
-   dm_key_args_list.append( d.getVar('BLOCK_SIZE', True))
-   dm_key_args_list.append( d.getVar('BLOCK_SIZE', True))
    bb.warn("Data Blocks Number %s" % d.getVar('DATA_BLOCKS_NUMBER', True))
    dm_key_args_list.append( d.getVar('DATA_BLOCKS_NUMBER', True))
-   dm_key_args_list.append( str(int(d.getVar('DATA_BLOCKS_NUMBER', True)) + 8))
-   dm_key_args_list.append( d.getVar('HASH_ALGO', True))
    dm_key_args_list.append( str(d.getVar('ROOT_HASH', True)))
-   dm_key_args_list.append( str(d.getVar('FIXED_SALT', True)))
-   dm_prefix = d.getVar('DM_KEY_PREFIX', True)
-   dm_key = dm_prefix + start + " " + " ".join(dm_key_args_list)+'\\"'
-   root_blk = "root=/dev/dm-0"
-   cmdline += " "+root_blk+" "
-   cmdline += " dm=\\"+dm_key
+   dm_key =  dm_prefix + " ".join(dm_key_args_list)+ " " +'\\"'
+   cmdline += " verity=\\" + dm_key
 
    d.setVar('KERNEL_CMD_PARAMS', ''.join(cmdline))
    bb.warn("After Setting Command line is %s " % d.getVar('KERNEL_CMD_PARAMS'))

@@ -1,4 +1,4 @@
-inherit autotools pkgconfig systemd update-rc.d qperf
+inherit autotools pkgconfig systemd update-rc.d qperf useradd
 
 DESCRIPTION = "Android system/core components"
 HOMEPAGE = "http://developer.android.com/"
@@ -46,6 +46,7 @@ COMPOSITION_apq8098 = "901D"
 COMPOSITION_qcs605 = "901D"
 COMPOSITION_sdxpoorwills = "90DB"
 COMPOSITION_sdxprairie = "90DB"
+COMPOSITION_sdmsteppe = "901D"
 
 do_install_append() {
    install -m 0755 ${S}/adb/launch_adbd -D ${D}${sysconfdir}/launch_adbd
@@ -63,12 +64,11 @@ do_install_append() {
    install -m 0755 ${S}/usb/debuger/help -D ${D}${base_sbindir}/usb/debuger/
    install -m 0755 ${S}/usb/debuger/usb_debug -D ${D}${base_sbindir}/
    install -b -m 0644 /dev/null -D ${D}${sysconfdir}/build.prop
-   chown 5002:5002 ${D}${sysconfdir}/build.prop
    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
-      install -m 0755 ${S}/adb/start_adbd -D ${D}${sysconfdir}/initscripts/adbd
-      install -m 0755 ${S}/logd/start_logd -D ${D}${sysconfdir}/initscripts/logd
-      install -m 0755 ${S}/usb/start_usb -D ${D}${sysconfdir}/initscripts/usb
-      install -m 0755 ${S}/rootdir/etc/init.qcom.post_boot.sh -D ${D}${sysconfdir}/initscripts/init_post_boot
+      install -m 0750 ${S}/adb/start_adbd -D ${D}${sysconfdir}/initscripts/adbd
+      install -m 0750 ${S}/logd/start_logd -D ${D}${sysconfdir}/initscripts/logd
+      install -m 0750 ${S}/usb/start_usb -D ${D}${sysconfdir}/initscripts/usb
+      install -m 0750 ${S}/rootdir/etc/init.qcom.post_boot.sh -D ${D}${sysconfdir}/initscripts/init_post_boot
       install -d ${D}${systemd_unitdir}/system/
       install -d ${D}${systemd_unitdir}/system/multi-user.target.wants/
       install -d ${D}${systemd_unitdir}/system/ffbm.target.wants/
@@ -207,3 +207,4 @@ FILES_${PN}-leprop     += "${systemd_unitdir}/system/leprop.service ${systemd_un
 FILES_${PN}-dbg  = "${bindir}/.debug/* ${libdir}/.debug/*"
 FILES_${PN}      = "${bindir}/* ${libdir}/pkgconfig/* ${libdir}/*.so.* "
 FILES_${PN}-dev  = "${libdir}/*.so ${libdir}/*.la ${includedir}*"
+do_configure[depends] += "virtual/kernel:do_shared_workdir"

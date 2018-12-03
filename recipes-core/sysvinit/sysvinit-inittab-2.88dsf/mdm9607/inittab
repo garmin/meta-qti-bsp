@@ -15,6 +15,10 @@ si::sysinit:/etc/init.d/rcS
 # NOTE: These entries should be above the rc
 #       run level entries with wait below.
 dvsk:2345:wait:mkdir -p -m 777 /dev/socket
+chmd:2345:wait:chmod 777 /dev/socket
+# update max dgram length
+log1:2345:wait:echo 600 > /proc/sys/net/unix/max_dgram_qlen
+
 rmts:2345:respawn:/sbin/rmt_storage
 tftp:2345:respawn:/sbin/tftp_server
 scrb:2345:respawn:/sbin/fs-scrub-daemon

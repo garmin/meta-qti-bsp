@@ -10,6 +10,8 @@ S = "${WORKDIR}/"
 
 PR = "r0"
 
+inherit useradd
+
 do_install() {
     install -m 0754 ${WORKDIR}/getslotsuffix.sh -D ${D}${bindir}/getslotsuffix
 }
