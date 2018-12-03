@@ -32,7 +32,7 @@ Description=Mount dsp partition to /dsp mount point
 Type=oneshot
 RemainAfterExit=yes
 PassEnvironment="SLOT_SUFFIX"
-ExecStart=/bin/mount -o relatime,data=ordered,noauto_da_alloc,discard,ro,noexec,nodev,nosuid -t ext4 /dev/disk/by-partlabel/dsp${SLOT_SUFFIX} /dsp
+ExecStart=/bin/mount -o relatime,data=ordered,noauto_da_alloc,discard,ro,noexec,nodev,nosuid,context=system_u:object_r:adsprpcd_t:s0 -t ext4 /dev/disk/by-partlabel/dsp${SLOT_SUFFIX} /dsp
 
 [Install]
 WantedBy=local-fs.target

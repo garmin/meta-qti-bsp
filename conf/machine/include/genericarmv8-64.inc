@@ -1,8 +1,5 @@
-BASEMACHINE ?= "sdm710"
+BASEMACHINE ?= "genericarmv8-64"
 require conf/machine/include/basemachine.inc
-
-SOC_FAMILY ?= "warlock"
-include conf/machine/include/soc-family.inc
 
 # Pull in security flags
 require ${COREBASE}/meta-qti-bsp/conf/distro/include/security_flags.inc
@@ -10,7 +7,7 @@ require ${COREBASE}/meta-qti-bsp/conf/distro/include/security_flags.inc
 require conf/machine/include/arm/arch-armv8.inc
 
 PREFERRED_PROVIDER_virtual/kernel = "linux-msm"
-PREFERRED_VERSION_linux-msm = "4.17"
+PREFERRED_VERSION_linux-msm = "4.9"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
@@ -39,6 +36,8 @@ RECOVERYFS_SIZE_EXT4 ?= "136000000"
 require conf/multilib.conf
 MULTILIBS = "multilib:lib32"
 DEFAULTTUNE_virtclass-multilib-lib32 = "armv7a-neon"
+
+DISTRO_FEATURES_append = " avble"
 
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4"

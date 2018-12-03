@@ -94,6 +94,7 @@ else
         eval FindAndMountVolume${fstype} systemrw /systemrw
         test -x /sbin/restorecon && /sbin/restorecon -RD /data /systemrw
         eval FindAndMountVolume${fstype} cachefs /cache
+	eval FindAndMountVolume${fstype} persist /persist
 fi
 
 if [ -x /sbin/restorecon ]; then

@@ -23,6 +23,7 @@ SRC_URI += "\
 SRC_URI_append_apq8053 += "file://apq8053/mdev.conf"
 SRC_URI_append_mdm9607 += "file://mdm9607/mdev.conf"
 SRC_URI_append_mdm9607 += "file://mdm9607/sensors.sh"
+SRC_URI_append += "${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://0001-Remove-readprofile-and-brctl-from-busybox.links-file.patch', '', d)}"
 
 BUSYBOX_SPLIT_SUID = "0"
 
@@ -36,7 +37,7 @@ do_install_append() {
     # systemd is udev compatible.
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d ${D}${sysconfdir}/udev/scripts/
-        install -m 0755 ${WORKDIR}/automountsdcard.sh \
+        install -m 0744 ${WORKDIR}/automountsdcard.sh \
             ${D}${sysconfdir}/udev/scripts/automountsdcard.sh
         install -d ${D}${systemd_unitdir}/system/
         install -m 0644 ${WORKDIR}/busybox-syslog.service -D ${D}${systemd_unitdir}/system/busybox-syslog.service
@@ -44,6 +45,10 @@ do_install_append() {
         # enable the service for multi-user.target
         ln -sf ${systemd_unitdir}/system/busybox-syslog.service \
            ${D}${systemd_unitdir}/system/multi-user.target.wants/busybox-syslog.service
+        install -d ${D}${sysconfdir}/initscripts
+        install -m 0755 ${WORKDIR}/syslog ${D}${sysconfdir}/initscripts/syslog
+        sed -i 's/syslogd -- -n/syslogd -n/' ${D}${sysconfdir}/initscripts/syslog
+        sed -i 's/init.d/initscripts/g'  ${D}${systemd_unitdir}/system/busybox-syslog.service
     else
         install -d ${D}${sysconfdir}/mdev
         install -m 0755 ${WORKDIR}/automountsdcard.sh ${D}${sysconfdir}/mdev/
