@@ -47,6 +47,9 @@ CACHE_SIZE_EXT4 ?= "80000000"
 # Enable LE Verified Boot
 DISTRO_FEATURES_append = " vble"
 
+#Disable rpmb listener
+DISTRO_FEATURES_append = " no-rpmb-listener-support"
+
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4 ubi"
 
