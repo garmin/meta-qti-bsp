@@ -49,3 +49,7 @@ DISTRO_FEATURES_append = " vble"
 
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4 ubi"
+
+# Userspace needs below given macro to support libion after kernel 4.12.
+TARGET_CFLAGS += " -DTARGET_ION_ABI_VERSION=2"
+TARGET_CXXFLAGS += " -DTARGET_ION_ABI_VERSION=2"
