@@ -26,8 +26,11 @@ SRC_URI_append_mdm9607 += "file://mdm9607/sensors.sh"
 SRC_URI_append += "${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://0001-Remove-readprofile-and-brctl-from-busybox.links-file.patch', '', d)}"
 
 BUSYBOX_SPLIT_SUID = "0"
-
+DEPENDS += " libtirpc"
 FILES_${PN} += "/usr/bin/env"
+
+CFLAGS_append = " -I${STAGING_INCDIR}/tirpc"
+LDFLAGS_append = " -ltirpc"
 
 do_compile_append_mdm() {
     sed -i '/modprobe/d' ./busybox.links
