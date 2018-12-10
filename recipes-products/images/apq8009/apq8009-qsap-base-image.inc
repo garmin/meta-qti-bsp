@@ -9,7 +9,6 @@ IMAGE_INSTALL += "chronyc"
 
 IMAGE_INSTALL += "openssh"
 IMAGE_INSTALL += "iw"
-IMAGE_INSTALL += "sigma-dut"
 IMAGE_INSTALL += "libcap"
 IMAGE_INSTALL += "attr"
 IMAGE_INSTALL += "mtd-utils-ubifs"
