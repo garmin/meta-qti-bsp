@@ -56,8 +56,16 @@ EXTRA_OECONF += " --disable-hwdb"
 # So temporarily revert to default optimizations for systemd.
 FULL_OPTIMIZATION = "-O2 -fexpensive-optimizations -frename-registers -fomit-frame-pointer -ftree-vectorize"
 
+MACHINE_COREDUMP_ENABLE = "${@bb.utils.contains('BASEMACHINE', 'qcs605', 'true', 'false', d)}"
+
 # Place systemd-udevd.service in /etc/systemd/system
 do_install_append () {
+
+   if [ "${MACHINE_COREDUMP_ENABLE}" == "true" ]; then
+       sed -i "s#var\/tmp#data\/coredump#g" ${WORKDIR}/sysctl-core.conf
+       #create coredump folder in data
+       install -d ${D}${userfsdatadir}/coredump
+   fi
    install -d ${D}/etc/systemd/system/
    install -d ${D}/lib/systemd/system/ffbm.target.wants
    install -d ${D}/etc/systemd/system/ffbm.target.wants
@@ -101,5 +109,5 @@ do_install_append_robot-som-ros () {
 
 PACKAGES +="${PN}-coredump"
 FILES_${PN} += "/etc/initscripts \
-                ${sysconfdir}/udev/rules.d "
-FILES_${PN}-coredump = "/etc/sysctl.d/core.conf /etc/security/limits.d/core.conf"
+                ${sysconfdir}/udev/rules.d ${userfsdatadir}/*"
+FILES_${PN}-coredump = "/etc/sysctl.d/core.conf /etc/security/limits.d/core.conf  ${userfsdatadir}/coredump"
