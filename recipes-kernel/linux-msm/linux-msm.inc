@@ -54,8 +54,6 @@ do_compile () {
 # keep this path in-sync with bouncycastle recipe.
 SECURITY_TOOLS_DIR = "${TMPDIR}/work-shared/security_tools"
 
-do_configure[depends] += "bouncycastle:do_unpack"
-
 # Copy verity certificate into ${S} to generate verity signed boot image
 do_configure_append () {
     if [ "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'dm-verity', '', d)}" = "dm-verity" ] ; then
