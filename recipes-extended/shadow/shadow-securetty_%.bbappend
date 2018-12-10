@@ -1,1 +1,2 @@
 SERIAL_CONSOLE = "ttyHSL0"
+SERIAL_CONSOLE_genericarmv8-64 = "ttyV0"
