@@ -1,4 +1,4 @@
-inherit kernel qperf
+inherit kernel
 
 DESCRIPTION = "CAF Linux Kernel"
 LICENSE = "GPLv2"

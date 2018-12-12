@@ -1,4 +1,4 @@
-inherit deploy qperf
+inherit deploy
 
 DESCRIPTION = "Little Kernel bootloader"
 LICENSE = "MIT"
