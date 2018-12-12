@@ -93,6 +93,11 @@ do_install_append_msm() {
         if ${@bb.utils.contains('DISTRO_FEATURES', 'full-disk-encryption', 'false', 'true', d)}; then
             if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
                 install -m 0644 ${WORKDIR}/systemd/data.mount ${D}${systemd_unitdir}/system/data.mount
+
+                # Run fsck at boot
+                install -d 0644 ${D}${systemd_unitdir}/system/local-fs.target.requires
+                ln -sf ${systemd_unitdir}/system/systemd-fsck@.service \
+                       ${D}${systemd_unitdir}/system/local-fs.target.requires/systemd-fsck@dev-disk-by\\x2dpartlabel-userdata.service
             else
                 install -m 0644 ${WORKDIR}/systemd/data-ubi.mount ${D}${systemd_unitdir}/system/data.mount
             fi
