@@ -4,14 +4,13 @@ require ${COREBASE}/meta-qti-bsp/recipes-products/images/common/common-base-imag
 RDEPENDS  += "${@bb.utils.contains('MULTILIB_VARIANTS', 'lib64','lib64-edk2','edk2',d)}"
 
 #install userspace packages
-IMAGE_INSTALL += "abctl"
 IMAGE_INSTALL += "av-frameworks"
 IMAGE_INSTALL += "binder"
 IMAGE_INSTALL += "kptr-restrict"
 IMAGE_INSTALL += "libion"
 IMAGE_INSTALL += "libhardware"
 IMAGE_INSTALL += "media-headers"
-IMAGE_INSTALL += "start-script-ab-slot-util"
+IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', 'start-script-ab-slot-util', '', d)}"
 IMAGE_INSTALL += "start-scripts-firmware-links"
 IMAGE_INSTALL += "system-conf"
 IMAGE_INSTALL += "system-media"
