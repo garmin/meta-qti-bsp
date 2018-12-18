@@ -25,13 +25,13 @@ def nand_set_vars_and_get_dependencies(d):
         d.setVar('RECOVERY_IMAGE', "0");
         # For nand targets, A/B OTA support is not present currently
         d.setVar('GENERATE_AB_OTA_PACKAGE', "0");
-        return "releasetools-native"
+        return " releasetools-native"
     else:
         # for Non A/B target, set RECOVERY_IMAGE to "1"
         # this will generate a non A/B update package as well.
         d.setVar('RECOVERY_IMAGE', "1");
         d.setVar('GENERATE_AB_OTA_PACKAGE', "0");
-        return "machine-recovery-image releasetools-native"
+        return " machine-recovery-image releasetools-native"
 
 
 # Add tasks to generate recovery image, OTA zip files
