@@ -54,5 +54,5 @@ DISTRO_FEATURES_append = " no-rpmb-listener-support"
 IMAGE_FSTYPES += "ext4 ubi"
 
 # Userspace needs below given macro to support libion after kernel 4.12.
-TARGET_CFLAGS += " -DTARGET_ION_ABI_VERSION=2"
-TARGET_CXXFLAGS += " -DTARGET_ION_ABI_VERSION=2"
+TARGET_CFLAGS_append = " -DTARGET_ION_ABI_VERSION=2 "
+TARGET_CXXFLAGS_append = " -DTARGET_ION_ABI_VERSION=2 "
