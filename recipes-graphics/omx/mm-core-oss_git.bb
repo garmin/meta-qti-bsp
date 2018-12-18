@@ -28,4 +28,3 @@ INSANE_SKIP_${PN} = "dev-so"
 do_install() {
 	oe_runmake DESTDIR="${D}/" LIBVER="${LV}" install
 }
-do_configure[depends] += "virtual/kernel:do_shared_workdir"

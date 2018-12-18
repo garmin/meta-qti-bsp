@@ -76,4 +76,3 @@ do_install_append() {
               fi
         fi
 }
-do_configure[depends] += "virtual/kernel:do_shared_workdir"
