@@ -50,13 +50,9 @@ PACKAGECONFIG = " \
     xz \
 "
 EXTRA_OECONF += " --disable-efi"
+EXTRA_OECONF += " --disable-hwdb"
 
 CFLAGS_append = " -fPIC"
-
-# Don't use systemd network name resolution manager
-EXTRA_OECONF += " --disable-resolved --disable-hwdb"
-PACKAGECONFIG_remove = "resolved"
-ALTERNATIVE_LINK_NAME[resolv-conf] = "${sysconfdir}/resolv-systemd.conf"
 
 # In aarch64 targets systemd is not booting with -finline-functions -finline-limit=64 optimizations
 # So temporarily revert to default optimizations for systemd.
