@@ -22,12 +22,10 @@ do_install_append_msm(){
           sed "s/^gEnable2x2\s*=.*/gEnable2x2=0/" -i ${D}/lib/firmware/wlan/qca_cld/WCNSS_qcom_cfg.ini
       fi
     if ${@base_conditional('BASEMACHINE', 'apq8009', base_conditional('BASEPRODUCT', 'qsap', 'false', 'true', d), 'true', d)}; then
-        if ${@base_conditional('BASEMACHINE', 'qcs40x', 'false', 'true', d)}; then
-            install -m 0644 ${WORKDIR}/wlan_daemon.service -D ${D}/etc/systemd/system/wlan_daemon.service
-            # enable the service for multi-user.target
-            ln -sf /etc/systemd/system/wlan_daemon.service \
-               ${D}/etc/systemd/system/multi-user.target.wants/wlan_daemon.service
-        fi
+        install -m 0644 ${WORKDIR}/wlan_daemon.service -D ${D}/etc/systemd/system/wlan_daemon.service
+        # enable the service for multi-user.target
+        ln -sf /etc/systemd/system/wlan_daemon.service \
+           ${D}/etc/systemd/system/multi-user.target.wants/wlan_daemon.service
     fi
   else
     if ${@base_conditional('BASEMACHINE', 'apq8009', base_conditional('BASEPRODUCT', 'qsap', 'false', 'true', d), 'true', d)}; then
