@@ -27,6 +27,9 @@ EXTRA_OECONF_append_arm = " \
     ${@bb.utils.contains('MULTILIB_VARIANTS', 'lib32','','--enable-32bit-binder-ipc',d)} \
 "
 
+# sdmsteppe uses 64bit IPC though userspace is 32bit.
+EXTRA_OECONF_remove_sdmsteppe = "--enable-32bit-binder-ipc"
+
 CFLAGS += "-I${STAGING_INCDIR}/libselinux"
 
 FILES_${PN}-dbg    = "${libdir}/.debug/libbinder.* ${bindir}/.debug/servicemanager ${bindir}/test_binder"
