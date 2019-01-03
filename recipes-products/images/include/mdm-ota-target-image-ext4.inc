@@ -2,7 +2,7 @@
 # add the MACHINE name to this list.
 # This is the "only" list that will control whether
 # OTA upgrade will be supported on a target.
-OTA_SUPPORTED_EMMC_TARGET_LIST = "apq8009 qcs405-som1 qcs605-64 qcs605-32"
+OTA_SUPPORTED_EMMC_TARGET_LIST = "apq8009 qcs405-som1 qcs605-64 qcs605-32 sdm845"
 
 def emmc_target_supports_OTA_upgrade(d):
     list_of_supported_targets = d.getVar('OTA_SUPPORTED_EMMC_TARGET_LIST');
@@ -143,7 +143,7 @@ do_recovery_ext4() {
 
        #recovery_size : Size of recovery partition from partition.xml
        echo recovery_size=0x01E00000 >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
-    elif [ "${BASEMACHINE}" == "apq8096" ] || [ "${BASEMACHINE}" == "apq8017" ] || [ "${BASEMACHINE}" == "qcs605" ]; then
+    elif [ "${BASEMACHINE}" == "apq8096" ] || [ "${BASEMACHINE}" == "apq8017" ] || [ "${BASEMACHINE}" == "qcs605" ] || [ "${BASEMACHINE}" == "sdm845" ]; then
        #boot_size: Size of boot partition from partition.xml
        echo boot_size=0x04000000  >> ${OTA_TARGET_IMAGE_ROOTFS_EXT4}/META/misc_info.txt
 

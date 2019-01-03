@@ -16,4 +16,6 @@ DEPENDS += "libcutils liblog system-core"
 
 EXTRA_OECONF_append_apq8053 = " --enable-sensors"
 EXTRA_OECONF_append_concam = " --enable-camera"
+EXTRA_OECONF_append_sdm845 = " --enable-sensors"
+EXTRA_OECONF_append_sdm845 = " --enable-camera"
 EXTRA_OECONF_append_robot-som = " --enable-camera"

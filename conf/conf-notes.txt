@@ -33,6 +33,8 @@ Supported combinations are listed below.
       +---------------+----------------+------------------+
       |sdmsteppe      | concam         | debug perf user  |
       +---------------+----------------+------------------+
+      |sdm845         | robot          | debug            |
+      +---------------+----------------+------------------+
 
 Once ready run 'bitbake <pkg-name>' to build required package or
 run 'bitbake machine-image' to build complete image.

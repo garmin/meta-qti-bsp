@@ -14,6 +14,7 @@ PR = "r19"
 
 DEPENDS += "virtual/kernel openssl glib-2.0 libselinux ext4-utils libunwind libcutils libmincrypt libbase libutils"
 DEPENDS_append_qcs605 = " libsync"
+DEPENDS_append_sdm845 = " libsync"
 
 EXTRA_OECONF = " --with-host-os=${HOST_OS} --with-glib"
 EXTRA_OECONF_append = " --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
@@ -21,6 +22,7 @@ EXTRA_OECONF_append = " --with-logd-logging"
 EXTRA_OECONF_append = "${@bb.utils.contains('VARIANT','user',' --disable-debuggerd','',d)}"
 EXTRA_OECONF_append_apq8053 = " --enable-logd-privs"
 EXTRA_OECONF_append_qcs605 = " --enable-logd-privs"
+EXTRA_OECONF_append_sdm845 = " --enable-logd-privs"
 EXTRA_OECONF_append_qcs405 = " --enable-logd-privs"
 EXTRA_OECONF_append_sdmsteppe = " --enable-logd-privs"
 
@@ -47,6 +49,7 @@ COMPOSITION_apq8053 = "901D"
 COMPOSITION_apq8096 = "901D"
 COMPOSITION_apq8098 = "901D"
 COMPOSITION_qcs605 = "901D"
+COMPOSITION_sdm845 = "901D"
 COMPOSITION_sdxpoorwills = "90DB"
 COMPOSITION_sdmsteppe = "901D"
 
