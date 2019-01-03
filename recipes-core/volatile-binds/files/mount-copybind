@@ -26,9 +26,11 @@ if [ -d "$mountpoint" ]; then
  cd $mountpoint
  for file in *
   do
+   if [ -f "$mountpoint/$file" ]; then
     if [ ! -f "$spec/$file" ]; then
         cp --preserve=all "$file" "$spec/"
     fi
  mount -o "bind" "$spec/$file" "$mountpoint/$file"
+   fi
  done
 fi

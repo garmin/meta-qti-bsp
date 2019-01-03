@@ -19,6 +19,7 @@ vendor.audio.offload.multiple.enabled=true
 vendor.audio.adm.buffering.ms=2
 #Enable offload audio video playback by default
 audio.offload.video=true
+vendor.audio.pcm.offload.buffer.duration.ms=20
 #enable voice path for PCM VoIP by default
 vendor.voice.path.for.pcm.voip=true
 #enable dsp gapless mode by default

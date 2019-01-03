@@ -17,7 +17,8 @@ DATA_BLOCK_START = "0"
 DM_KEY_PREFIX = '"'
 DATA_BLOCKS_NUMBER ?= ""
 SIZE_IN_SECTORS ?= ""
-
+FEC_OFFSET ?= "0"
+FEC_SIZE ?= "0"
 
 FEC_SUPPORT = "${@bb.utils.contains('VERITY_ENABLED', '1', '1', '0', d)}"
 DEPENDS += " ${@bb.utils.contains('FEC_SUPPORT', '1', 'fec-native', '', d)}"
@@ -49,13 +50,20 @@ python adjust_system_size_for_verity () {
         else:
             hi = i
     data_blocks_number = (result // block_size)
+    fec_size = int(d.getVar("FEC_SIZE",True))
     size_in_sectors = data_blocks_number * 8
+    if fec_size !=0:
+        fec_off = (partition_size - fec_size) // block_size
+    else:
+        fec_off = 0
     d.setVar('SIZE_IN_SECTORS', str(size_in_sectors))
     d.setVar('DATA_BLOCKS_NUMBER', str(data_blocks_number))
 
     d.setVar('SYSTEM_SIZE_EXT4', str(result))
     d.setVar('VERITY_SIZE', str(verity_size))
     d.setVar('ORG_SYSTEM_SIZE_EXT4', str(partition_size))
+    d.setVar('FEC_OFFSET', str(fec_off))
+    bb.warn("FEC Offset : %s" % d.getVar("FEC_OFFSET",True))
     bb.warn("New system image size with verity: %s" % d.getVar("SYSTEM_SIZE_EXT4",True))
     bb.warn("Old system image size without verity: %s" % d.getVar("ORG_SYSTEM_SIZE_EXT4",True))
     bb.warn("verity size is: %s" % d.getVar("VERITY_SIZE",True))
@@ -91,6 +99,7 @@ def get_verity_size(d, partition_size, fec_support):
             fec_size =  int(subprocess.check_output(cmd, shell=True).strip())
         except subprocess.CalledProcessError as e:
             bb.fatal("Error in calculating fec size:\n%s" % e.output)
+        d.setVar('FEC_SIZE', str(fec_size))
         return verity_size + fec_size
     return verity_size
 
@@ -170,6 +179,7 @@ def update_kernel_commandline_param_with_dmkey_value(d):
    bb.warn("Data Blocks Number %s" % d.getVar('DATA_BLOCKS_NUMBER', True))
    dm_key_args_list.append( d.getVar('DATA_BLOCKS_NUMBER', True))
    dm_key_args_list.append( str(d.getVar('ROOT_HASH', True)))
+   dm_key_args_list.append( d.getVar('FEC_OFFSET', True))
    dm_key =  dm_prefix + " ".join(dm_key_args_list)+ " " +'\\"'
    cmdline += " verity=\\" + dm_key
 

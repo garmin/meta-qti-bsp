@@ -30,6 +30,7 @@ FILESPATH =+ "${WORKSPACE}:"
 SRC_URI   =  "file://kernel \
 	      ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'file://systemd.cfg', '', d)} \
               ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://virtualization.cfg', '', d)} \
+              ${@bb.utils.contains('DISTRO_FEATURES', 'nand-squashfs', 'file://squashfs.cfg', '', d)} \
 	     "
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"

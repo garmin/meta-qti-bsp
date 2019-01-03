@@ -16,4 +16,3 @@ EXTRA_OECONF = "--with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include 
                 --with-core-headers=${STAGING_INCDIR_NATIVE}"
 
 BBCLASSEXTEND = "native"
-do_configure[depends] += "virtual/kernel:do_shared_workdir"

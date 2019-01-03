@@ -43,7 +43,7 @@ dirs755_append_sdmsteppe += "/firmware /persist /cache /dsp /bt_firmware"
 
 # Remove sepolicy entries from various files when selinux is not present.
 do_fix_sepolicies () {
-    if ${@bb.utils.contains('DISTRO_FEATURES','selinux','false','true',d)}; then
+    if ${@bb.utils.contains('DISTRO_FEATURES','selinux', 'false', 'true', d)}; then
         # For mount services
         sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware.mount
         sed -i "s#,context=system_u:object_r:firmware_t:s0##g" ${WORKDIR}/systemd/firmware-mount.service
@@ -86,33 +86,42 @@ do_install_append_msm() {
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d 0644 ${D}${sysconfdir}/systemd/system
         install -d 0644 ${D}${sysconfdir}/systemd/system/local-fs.target.requires
+        install -d 0644 ${D}${systemd_unitdir}/system
+        install -d 0644 ${D}${systemd_unitdir}/system/sysinit.target.wants
 
         # userdata is present by default.
-        if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
-            install -m 0644 ${WORKDIR}/systemd/data.mount ${D}${sysconfdir}/systemd/system/data.mount
-        else
-            install -m 0644 ${WORKDIR}/systemd/data-ubi.mount ${D}${sysconfdir}/systemd/system/data.mount
+        if ${@bb.utils.contains('DISTRO_FEATURES', 'full-disk-encryption', 'false', 'true', d)}; then
+            if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
+                install -m 0644 ${WORKDIR}/systemd/data.mount ${D}${systemd_unitdir}/system/data.mount
+
+                # Run fsck at boot
+                install -d 0644 ${D}${systemd_unitdir}/system/local-fs.target.requires
+                ln -sf ${systemd_unitdir}/system/systemd-fsck@.service \
+                       ${D}${systemd_unitdir}/system/local-fs.target.requires/systemd-fsck@dev-disk-by\\x2dpartlabel-userdata.service
+            else
+                install -m 0644 ${WORKDIR}/systemd/data-ubi.mount ${D}${systemd_unitdir}/system/data.mount
+            fi
+            ln -sf  ${systemd_unitdir}/system/data.mount ${D}${systemd_unitdir}/system/sysinit.target.wants/data.mount
         fi
-        ln -sf  ../data.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/data.mount
         for d in ${dirs755}; do
             if [ "$d" == "/cache" ]; then
                 if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
-                    install -m 0644 ${WORKDIR}/systemd/cache.mount ${D}${sysconfdir}/systemd/system/cache.mount
+                    install -m 0644 ${WORKDIR}/systemd/cache.mount ${D}${systemd_unitdir}/system/cache.mount
                 else
-                    install -m 0644 ${WORKDIR}/systemd/cache-ubi.mount ${D}${sysconfdir}/systemd/system/cache.mount
+                    install -m 0644 ${WORKDIR}/systemd/cache-ubi.mount ${D}${systemd_unitdir}/system/cache.mount
                 fi
-                ln -sf  ../cache.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/cache.mount
+                ln -sf  ${systemd_unitdir}/system/cache.mount ${D}${systemd_unitdir}/system/sysinit.target.wants/cache.mount
             fi
+
             if [ "$d" == "/persist" ]; then
                 if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
-                    install -m 0644 ${WORKDIR}/systemd/persist.mount ${D}${sysconfdir}/systemd/system/persist.mount
-                    ln -sf  ../persist.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/persist.mount
+                    install -m 0644 ${WORKDIR}/systemd/persist.mount ${D}${systemd_unitdir}/system/persist.mount
                 else
                     if ${@bb.utils.contains('DISTRO_FEATURES','persist-volume','true','false',d)}; then
-                        install -m 0644 ${WORKDIR}/systemd/persist-ubi.mount ${D}${sysconfdir}/systemd/system/persist.mount
-                        ln -sf  ../persist.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/persist.mount
+                        install -m 0644 ${WORKDIR}/systemd/persist-ubi.mount ${D}${systemd_unitdir}/system/persist.mount
+                    fi
                 fi
-                fi
+                ln -sf  ${systemd_unitdir}/system/persist.mount ${D}${systemd_unitdir}/system/sysinit.target.wants/persist.mount
             fi
 
             # If the AB boot feature is enabled, then instead of <partition>.mount,
