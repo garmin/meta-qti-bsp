@@ -27,6 +27,7 @@ SRC_URI_append += "file://systemd/bluetooth-ubi-mount.sh"
 SRC_URI_append += "file://systemd/bluetooth-ubi-mount.service"
 SRC_URI_append += "file://systemd/bluetooth.mount"
 SRC_URI_append += "file://systemd/bluetooth-mount.service"
+SRC_URI_append += "file://systemd/non-hlos-squash.sh"
 
 dirs755 += "/media/cf /media/net /media/ram \
             /media/union /media/realroot /media/hdd \
@@ -148,7 +149,11 @@ do_install_append_msm() {
                     else
                         install -d 0644 ${D}${sysconfdir}/initscripts
                         install -m 0644 ${WORKDIR}/systemd/firmware-ubi-mount.service ${D}${sysconfdir}/systemd/system/firmware-mount.service
-                        install -m 0744 ${WORKDIR}/systemd/firmware-ubi-mount.sh ${D}${sysconfdir}/initscripts/firmware-ubi-mount.sh
+                        if ${@bb.utils.contains('DISTRO_FEATURES','nand-squashfs','true','false',d)}; then
+                            install -m 0744 ${WORKDIR}/systemd/non-hlos-squash.sh ${D}${sysconfdir}/initscripts/firmware-ubi-mount.sh
+                        else
+                            install -m 0744 ${WORKDIR}/systemd/firmware-ubi-mount.sh ${D}${sysconfdir}/initscripts/firmware-ubi-mount.sh
+                        fi
                         ln -sf  ../firmware-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware-mount.service
                     fi
                 fi
