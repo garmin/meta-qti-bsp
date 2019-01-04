@@ -22,10 +22,18 @@ INHERIT += "recipe_sanity"
 PREFERRED_VERSION_autoconf = "2.68"
 ARM_INSTRUCTION_SET       ?= "arm"
 
-FULL_OPTIMIZATION          = "-O2 -Wa,--noexecstack -fexpensive-optimizations -frename-registers -fomit-frame-pointer -ftree-vectorize "
-FULL_OPTIMIZATION         += " -finline-functions -finline-limit=64 "
-# Ignore a few common warnings
-FULL_OPTIMIZATION         += " -Wno-error=maybe-uninitialized -Wno-error=unused-result "
+##################################################################
+# Optimization flags.
+##################################################################
+COMMON_OPTIMIZATION = " \
+  -Wa,--noexecstack -fexpensive-optimizations \
+  -frename-registers -ftree-vectorize \
+  -finline-functions -finline-limit=64 \
+  -Wno-error=maybe-uninitialized -Wno-error=unused-result \
+  "
+
+FULL_OPTIMIZATION         = "-O2 -fomit-frame-pointer ${COMMON_OPTIMIZATION} "
+DEBUG_OPTIMIZATION_append = " ${COMMON_OPTIMIZATION} "
 
 # NLS
 USE_NLS = "no"
