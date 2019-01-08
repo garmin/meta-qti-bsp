@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2014-2015, The Linux Foundation. All rights reserved.
+# Copyright (c) 2014-2015,2018, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -32,6 +32,7 @@
 FindAndMountUBI () {
    partition=$1
    dir=$2
+   extra_opts=$3
 
    mtd_block_number=`cat $mtd_file | grep -i $partition | sed 's/^mtd//' | awk -F ':' '{print $1}'`
    echo "MTD : Detected block device : $dir for $partition"
@@ -43,7 +44,8 @@ FindAndMountUBI () {
     do
         if [ -c $device ]
         then
-            mount -t ubifs /dev/ubi1_0 $dir -o bulk_read
+            test -x /sbin/restorecon && /sbin/restorecon $device
+            mount -t ubifs /dev/ubi1_0 $dir -o bulk_read$extra_opts
             break
         else
             sleep 0.010
@@ -54,23 +56,25 @@ FindAndMountUBI () {
 FindAndMountVolumeUBI () {
    volume_name=$1
    dir=$2
+   extra_opts=$3
    if [ ! -d $dir ]
    then
        mkdir -p $dir
    fi
-   mount -t ubifs ubi0:$volume_name $dir -o bulk_read
+   mount -t ubifs ubi0:$volume_name $dir -o bulk_read$extra_opts
 }
 
 FindAndMountEXT4 () {
    partition=$1
    dir=$2
+   extra_opts=$3
    mmc_block_device=/dev/block/bootdevice/by-name/$partition
    echo "EMMC : Detected block device : $dir for $partition"
    if [ ! -d $dir ]
    then
        mkdir -p $dir
    fi
-   mount -t ext4 $mmc_block_device $dir -o relatime,data=ordered,noauto_da_alloc,discard
+   mount -t ext4 $mmc_block_device $dir -o relatime,data=ordered,noauto_da_alloc,discard$extra_opts
    echo "EMMC : Mounting of $mmc_block_device on $dir done"
 }
 
@@ -83,12 +87,19 @@ then
         eval FindAndMount${fstype} userdata /data
         eval FindAndMount${fstype} cache /cache
         eval FindAndMount${fstype} systemrw /systemrw
+        test -x /sbin/restorecon && /sbin/restorecon -RD /data /cache /systemrw
 else
         fstype="UBI"
         eval FindAndMountVolume${fstype} usrfs /data
         eval FindAndMountVolume${fstype} systemrw /systemrw
         eval FindAndMountVolume${fstype} persist /persist
+        test -x /sbin/restorecon && /sbin/restorecon -RD /data /systemrw /persist
 fi
 
-eval FindAndMount${fstype} modem /firmware
+if [ -x /sbin/restorecon ]; then
+    firmware_selinux_opt=",context=system_u:object_r:firmware_t:s0"
+else
+    firmware_selinux_opt=""
+fi
+eval FindAndMount${fstype} modem /firmware $firmware_selinux_opt
 exit 0
