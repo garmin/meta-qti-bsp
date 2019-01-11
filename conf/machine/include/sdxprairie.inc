@@ -50,6 +50,9 @@ DISTRO_FEATURES_append = " vble"
 #Disable rpmb listener
 DISTRO_FEATURES_append = " no-rpmb-listener-support"
 
+#Disable ssd listener
+DISTRO_FEATURES_append = " no-ssd-listener-support"
+
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ext4 ubi"
 
