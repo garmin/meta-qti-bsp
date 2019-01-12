@@ -40,7 +40,7 @@ dirs755_append_qcs405-som1 += "/firmware /cache /persist /dsp /bt_firmware"
 dirs755_append_qcs403-som2 += "/firmware /persist /cache /dsp /bt_firmware"
 dirs755_append_mdm9607 +=" /persist"
 dirs755_append_sdmsteppe += "/firmware /persist /cache /dsp /bt_firmware"
-dirs755_append_sdxprairie +=" /persist"
+dirs755_append_sdxprairie +=" /firmware /persist"
 
 # Remove sepolicy entries from various files when selinux is not present.
 do_fix_sepolicies () {
@@ -182,3 +182,27 @@ do_install_append_msm() {
     fi
 }
 
+do_install_append_mdm() {
+    if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+        install -d 0644 ${D}${sysconfdir}/systemd/system
+        install -d 0644 ${D}${sysconfdir}/systemd/system/local-fs.target.requires
+        if ${@bb.utils.contains('DISTRO_FEATURES','ro-rootfs','true','false',d)}; then
+            install -m 0644 ${WORKDIR}/systemd/systemrw.mount ${D}${sysconfdir}/systemd/system/systemrw.mount
+            ln -sf  ../systemrw.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/systemrw.mount
+        fi
+
+        if [ "$d" == "/firmware" ]; then
+           install -d 0644 ${D}${sysconfdir}/initscripts
+           install -m 0644 ${WORKDIR}/systemd/firmware-ubi-mount.service ${D}${sysconfdir}/systemd/system/firmware-mount.service
+           install -m 0744 ${WORKDIR}/systemd/firmware-ubi-mount.sh ${D}${sysconfdir}/initscripts/firmware-ubi-mount.sh
+           ln -sf  ../firmware-mount.service  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/firmware-mount.service
+        fi
+
+        if [ "$d" == "/persist" ]; then
+            if ${@bb.utils.contains('DISTRO_FEATURES','persist-volume','true','false',d)}; then
+                install -m 0644 ${WORKDIR}/systemd/persist-ubi.mount ${D}${sysconfdir}/systemd/system/persist.mount
+                ln -sf  ../persist.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/persist.mount
+            fi
+        fi
+    fi
+}

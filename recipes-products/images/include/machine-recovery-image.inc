@@ -31,7 +31,7 @@ IMAGE_INSTALL += "libe2p"
 IMAGE_INSTALL += "libext2fs"
 
 # Needed for generating recovery.ubi ignored for ext4
-MKUBIFS_ARGS = "${@bb.utils.contains('IMAGE_FSTYPES', 'ubi', '-m 4096 -e 253952 -c 83 -F', '', d)}"
+MKUBIFS_ARGS = "${@bb.utils.contains('IMAGE_FSTYPES', 'ubi', '-m 4096 -e 253952 -c 200 -F', '', d)}"
 UBI_VOLNAME  = "${@bb.utils.contains('IMAGE_FSTYPES', 'ubi', 'rootfs', '', d)}"
 EXT4_IMAGET_TYPE  = "${@bb.utils.contains('IMAGE_FSTYPES', 'ext4', True, False, d)}"
 
