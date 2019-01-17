@@ -49,8 +49,8 @@ PACKAGECONFIG = " \
     timedated \
     xz \
 "
-EXTRA_OECONF += " --disable-efi"
-EXTRA_OECONF += " --disable-hwdb"
+EXTRA_OEMESON += " -Defi=false"
+EXTRA_OEMESON += " -Dhwdb=false"
 
 CFLAGS_append = " -fPIC"
 
