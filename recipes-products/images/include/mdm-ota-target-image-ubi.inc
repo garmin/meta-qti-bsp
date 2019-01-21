@@ -40,8 +40,9 @@ python __anonymous () {
         d.appendVar('DEPENDS', nand_set_vars_and_get_dependencies(d));
         if (d.getVar('RECOVERY_IMAGE', True) == '1' or
                 d.getVar('GENERATE_AB_OTA_PACKAGE', True) == '1'):
-            bb.build.addtask('do_recovery_ubi', 'do_build', 'do_image_ubi', d)
-            bb.build.addtask('do_gen_otazip_ubi', 'do_build', 'do_recovery_ubi', d)
+            if bb.utils.contains_any('VARIANT', 'perf user', True, False, d):
+                bb.build.addtask('do_recovery_ubi', 'do_build', 'do_image_ubi', d)
+                bb.build.addtask('do_gen_otazip_ubi', 'do_build', 'do_recovery_ubi', d)
 }
 
 OTA_TARGET_IMAGE_ROOTFS_UBI = "${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ubi"
