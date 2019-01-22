@@ -24,12 +24,42 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
 
-rootfs               /                    auto       defaults              1  1
-proc                 /proc                proc       defaults              0  0
-devpts               /dev/pts             devpts     mode=0620,gid=5       0  0
-usbfs                /proc/bus/usb        usbfs      noauto                0  0
-tmpfs                /run                 tmpfs      mode=0755,nodev,nosuid,strictatime 0  0
-tmpfs                /var/volatile        tmpfs      defaults              0  0
-tmpfs                /dev/shm             tmpfs      mode=0777             0  0
+# filename              partition
+
+NON-HLOS.ubi            modem
+NON-HLOS.bin            modem
+dspso.ubi               dsp
+
+sbl1.mbn                sbl
+tz.mbn                  tz
+rpm.mbn                 rpm
+appsboot.mbn            aboot
+devcfg.mbn              tz_devcfg
+abl.elf                 abl
+pmic.elf                pmic
+
+# filename + .bak       backup partition
+
+#sbl1.mbn.bak            sbl1bak
+#tz.mbn.bak              tzbak
+#rpm.mbn.bak             rpmbak
+#appsboot.mbn.bak        abootbak
+
+# For multiple file firmware images that differ from *.mbn and *.bin
+# you can specify filename.* to direct all files to the same location.
+# For example for modem.mdt, modem.b00, modem.b01,... modem.bxx files
+# writting 'modem.*   location' will direct all files to 'location'.
+# If still some files need to go to different location give the full
+# file name also, for example 'modem.b01   other_location'
+
+# filename                location
+
+mba.*                     /firmware/image
+modem.*                   /firmware/image
+athwlan.bin               /firmware/image
+bdwlan.bin                /firmware/image
+otp.bin                   /firmware/image
+utf.bin                   /firmware/image
+nvm_tlv_usb_tf_1.1.bin    /firmware/image
+rampatch_tlv_tf_1.1.tlv   /firmware/image

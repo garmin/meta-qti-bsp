@@ -57,16 +57,15 @@ do_install_append() {
               # If A/B boot is supported, recovery is just an executable and not a service
               # Just install the fstab for recovery
               install -m 0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/fstab_AB -D ${D}/res/recovery_volume_config
-        elif [ "${SYSTEMD_SUPPORT}" == "systemd" ]; then
-              install -m  0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/recovery/files/fstab -D ${D}${sysconfdir}/fstab
-              install -m 0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/fstab -D ${D}/res/recovery_volume_config
-              install -d ${D}${systemd_unitdir}/system/
-              install -m 0644 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/recovery/files/recovery.service -D ${D}${systemd_unitdir}/system/recovery.service
-              install -d ${D}${systemd_unitdir}/system/multi-user.target.wants/
-              # enable the service for multi-user.target
-              ln -sf ${systemd_unitdir}/system/recovery.service \
-                            ${D}${systemd_unitdir}/system/multi-user.target.wants/recovery.service
         else
+              if [ "${SYSTEMD_SUPPORT}" == "systemd" ]; then
+                    install -d ${D}${systemd_unitdir}/system/
+                    install -m 0644 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/recovery/files/recovery.service -D ${D}${systemd_unitdir}/system/recovery.service
+                    install -d ${D}${systemd_unitdir}/system/multi-user.target.wants/
+                    # enable the service for multi-user.target
+                    ln -sf ${systemd_unitdir}/system/recovery.service \
+                                  ${D}${systemd_unitdir}/system/multi-user.target.wants/recovery.service
+              fi
               if [ "${SELINUX_SUPPORT}" == "selinux" ]; then
                   install -m  0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/fstab -D ${D}${sysconfdir}/fstab
                   install -m 0755 ${WORKSPACE}/poky/meta-qti-bsp/recipes-bsp/base-files-recovery/fstab -D ${D}/res/recovery_volume_config
