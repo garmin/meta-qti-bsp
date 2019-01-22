@@ -89,6 +89,7 @@ do_install_append_msm() {
         install -d 0644 ${D}${sysconfdir}/systemd/system
         install -d 0644 ${D}${sysconfdir}/systemd/system/local-fs.target.requires
         install -d 0644 ${D}${systemd_unitdir}/system
+        install -d 0644 ${D}${systemd_unitdir}/system/local-fs.target.requires
         install -d 0644 ${D}${systemd_unitdir}/system/sysinit.target.wants
 
         # userdata is present by default.
@@ -97,9 +98,9 @@ do_install_append_msm() {
                 install -m 0644 ${WORKDIR}/systemd/data.mount ${D}${systemd_unitdir}/system/data.mount
 
                 # Run fsck at boot
-                install -d 0644 ${D}${systemd_unitdir}/system/local-fs.target.requires
+                install -d 0644 ${D}${systemd_unitdir}/system/local-fs-pre.target.requires
                 ln -sf ${systemd_unitdir}/system/systemd-fsck@.service \
-                       ${D}${systemd_unitdir}/system/local-fs.target.requires/systemd-fsck@dev-disk-by\\x2dpartlabel-userdata.service
+                       ${D}${systemd_unitdir}/system/local-fs-pre.target.requires/systemd-fsck@dev-disk-by\\x2dpartlabel-userdata.service
             else
                 install -m 0644 ${WORKDIR}/systemd/data-ubi.mount ${D}${systemd_unitdir}/system/data.mount
             fi
@@ -185,11 +186,16 @@ do_install_append_msm() {
             if ${@bb.utils.contains('DISTRO_FEATURES','ro-rootfs','true','false',d)}; then
                 if [ "$d" == "/systemrw" ]; then
                     if ${@bb.utils.contains('DISTRO_FEATURES','nand-boot','false','true',d)}; then
-                        install -m 0644 ${WORKDIR}/systemd/systemrw.mount ${D}${sysconfdir}/systemd/system/systemrw.mount
+                        install -m 0644 ${WORKDIR}/systemd/systemrw.mount ${D}${systemd_unitdir}/system/systemrw.mount
+
+                        # Run fsck at boot
+                        install -d 0644 ${D}${systemd_unitdir}/system/local-fs-pre.target.requires
+                        ln -sf ${systemd_unitdir}/system/systemd-fsck@.service \
+                             ${D}${systemd_unitdir}/system/local-fs-pre.target.requires/systemd-fsck@dev-disk-by\\x2dpartlabel-systemrw.service
                     else
-                        install -m 0644 ${WORKDIR}/systemd/systemrw-ubi.mount ${D}${sysconfdir}/systemd/system/systemrw.mount
+                        install -m 0644 ${WORKDIR}/systemd/systemrw-ubi.mount ${D}${systemd_unitdir}/system/systemrw.mount
                     fi
-                        ln -sf  ../systemrw.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/systemrw.mount
+                    ln -sf  ${systemd_unitdir}/system/systemrw.mount ${D}${systemd_unitdir}/system/local-fs.target.requires/systemrw.mount
                 fi
             fi
         done
