@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2018, The Linux Foundation. All rights reserved.
+# Copyright (c) 2019, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -26,18 +26,29 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 
-FindAndMountBindDSP () {
-   device=/firmware/dspso
+FindAndMountUBI () {
+   partition=$1
+   dir=$2
+
+   mtd_block_number=`cat $mtd_file | grep -i $partition | sed 's/^mtd//' | awk -F ':' '{print $1}'`
+   echo "MTD : Detected block device : $dir for $partition"
+   mkdir -p $dir
+
+   ubiattach -m $mtd_block_number
+   non_hlos_block=`cat $mtd_file | grep -i nonhlos-fs | sed 's/^mtd//' | awk -F ':' '{print $1}'`
+   device=/dev/mtdblock$non_hlos_block
    while [ 1 ]
     do
-        if [ -d $device ]
+        if [ -b $device ]
         then
-            mount -o "bind" $device /dsp
+            mount $device /firmware
             break
         else
             sleep 0.010
         fi
     done
 }
-eval FindAndMountBindDSP
+mtd_file=/proc/mtd
+eval FindAndMountUBI modem /firmware
 exit 0
+
