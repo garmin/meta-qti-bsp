@@ -168,11 +168,25 @@ do_recovery_ubi() {
     #blocksize = BOARD_FLASH_BLOCK_SIZE
     echo blocksize=131072 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
 
-    #boot_size: Size of boot partition from partition.xml
-    echo boot_size=0x00A00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+    if [ "${BASEMACHINE}" == "mdm9607" ]; then
+        # boot_size: Size of boot partition from partition.xml
+        echo boot_size=0x007C0000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
 
-    #recovery_size : Size of recovery partition from partition.xml
-    echo recovery_size=0x00A00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+        # recovery_size : Size of recovery partition from partition.xml
+        echo recovery_size=0x007C0000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+    elif [ "${BASEMACHINE}" == "sdxpoorwills" ] && [ "${DISTRO}" == "auto" ]; then
+        # boot_size: Size of boot partition from partition.xml
+        echo boot_size=0x00C00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+
+        # recovery_size : Size of recovery partition from partition.xml
+        echo recovery_size=0x00C00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+    else
+        # boot_size: Size of boot partition from partition.xml
+        echo boot_size=0x00A00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+
+        # recovery_size : Size of recovery partition from partition.xml
+        echo recovery_size=0x00A00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+    fi
 
     #system_size : Size of system partition from partition.xml
     echo system_size=0x00A00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
