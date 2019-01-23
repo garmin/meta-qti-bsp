@@ -1,6 +1,6 @@
 #!/bin/sh
 
- for uevent in /sys/devices/*.i2c/i2c-*/*-006*/iio:device?*/uevent; do
+ for uevent in /sys/bus/i2c/devices/*-006*/iio:device?*/uevent; do
       . $uevent
     chown root:sensors /sys/bus/iio/devices
     chmod 755 /sys/bus/iio/devices
