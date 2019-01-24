@@ -7,6 +7,7 @@ inherit qimage
 include ${@get_bblayer_img_inc('base', d)}
 
 require include/mdm-bootimg.inc
+DEPENDS += " mkbootimg-native"
 
 require include/mdm-ota-target-image-ubi.inc
 require include/mdm-ota-target-image-ext4.inc
