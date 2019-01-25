@@ -18,7 +18,7 @@ Supported combinations are listed below.
       |mdm9607        | mdm            | debug perf       |
       |               | mdm-kernel-4.9 |                  |
       +---------------+----------------+------------------+
-      |mdm9650        |                | debug perf       |
+      |mdm9650        | mdm            | debug perf       |
       +---------------+----------------+------------------+
       |qcs403-som2    | qsap           | debug            |
       |qcs405-som1    |                |                  |
@@ -26,7 +26,7 @@ Supported combinations are listed below.
       |qcs605-32      | concam         | debug perf user  |
       |qcs605-64      |                |                  |
       +---------------+----------------+------------------+
-      |sdxpoorwills   |                | debug perf       |
+      |sdxpoorwills   | mdm auto       | debug perf       |
       +---------------+----------------+------------------+
       |sa8155         | automotive     | debug perf       |
       |sa8155qdrive   |                |                  |
