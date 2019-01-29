@@ -2,7 +2,7 @@
 # into images as required by device-mapper-verity feature.
 
 VERITY_ENABLED = "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', '1', '0', d)}"
-DEPENDS += " ${@bb.utils.contains('VERITY_ENABLED', '1', 'verity-utils-native', '', d)}"
+DEPENDS += " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'verity-utils-native', '', d)}"
 
 FIXED_SALT = "aee087a5be3b982978c923f566a94613496b417f2af592639bc80d141e34dfe7"
 BLOCK_SIZE = "4096"
@@ -28,6 +28,7 @@ SPARSE_SYSTEM_IMG    = "${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET}"
 VERITY_IMG           = "${VERITY_IMAGE_DIR}/verity.img"
 VERITY_METADATA_IMG  = "${VERITY_IMAGE_DIR}/verity-metadata.img"
 VERITY_FEC_IMG       = "${VERITY_IMAGE_DIR}/verity-fec.img"
+VERITY_CMDLINE       = "${VERITY_IMAGE_DIR}/cmdline"
 
 python adjust_system_size_for_verity () {
     partition_size = int(d.getVar("SYSTEM_SIZE_EXT4",True))
@@ -166,8 +167,7 @@ python make_verity_enabled_system_image () {
     cmd = append2simg_path + " %s %s " % (sparse_img, verity_md_img)
     subprocess.call(cmd, shell=True)
 
-    #system image is ready. Add dmkey to kernel cmdline.
-    cmdline = d.getVar('KERNEL_CMD_PARAMS', True)
+    #system image is ready. Update verity cmdline.
     dm_prefix = d.getVar('DM_KEY_PREFIX', True)
     dm_key_args_list = []
     dm_key_args_list.append( d.getVar('SIZE_IN_SECTORS', True))
@@ -175,9 +175,20 @@ python make_verity_enabled_system_image () {
     dm_key_args_list.append( str(d.getVar('ROOT_HASH', True)))
     dm_key_args_list.append( d.getVar('FEC_OFFSET', True))
     dm_key =  dm_prefix + " ".join(dm_key_args_list)+ " " +'\\"'
-    cmdline += " verity=\\" + dm_key
+    cmdline = "verity=\\" + dm_key
 
-    d.setVar('KERNEL_CMD_PARAMS', ''.join(cmdline))
-    bb.debug(1, "Updated Command line is %s " % d.getVar('KERNEL_CMD_PARAMS'))
-    bb.note("Updated Kernel Cmdline with verity hash value")
+    bb.debug(1, "Verity Command line set to %s " % (cmdline))
+
+    # Write cmdline to a tmp file
+    verity_cmd = d.getVar('VERITY_CMDLINE', True)
+    subprocess.check_output("echo '%s' > %s" % (cmdline, verity_cmd), shell=True)
+
 }
+
+def get_verity_cmdline(d):
+    import subprocess
+
+    # Get verity cmdline from tmp file
+    verity_cmd = d.getVar('VERITY_CMDLINE', True)
+    output = subprocess.check_output("grep -m 1 verity %s" % (verity_cmd), shell=True)
+    return output.decode('UTF-8')

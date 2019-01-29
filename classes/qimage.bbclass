@@ -85,23 +85,32 @@ do_makesystem[dirs]       = "${DEPLOY_DIR_IMAGE}"
 do_make_bootimg[depends]  += "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', '${PN}:do_makesystem', '', d)}"
 do_make_bootimg[dirs]      = "${DEPLOY_DIR_IMAGE}"
 
-nand_boot_flag = "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', '1', '0', d)}"
+python do_make_bootimg () {
+    import subprocess
 
-do_make_bootimg () {
+    xtra_parms=""
+    if bb.utils.contains('DISTRO_FEATURES', 'nand-boot', True, False, d):
+        xtra_parms = " --tags-addr" + d.getVar('KERNEL_TAGS_OFFSET')
 
-    extra_mkbootimg_params=""
-    if [ ${nand_boot_flag} == "1" ]; then
-        extra_mkbootimg_params=' --tags-addr ${KERNEL_TAGS_OFFSET}'
-    fi
+    verity_cmdline = ""
+    if bb.utils.contains('DISTRO_FEATURES', 'dm-verity', True, False, d):
+        verity_cmdline = get_verity_cmdline(d).strip()
 
-    # Make bootimage
-    ${STAGING_BINDIR_NATIVE}/mkbootimg --kernel ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE} \
-        --ramdisk /dev/null \
-        --cmdline "${KERNEL_CMD_PARAMS}" \
-        --pagesize ${PAGE_SIZE} \
-        --base ${KERNEL_BASE} \
-        --ramdisk_offset 0x0 \
-        ${extra_mkbootimg_params} --output ${DEPLOY_DIR_IMAGE}/${BOOTIMAGE_TARGET}
+
+    mkboot_bin_path = d.getVar('STAGING_BINDIR_NATIVE', True) + '/mkbootimg'
+    zimg_path       = d.getVar('DEPLOY_DIR_IMAGE', True) + "/" + d.getVar('KERNEL_IMAGETYPE', True)
+    cmdline         = "\"" + d.getVar('KERNEL_CMD_PARAMS', True) + " " + verity_cmdline + "\""
+    pagesize        = d.getVar('PAGE_SIZE', True)
+    base            = d.getVar('KERNEL_BASE', True)
+    output          = d.getVar('DEPLOY_DIR_IMAGE', True) + "/" + d.getVar('BOOTIMAGE_TARGET', True)
+
+    # cmd to make boot.img
+    cmd =  mkboot_bin_path + " --kernel %s --cmdline %s --pagesize %s --base %s %s --ramdisk /dev/null --ramdisk_offset 0x0 --output %s" \
+           % (zimg_path, cmdline, pagesize, base, xtra_parms, output )
+
+    bb.debug(1, "mkbootimg cmd: %s" % (cmd))
+
+    subprocess.call(cmd, shell=True)
 }
 
 addtask do_make_bootimg after do_rootfs before do_build
