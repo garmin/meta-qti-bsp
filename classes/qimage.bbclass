@@ -90,7 +90,7 @@ python do_make_bootimg () {
 
     xtra_parms=""
     if bb.utils.contains('DISTRO_FEATURES', 'nand-boot', True, False, d):
-        xtra_parms = " --tags-addr" + d.getVar('KERNEL_TAGS_OFFSET')
+        xtra_parms = " --tags-addr" + " " + d.getVar('KERNEL_TAGS_OFFSET')
 
     verity_cmdline = ""
     if bb.utils.contains('DISTRO_FEATURES', 'dm-verity', True, False, d):
