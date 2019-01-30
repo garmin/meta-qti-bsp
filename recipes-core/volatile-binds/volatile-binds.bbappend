@@ -46,6 +46,9 @@ VOLATILE_BINDS_append_apq8017 = "\
 VOLATILE_BINDS_append_apq8009 = "\
 /systemrw/alexa /etc/alexa/ \n\
 "
+VOLATILE_BINDS_append_qcs40x = "\
+/systemrw/var/lib/pulse /var/lib/pulse/ \n\
+"
 
 INITSCRIPT_PACKAGES =+ "${PN}"
 INITSCRIPT_NAME_${PN} = "robind"

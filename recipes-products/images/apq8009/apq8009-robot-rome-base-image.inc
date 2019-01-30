@@ -8,7 +8,7 @@ IMAGE_INSTALL_remove = "packagegroup-ss-mgr"
 IMAGE_INSTALL += "reboot-daemon"
 IMAGE_INSTALL += "e2fsprogs"
 IMAGE_INSTALL += "start-scripts-userfs-reset"
-IMAGE_INSTALL += "start-script-ab-slot-util"
+IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', 'start-script-ab-slot-util', '', d)}"
 IMAGE_INSTALL += "chrony"
 IMAGE_INSTALL += "chronyc"
 
