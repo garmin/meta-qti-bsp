@@ -1,5 +1,5 @@
 #!/bin/sh
-# Copyright (c) 2014-2015,2018, The Linux Foundation. All rights reserved.
+# Copyright (c) 2014-2015,2018-2019, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -86,14 +86,14 @@ then
         fstype="EXT4"
         eval FindAndMount${fstype} userdata /data
         eval FindAndMount${fstype} cache /cache
-        eval FindAndMount${fstype} systemrw /systemrw
-        test -x /sbin/restorecon && /sbin/restorecon -RD /data /cache /systemrw
+        eval FindAndMount${fstype} systemrw /systemrw ,rootcontext=system_u:object_r:system_data_t:s0
+        test -x /sbin/restorecon && /sbin/restorecon -RD /data /cache
 else
         fstype="UBI"
         eval FindAndMountVolume${fstype} usrfs /data
-        eval FindAndMountVolume${fstype} systemrw /systemrw
+        eval FindAndMountVolume${fstype} systemrw /systemrw ,rootcontext=system_u:object_r:system_data_t:s0
         eval FindAndMountVolume${fstype} persist /persist
-        test -x /sbin/restorecon && /sbin/restorecon -RD /data /systemrw /persist
+        test -x /sbin/restorecon && /sbin/restorecon -RD /data /persist
 fi
 
 if [ -x /sbin/restorecon ]; then
