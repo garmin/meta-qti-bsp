@@ -2,7 +2,8 @@
 Description=Bind mount volatile @where@
 DefaultDependencies=false
 Before=local-fs.target
-RequiresMountsFor=@whatparent@ @whereparent@
+After=find_partitions.service
+RequiresMountsFor=@whereparent@
 ConditionPathIsReadWrite=@whatparent@
 ConditionPathExists=@where@
 ConditionPathIsReadWrite=!@where@
@@ -16,4 +17,5 @@ ExecStart=/sbin/mount-copybind @what@ @where@
 ExecStop=/sbin/umount-copybind @where@
 
 [Install]
+Requires=find_partitions.service
 WantedBy=local-fs.target

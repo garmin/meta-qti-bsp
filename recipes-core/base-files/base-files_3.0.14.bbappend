@@ -195,10 +195,6 @@ do_install_append_mdm() {
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d 0644 ${D}${sysconfdir}/systemd/system
         install -d 0644 ${D}${sysconfdir}/systemd/system/local-fs.target.requires
-        if ${@bb.utils.contains('DISTRO_FEATURES','ro-rootfs','true','false',d)}; then
-            install -m 0644 ${WORKDIR}/systemd/systemrw.mount ${D}${sysconfdir}/systemd/system/systemrw.mount
-            ln -sf  ../systemrw.mount  ${D}${sysconfdir}/systemd/system/local-fs.target.requires/systemrw.mount
-        fi
 
         if [ "$d" == "/firmware" ]; then
            install -d 0644 ${D}${sysconfdir}/initscripts
