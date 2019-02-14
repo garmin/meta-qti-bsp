@@ -17,3 +17,7 @@ IMAGE_INSTALL += "system-media"
 IMAGE_INSTALL += "system-prop"
 IMAGE_INSTALL += "wireless-tools"
 IMAGE_INSTALL += "iw"
+
+# Install recovery and its libs in system image if A/B boot is supported
+IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', 'recovery-bin', '', d)}"
+IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', 'recovery', '', d)}"
