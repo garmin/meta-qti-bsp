@@ -15,7 +15,7 @@ S = "${WORKDIR}/libion"
 DEPENDS += "virtual/kernel liblog"
 
 EXTRA_OECONF += " --disable-static"
-EXTRA_OECONF += "${@bb.utils.contains('PREFERRED_VERSION_linux-msm', '4.14', '', '--with-legacyion', d)}"
+EXTRA_OECONF += "${@bb.utils.contains_any('PREFERRED_VERSION_linux-msm', '3.18 4.4 4.9', '--with-legacyion', '', d)}"
 EXTRA_OECONF += "--with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
 
 PACKAGES +="${PN}-test-bin"

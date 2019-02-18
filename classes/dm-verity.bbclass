@@ -2,23 +2,23 @@
 # into images as required by device-mapper-verity feature.
 
 VERITY_ENABLED = "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', '1', '0', d)}"
-DEPENDS += " ${@bb.utils.contains('VERITY_ENABLED', '1', 'verity-utils-native', '', d)}"
+DEPENDS += " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'verity-utils-native', '', d)}"
 
 FIXED_SALT = "aee087a5be3b982978c923f566a94613496b417f2af592639bc80d141e34dfe7"
 BLOCK_SIZE = "4096"
-BLOCK_DEVICE_SYSTEM ?= "/dev/block/bootdevice/by-name/system"
-ORG_SYSTEM_SIZE_EXT4 ?= "0"
-VERITY_SIZE ?= "0"
-ROOT_HASH ?= ""
+BLOCK_DEVICE_SYSTEM = "/dev/block/bootdevice/by-name/system"
+ORG_SYSTEM_SIZE_EXT4 = "0"
+VERITY_SIZE = "0"
+ROOT_HASH = ""
 HASH_ALGO = "sha256"
 MAPPER_DEVICE = "verity"
 UPSTREAM_VERITY_VERSION = "1"
 DATA_BLOCK_START = "0"
 DM_KEY_PREFIX = '"'
 DATA_BLOCKS_NUMBER ?= ""
-SIZE_IN_SECTORS ?= ""
-FEC_OFFSET ?= "0"
-FEC_SIZE ?= "0"
+SIZE_IN_SECTORS = ""
+FEC_OFFSET = "0"
+FEC_SIZE = "0"
 
 FEC_SUPPORT = "${@bb.utils.contains('VERITY_ENABLED', '1', '1', '0', d)}"
 DEPENDS += " ${@bb.utils.contains('FEC_SUPPORT', '1', 'fec-native', '', d)}"
@@ -28,6 +28,7 @@ SPARSE_SYSTEM_IMG    = "${DEPLOY_DIR_IMAGE}/${SYSTEMIMAGE_TARGET}"
 VERITY_IMG           = "${VERITY_IMAGE_DIR}/verity.img"
 VERITY_METADATA_IMG  = "${VERITY_IMAGE_DIR}/verity-metadata.img"
 VERITY_FEC_IMG       = "${VERITY_IMAGE_DIR}/verity-fec.img"
+VERITY_CMDLINE       = "${VERITY_IMAGE_DIR}/cmdline"
 
 python adjust_system_size_for_verity () {
     partition_size = int(d.getVar("SYSTEM_SIZE_EXT4",True))
@@ -56,18 +57,20 @@ python adjust_system_size_for_verity () {
         fec_off = (partition_size - fec_size) // block_size
     else:
         fec_off = 0
+
     d.setVar('SIZE_IN_SECTORS', str(size_in_sectors))
     d.setVar('DATA_BLOCKS_NUMBER', str(data_blocks_number))
-
     d.setVar('SYSTEM_SIZE_EXT4', str(result))
     d.setVar('VERITY_SIZE', str(verity_size))
     d.setVar('ORG_SYSTEM_SIZE_EXT4', str(partition_size))
     d.setVar('FEC_OFFSET', str(fec_off))
-    bb.warn("FEC Offset : %s" % d.getVar("FEC_OFFSET",True))
-    bb.warn("New system image size with verity: %s" % d.getVar("SYSTEM_SIZE_EXT4",True))
-    bb.warn("Old system image size without verity: %s" % d.getVar("ORG_SYSTEM_SIZE_EXT4",True))
-    bb.warn("verity size is: %s" % d.getVar("VERITY_SIZE",True))
 
+    bb.debug(1, "Data Blocks Number: %s" % d.getVar('DATA_BLOCKS_NUMBER', True))
+    bb.debug(1, "FEC Offset: %s" % d.getVar("FEC_OFFSET",True))
+    bb.debug(1, "system image size without verity: %s" % d.getVar("ORG_SYSTEM_SIZE_EXT4",True))
+    bb.debug(1, "verity size: %s" % d.getVar("VERITY_SIZE",True))
+    bb.debug(1, "system image size with verity: %s" % d.getVar("SYSTEM_SIZE_EXT4",True))
+    bb.note("System image size is adjusted with verity")
 }
 
 def get_verity_size(d, partition_size, fec_support):
@@ -122,8 +125,8 @@ python make_verity_enabled_system_image () {
         d.setVar('ROOT_HASH', root_hash.decode('UTF-8'))
     except subprocess.CalledProcessError as e:
         bb.fatal("Error in building verity tree :\n%s" % e.output)
-    bb.warn("Value of root hash is %s" % root_hash)
-    bb.warn("Value of salt is %s" % salt)
+    bb.debug(1, "Value of root hash is %s" % root_hash)
+    bb.debug(1, "Value of salt is %s" % salt)
 
     # Build verity metadata
     blk_dev = d.getVar("BLOCK_DEVICE_SYSTEM",True)
@@ -133,7 +136,7 @@ python make_verity_enabled_system_image () {
     subprocess.call(cmd, shell=True)
 
     # Append verity metadata to verity image.
-    bb.warn("appending verity_img to verity_md_img .... ")
+    bb.debug(1, "appending verity_img to verity_md_img .... ")
     with open(verity_md_img, "ab") as out_file:
         with open(verity_img, "rb") as input_file:
             for line in input_file:
@@ -153,35 +156,39 @@ python make_verity_enabled_system_image () {
         cmd = fec_bin_path + " -e -p %s %s %s %s" % (padding_size, sparse_img, verity_md_img, fec_img_path)
         subprocess.call(cmd, shell=True)
 
-        bb.warn("appending fec_img_path to verity_md_img.... ")
+        bb.debug(1, "appending fec_img_path to verity_md_img.... ")
         with open(verity_md_img, "ab") as out_file:
             with open(fec_img_path, "rb") as input_file:
                 for line in input_file:
                     out_file.write(line)
 
-    # All done. Append verity img to sparse system img.
+    # Almost done. Append verity img to sparse system img.
     append2simg_path = d.getVar('STAGING_BINDIR_NATIVE', True) + '/append2simg'
     cmd = append2simg_path + " %s %s " % (sparse_img, verity_md_img)
     subprocess.call(cmd, shell=True)
-    update_kernel_commandline_param_with_dmkey_value(d)
+
+    #system image is ready. Update verity cmdline.
+    dm_prefix = d.getVar('DM_KEY_PREFIX', True)
+    dm_key_args_list = []
+    dm_key_args_list.append( d.getVar('SIZE_IN_SECTORS', True))
+    dm_key_args_list.append( d.getVar('DATA_BLOCKS_NUMBER', True))
+    dm_key_args_list.append( str(d.getVar('ROOT_HASH', True)))
+    dm_key_args_list.append( d.getVar('FEC_OFFSET', True))
+    dm_key =  dm_prefix + " ".join(dm_key_args_list)+ " " +'\\"'
+    cmdline = "verity=\\" + dm_key
+
+    bb.debug(1, "Verity Command line set to %s " % (cmdline))
+
+    # Write cmdline to a tmp file
+    verity_cmd = d.getVar('VERITY_CMDLINE', True)
+    subprocess.check_output("echo '%s' > %s" % (cmdline, verity_cmd), shell=True)
+
 }
 
-# Tasks to alter system image if varity is enabled.
-VERITYPREFUNCS = " ${@bb.utils.contains('VERITY_ENABLED', '1', 'adjust_system_size_for_verity', '', d)}"
-do_makesystem[prefuncs] += " ${VERITYPREFUNCS}"
+def get_verity_cmdline(d):
+    import subprocess
 
-
-def update_kernel_commandline_param_with_dmkey_value(d):
-   cmdline = d.getVar('KERNEL_CMD_PARAMS', True)
-   dm_key_args_list = []
-   dm_prefix = d.getVar('DM_KEY_PREFIX', True)
-   dm_key_args_list.append( d.getVar('SIZE_IN_SECTORS', True))
-   bb.warn("Data Blocks Number %s" % d.getVar('DATA_BLOCKS_NUMBER', True))
-   dm_key_args_list.append( d.getVar('DATA_BLOCKS_NUMBER', True))
-   dm_key_args_list.append( str(d.getVar('ROOT_HASH', True)))
-   dm_key_args_list.append( d.getVar('FEC_OFFSET', True))
-   dm_key =  dm_prefix + " ".join(dm_key_args_list)+ " " +'\\"'
-   cmdline += " verity=\\" + dm_key
-
-   d.setVar('KERNEL_CMD_PARAMS', ''.join(cmdline))
-   bb.warn("After Setting Command line is %s " % d.getVar('KERNEL_CMD_PARAMS'))
+    # Get verity cmdline from tmp file
+    verity_cmd = d.getVar('VERITY_CMDLINE', True)
+    output = subprocess.check_output("grep -m 1 verity %s" % (verity_cmd), shell=True)
+    return output.decode('UTF-8')

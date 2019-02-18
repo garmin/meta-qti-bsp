@@ -1,7 +1,5 @@
 # The MSM Linux image rootfs creation files.
 
-inherit dm-verity
-
 # lk supports only 32-bit compilation.
 DEPENDS_append_arm += " lk"
 DEPENDS_append_aarch64 += " lib32-lk"

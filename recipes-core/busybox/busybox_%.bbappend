@@ -19,10 +19,9 @@ SRC_URI += "\
             file://iio.sh \
             file://0001-Support-MTP-function.patch \
             file://fix-mdev-crash.patch \
+            file://sensors.sh \
 "
 SRC_URI_append_apq8053 += "file://apq8053/mdev.conf"
-SRC_URI_append_mdm9607 += "file://mdm9607/mdev.conf"
-SRC_URI_append_mdm9607 += "file://mdm9607/sensors.sh"
 SRC_URI_append += "${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://0001-Remove-readprofile-and-brctl-from-busybox.links-file.patch', '', d)}"
 
 BUSYBOX_SPLIT_SUID = "0"
@@ -58,13 +57,18 @@ do_install_append() {
         install -m 0755 ${WORKDIR}/find-touchscreen.sh ${D}${sysconfdir}/mdev/
         install -m 0755 ${WORKDIR}/usb.sh ${D}${sysconfdir}/mdev/
         install -m 0755 ${WORKDIR}/iio.sh ${D}${sysconfdir}/mdev/
+
+        if [ ${BASEMACHINE} == "mdm9607" ];then
+            install -m 0755 ${WORKDIR}/sensors.sh ${D}${sysconfdir}/mdev/
+        elif [ ${BASEMACHINE} == "apq8053" ];then
+            install -m 0644 ${WORKDIR}/apq8053/mdev.conf ${D}${sysconfdir}/
+        elif [ "${BASEMACHINE}" == "sdxpoorwills" ] && [ "${DISTRO}" == "auto" ]; then
+            install -m 0755 ${WORKDIR}/sensors.sh ${D}${sysconfdir}/mdev/
+        fi
+
+        chmod -R go-x ${D}${sysconfdir}/mdev/
     fi
-    if [ ${BASEMACHINE} == "mdm9607" ]; then
-     install -m 0755 ${WORKDIR}/mdm9607/sensors.sh ${D}${sysconfdir}/mdev/
-    elif [ ${BASEMACHINE} == "apq8053"];then
-     install -m 0644 ${WORKDIR}/apq8053/mdev.conf ${D}${sysconfdir}/
-    fi
-    chmod -R go-x ${D}${sysconfdir}/mdev/
+
     mkdir -p ${D}/usr/bin
     ln -s /bin/env ${D}/usr/bin/env
 }

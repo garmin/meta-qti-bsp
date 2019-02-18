@@ -41,8 +41,6 @@ PAGE_SIZE ?= '4096'
 
 MACHINE_FEATURES += "kernel26 keyboard"
 
-#Enable persist image/volume.
-DISTRO_FEATURES += "persist-image"
 # Enable LE Verified Boot
 DISTRO_FEATURES_append = " vble"
 

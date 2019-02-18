@@ -26,28 +26,18 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 
-FindAndMountUBI () {
-   partition=$1
-   dir=$2
-
-   mtd_block_number=`cat $mtd_file | grep -i $partition | sed 's/^mtd//' | awk -F ':' '{print $1}'`
-   echo "MTD : Detected block device : $dir for $partition"
-   mkdir -p $dir
-
-   ubiattach -m $mtd_block_number -d 3 /dev/ubi_ctrl
-   device=/dev/ubi3_0
+FindAndMountBindDSP () {
+   device=/firmware/dspso
    while [ 1 ]
     do
-        if [ -c $device ]
+        if [ -d $device ]
         then
-            mount -t ubifs /dev/ubi3_0 $dir -o bulk_read
+            mount -o "bind" $device /dsp
             break
         else
             sleep 0.010
         fi
     done
 }
-mtd_file=/proc/mtd
-eval FindAndMountUBI dsp /dsp
+eval FindAndMountBindDSP
 exit 0
-

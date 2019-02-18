@@ -2,7 +2,7 @@
 # add the MACHINE name to this list.
 # This is the "only" list that will control whether
 # OTA upgrade will be supported on a target.
-OTA_SUPPORTED_NAND_TARGET_LIST = "sdxpoorwills mdm9607"
+OTA_SUPPORTED_NAND_TARGET_LIST = "sdxpoorwills mdm9607 qcs403-som2"
 
 def nand_target_supports_OTA_upgrade(d):
     list_of_supported_targets = d.getVar('OTA_SUPPORTED_NAND_TARGET_LIST');
@@ -19,19 +19,23 @@ def nand_set_vars_and_get_dependencies(d):
         # Do not create machine-recovery-image or the OTA packages
         return ""
 
+    # check if this is a nand target with squashfs support
+    if bb.utils.contains('DISTRO_FEATURES', 'nand-squashfs', True, False, d):
+        d.setVar('SQUASHFS_SUPPORTED', "1");
+
     if bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', True, False, d):
         # if A/B support is supported, recovery image need not be generated.
         # only A/B target will be generated
         d.setVar('RECOVERY_IMAGE', "0");
         # For nand targets, A/B OTA support is not present currently
         d.setVar('GENERATE_AB_OTA_PACKAGE', "0");
-        return "releasetools-native"
+        return " releasetools-native"
     else:
         # for Non A/B target, set RECOVERY_IMAGE to "1"
         # this will generate a non A/B update package as well.
         d.setVar('RECOVERY_IMAGE', "1");
         d.setVar('GENERATE_AB_OTA_PACKAGE', "0");
-        return "machine-recovery-image releasetools-native"
+        return " machine-recovery-image releasetools-native"
 
 
 # Add tasks to generate recovery image, OTA zip files
@@ -59,6 +63,7 @@ do_recovery_ubi[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_UBI}/OTA"
 do_recovery_ubi[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_UBI}/RECOVERY"
 do_recovery_ubi[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_UBI}/SYSTEM"
 do_recovery_ubi[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_UBI}/RADIO"
+do_recovery_ubi[cleandirs] += "${OTA_TARGET_IMAGE_ROOTFS_UBI}/IMAGES"
 
 # Create this folder just for saving file_contexts(SElinux security context file),
 # It will be used to generate OTA packages when selinux_fc is set.
@@ -95,7 +100,6 @@ do_recovery_ubi() {
     echo /cache    ubifs  cache >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/RECOVERY/recovery.fstab
     echo /data     ubifs  userdata >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/RECOVERY/recovery.fstab
     echo /recovery mtd     recovery >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/RECOVERY/recovery.fstab
-    echo /system   ubifs  system >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/RECOVERY/recovery.fstab
 
     #Copy contents of userdata rootfs
     if [ -d ${TMPDIR}/rootfs/${MACHINE}-usrfs/ ]; then
@@ -107,6 +111,24 @@ do_recovery_ubi() {
     cp   ${OTA_TARGET_IMAGE_ROOTFS_UBI}/RECOVERY/usr/bin/applypatch ${OTA_TARGET_IMAGE_ROOTFS_UBI}/OTA/bin/.
 
     cp   ${OTA_TARGET_IMAGE_ROOTFS_UBI}/RECOVERY/usr/bin/updater ${OTA_TARGET_IMAGE_ROOTFS_UBI}/OTA/bin/.
+
+    # if squashfs is supported, we use block-based OTA upgrade.
+    if [[ "${SQUASHFS_SUPPORTED}" == "1" ]]; then
+        # what we have is a squashfs image.
+        # OTA scripts expect a sparse image for block-based package.
+        # run img2simg on the squashfs image - this is purely aesthetic
+        # and adds no value to the compression of the image.
+        img2simg ${DEPLOY_DIR_IMAGE}/${BASEMACHINE}-sysfs.squash ${OTA_TARGET_IMAGE_ROOTFS_UBI}/IMAGES/system.img
+
+        # set block img diff version to v3
+        echo "blockimgdiff_versions=3" >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+
+        # change system partitions fs_type to squashfs and the block-device instead of mtd device's name
+        echo /system   squashfs  /dev/block/bootdevice/by-name/system >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/RECOVERY/recovery.fstab
+    else
+        echo /system   ubifs  system >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/RECOVERY/recovery.fstab
+    fi
+
 
     # Pack releasetools.py into META folder itself.
     # This could also have been done by passing "--device_specific" to
@@ -145,11 +167,25 @@ do_recovery_ubi() {
     #blocksize = BOARD_FLASH_BLOCK_SIZE
     echo blocksize=131072 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
 
-    #boot_size: Size of boot partition from partition.xml
-    echo boot_size=0x00A00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+    if [ "${BASEMACHINE}" == "mdm9607" ]; then
+        # boot_size: Size of boot partition from partition.xml
+        echo boot_size=0x007C0000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
 
-    #recovery_size : Size of recovery partition from partition.xml
-    echo recovery_size=0x00A00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+        # recovery_size : Size of recovery partition from partition.xml
+        echo recovery_size=0x007C0000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+    elif [ "${BASEMACHINE}" == "sdxpoorwills" ] && [ "${DISTRO}" == "auto" ]; then
+        # boot_size: Size of boot partition from partition.xml
+        echo boot_size=0x00C00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+
+        # recovery_size : Size of recovery partition from partition.xml
+        echo recovery_size=0x00C00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+    else
+        # boot_size: Size of boot partition from partition.xml
+        echo boot_size=0x00A00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+
+        # recovery_size : Size of recovery partition from partition.xml
+        echo recovery_size=0x00A00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
+    fi
 
     #system_size : Size of system partition from partition.xml
     echo system_size=0x00A00000 >> ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/misc_info.txt
@@ -177,7 +213,14 @@ do_gen_otazip_ubi() {
 
     cd ${IMAGE_ROOTFS}/../${MACHINE}-ota-target-image-ubi && /usr/bin/zip -qry -FS ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/target-files-ubi.zip *
 
-    cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ubi.zip ${IMAGE_ROOTFS} ubi
+    block_based=""
+    if [[ "${SQUASHFS_SUPPORTED}" == "1" ]]; then
+        # if nand-squashfs is supported, we can use block-based OTA upgrade
+        # on gluebi-emulated block devices.
+        block_based="--block"
+    fi
+
+    cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && ./full_ota.sh target-files-ubi.zip ${IMAGE_ROOTFS} ubi $block_based
 
     cd ${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools && cp update_ubi.zip target-files-ubi.zip ${DEPLOY_DIR_IMAGE}
 }

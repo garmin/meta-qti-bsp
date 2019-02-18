@@ -1,4 +1,4 @@
-inherit kernel qperf kernel-yocto dm-verity
+inherit kernel qperf kernel-yocto
 
 DESCRIPTION = "CAF Linux Kernel"
 LICENSE = "GPLv2"
@@ -13,7 +13,6 @@ python __anonymous () {
 }
 
 DEPENDS += " mkbootimg-native openssl-native kern-tools-native"
-DEPENDS += " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'bouncycastle-native', '', d)} "
 RDEPENDS_${KERNEL_PACKAGE_NAME}-base = ""
 
 LDFLAGS_aarch64 = "-O1 --hash-style=gnu --as-needed"
@@ -52,27 +51,15 @@ do_compile () {
     oe_runmake CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS} $use_alternate_initrd
 }
 
-# keep this path in-sync with bouncycastle recipe.
-SECURITY_TOOLS_DIR = "${TMPDIR}/work-shared/security_tools"
-
-# Copy verity certificate into ${S} to generate verity signed boot image
-do_configure_append () {
-    if [ "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'dm-verity', '', d)}" = "dm-verity" ] ; then
-        openssl x509 -in ${SECURITY_TOOLS_DIR}/verity.x509.pem -outform der -out ${S}/verity.x509
+do_deploy() {
+    if [[ ${KERNEL_IMAGETYPE} != *-dtb ]]; then
+        bberror "${PN}: Only appended DTB supported; Change KERNEL_IMAGETYPE to ${KERNEL_IMAGETYPE}-dtb in your kernel config."
+        return
     fi
-}
 
-do_deploy[depends] += " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'machine-image:do_makesystem', '', d)}"
-do_deploy[prefuncs] += "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'update_cmdline', '', d)}"
-
-
-# Update kernel cmdline for dm-verity.
-python update_cmdline () {
-    import subprocess
-    bb.build.exec_func('adjust_system_size_for_verity', d)
-    bb.build.exec_func('make_verity_enabled_system_image', d)
-    cmdline = d.getVar('KERNEL_CMD_PARAMS', True)
-    d.setVar('KERNEL_CMD_PARAMS', ''.join(cmdline))
+    if [ -f ${D}/${KERNEL_IMAGEDEST}/-${KERNEL_VERSION} ]; then
+        mv ${D}/${KERNEL_IMAGEDEST}/-${KERNEL_VERSION} ${D}/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION}
+    fi
 }
 
 # Put the zImage in the kernel-dev pkg

@@ -62,7 +62,7 @@ IMAGE_INSTALL += "${@base_conditional('USER_BUILD', '1', '', 'gdbserver', d)}"
 UNSPARSED_RECOVERYFS_DEST = "${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/BOOTABLE_IMAGES"
 
 # Compute sha1 of recovery(fs) images
-# as an extension of the do_rootfs() task.
+# after system & boot images are available.
 do_process_recovery_images() {
     # Create a "recoveryupgrade" directory which will house the
     # data needed by the recovery/recoveryfs upgrade mechanism.
@@ -81,7 +81,7 @@ do_process_recovery_images() {
         ${IMAGE_ROOTFS}/recoveryupgrade/recoveryfsimg_length
 }
 
-ROOTFS_POSTPROCESS_COMMAND += "do_process_recovery_images; "
+addtask do_process_recovery_images after do_make_bootimg before do_build
 
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
 

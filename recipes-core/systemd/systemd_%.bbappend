@@ -57,10 +57,18 @@ CFLAGS_append = " -fPIC"
 
 # In aarch64 targets systemd is not booting with -finline-functions -finline-limit=64 optimizations
 # So temporarily revert to default optimizations for systemd.
-FULL_OPTIMIZATION = "-O2 -fexpensive-optimizations -frename-registers -fomit-frame-pointer -ftree-vectorize"
+SELECTED_OPTIMIZATION = "-O2 -fexpensive-optimizations -frename-registers -fomit-frame-pointer -ftree-vectorize"
+
+MACHINE_COREDUMP_ENABLE = "${@bb.utils.contains('BASEMACHINE', 'qcs605', 'true', 'false', d)}"
 
 # Place systemd-udevd.service in /etc/systemd/system
 do_install_append () {
+
+   if [ "${MACHINE_COREDUMP_ENABLE}" == "true" ]; then
+       sed -i "s#var\/tmp#data\/coredump#g" ${WORKDIR}/sysctl-core.conf
+       #create coredump folder in data
+       install -d ${D}${userfsdatadir}/coredump
+   fi
    install -d ${D}/etc/systemd/system/
    install -d ${D}/lib/systemd/system/ffbm.target.wants
    install -d ${D}/etc/systemd/system/ffbm.target.wants
@@ -87,6 +95,14 @@ do_install_append () {
    install -m 0644 ${WORKDIR}/ion.rules -D ${D}${sysconfdir}/udev/rules.d/ion.rules
 }
 
+# Run fsck as part of local-fs-pre.target instead of local-fs.target
+do_install_append () {
+   # remove from After
+   sed -i '/After/s/local-fs-pre.target//' ${D}${systemd_unitdir}/system/systemd-fsck@.service
+   # Add to Before
+   sed -i '/Before/s/$/ local-fs-pre.target/' ${D}${systemd_unitdir}/system/systemd-fsck@.service
+}
+
 RRECOMMENDS_${PN}_remove += "systemd-extra-utils"
 PACKAGES_remove += "${PN}-extra-utils"
 
@@ -96,5 +112,5 @@ do_install_append_robot-som-ros () {
 
 PACKAGES +="${PN}-coredump"
 FILES_${PN} += "/etc/initscripts \
-                ${sysconfdir}/udev/rules.d "
-FILES_${PN}-coredump = "/etc/sysctl.d/core.conf /etc/security/limits.d/core.conf"
+                ${sysconfdir}/udev/rules.d ${userfsdatadir}/*"
+FILES_${PN}-coredump = "/etc/sysctl.d/core.conf /etc/security/limits.d/core.conf  ${userfsdatadir}/coredump"
