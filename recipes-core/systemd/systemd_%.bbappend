@@ -9,6 +9,7 @@ SRC_URI += "file://sysctl-core.conf"
 SRC_URI += "file://limit-core.conf"
 SRC_URI += "file://logind.conf"
 SRC_URI += "file://ion.rules"
+SRC_URI += "file://set-usb-nodes.rules"
 
 # Custom setup for PACKAGECONFIG to get a slimmer systemd.
 # Removed following:
