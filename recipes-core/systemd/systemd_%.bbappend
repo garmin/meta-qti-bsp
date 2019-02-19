@@ -56,7 +56,7 @@ EXTRA_OECONF += " --disable-hwdb"
 # So temporarily revert to default optimizations for systemd.
 SELECTED_OPTIMIZATION = "-O2 -fexpensive-optimizations -frename-registers -fomit-frame-pointer -ftree-vectorize"
 
-MACHINE_COREDUMP_ENABLE = "${@bb.utils.contains('BASEMACHINE', 'qcs605', 'true', 'false', d)}"
+MACHINE_COREDUMP_ENABLE = "${@bb.utils.contains_any('BASEMACHINE', 'qcs605 sdmsteppe', 'true', 'false', d)}"
 
 # Place systemd-udevd.service in /etc/systemd/system
 do_install_append () {
