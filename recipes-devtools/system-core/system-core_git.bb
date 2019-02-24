@@ -22,7 +22,6 @@ EXTRA_OECONF_append = " --with-logd-logging"
 EXTRA_OECONF_append = "${@bb.utils.contains('VARIANT','user',' --disable-debuggerd','',d)}"
 EXTRA_OECONF_append_apq8053 = " --enable-logd-privs"
 EXTRA_OECONF_append_qcs605 = " --enable-logd-privs"
-EXTRA_OECONF_append_sdm845 = " --enable-logd-privs"
 EXTRA_OECONF_append_qcs405 = " --enable-logd-privs"
 EXTRA_OECONF_append_sdmsteppe = " --enable-logd-privs"
 
