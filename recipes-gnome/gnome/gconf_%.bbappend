@@ -2,3 +2,6 @@
 
 DEPENDS += "gobject-introspection gobject-introspection-native"
 
+# Fix the native recipe sysroot so that the qemu-arm is provided
+# for build system to use when building pango library for target.
+DEPENDS += "qemu-native"
