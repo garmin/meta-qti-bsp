@@ -36,6 +36,8 @@ SECURITY_CFLAGS_pn-ulp2 = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-location-flp = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-location-service = "${SECURITY_PIC_CFLAGS}"
 SECURITY_CFLAGS_pn-loc-glue = "${SECURITY_PIC_CFLAGS}"
+SECURITY_CFLAGS_pn-location-batching = "${SECURITY_PIC_CFLAGS}"
+SECURITY_CFLAGS_pn-location-geofence = "${SECURITY_PIC_CFLAGS}"
 
 # General purpose OSS packages
 SECURITY_CFLAGS_pn-gtest = "${SECURITY_PIC_CFLAGS}"
