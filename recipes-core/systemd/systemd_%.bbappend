@@ -36,11 +36,13 @@ SRC_URI += "file://set-usb-nodes.rules"
 PACKAGECONFIG = " \
     ${@bb.utils.filter('DISTRO_FEATURES', 'selinux', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wifi', 'rfkill', '', d)} \
+    acl \
     binfmt \
     firstboot \
     hibernate \
     hostnamed \
     ima \
+    kmod \
     logind \
     machined \
     networkd \
