@@ -21,6 +21,10 @@ do_install_append() {
     install -m 0644 ${WORKDIR}/media-encryption.conf -D ${D}/${sysconfdir}/conf/media-encryption.conf
 }
 
+do_install_append_sdm845 () {
+    sed -i "s/footer/fdemeta/g" ${D}/${sysconfdir}/conf/media-encryption.conf
+}
+
 PACKAGES =+ "${PN}-lib"
 FILES_${PN}-lib   =  "${sysconfdir}/conf/*"
 FILES_${PN}-lib  +=  "${libdir}/libcrypthelper_mediameta.so.*  ${libdir}/pkgconfig/*"
