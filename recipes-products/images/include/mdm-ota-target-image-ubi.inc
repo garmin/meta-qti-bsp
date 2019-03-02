@@ -141,6 +141,12 @@ do_recovery_ubi() {
     # by default, this mechanism is limited to nand targets and not emmc.
     cp ${COREBASE}/meta/files/device_table-minimal.txt ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/device_table.txt
 
+    # File-based OTA upgrade is also responsible for assigning the correct
+    # uid/gid to each file in the system's rootfs. For this, we use canned_fs_config.
+    # The fsconfig file is the complete snapshot of file-attributes
+    # collected from the fakeroot/pseudo build environment.
+    cp ${DEPLOY_DIR_IMAGE}/system.canned.fsconfig ${OTA_TARGET_IMAGE_ROOTFS_UBI}/META/.
+
     #cp and modify file_contexts to BOOT/RAMDISK folder
     if [[ "${DISTRO_FEATURES}" =~ "selinux" ]]; then
         cp -a ${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/. ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/.

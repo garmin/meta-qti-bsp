@@ -84,6 +84,12 @@ if [ "${block_based}" = "--block" ]; then
 else
     # File-based OTA needs this to assign the correct context to '/' after OTA upgrade
     echo "/system -d system_u:object_r:root_t:s0" >> $target_files/BOOT/RAMDISK/file_contexts
+
+    # File-based OTA also can use canned_fs_config to set uid, gid & mode to all the files
+    # The "-x" is to tell fs_config that the modes in fsconfig file are in hex, not octal.
+    if [ -e $target_files/META/system.canned.fsconfig ]; then
+        FSCONFIGFOPTS=${FSCONFIGFOPTS}" -p system/ -x $target_files/META/system.canned.fsconfig "
+    fi
 fi
 
 # Generate selabel rules only if file_contexts is packed in target-files
