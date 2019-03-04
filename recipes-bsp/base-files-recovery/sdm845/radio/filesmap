@@ -39,7 +39,7 @@ cmnlib.mbn              /dev/block/bootdevice/by-name/cmnlib
 cmnlib64.mbn            /dev/block/bootdevice/by-name/cmnlib64
 devcfg.mbn              /dev/block/bootdevice/by-name/devcfg
 keymaster.mbn           /dev/block/bootdevice/by-name/keymaster
-keymaster64.mbn         /dev/block/bootdevice/by-name/keymaster64
+keymaster64.mbn         /dev/block/bootdevice/by-name/keymaster
 lksecapp.mbn            /dev/block/bootdevice/by-name/lksecapp
 sec.dat                 /dev/block/bootdevice/by-name/sec
 uefi_sec.mbn            /dev/block/bootdevice/by-name/uefisecapp
@@ -56,6 +56,7 @@ qupv3fw.elf             /dev/block/bootdevice/by-name/qupfw
 storsec.mbn             /dev/block/bootdevice/by-name/storsec
 vbmeta.img              /dev/block/bootdevice/by-name/vbmeta
 dtbo.img                /dev/block/bootdevice/by-name/dtbo
+imagefv.elf             /dev/block/bootdevice/by-name/ImageFv
 
 # filename + .bak       backup partition
 
