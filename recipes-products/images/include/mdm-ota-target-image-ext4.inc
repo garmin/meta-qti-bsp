@@ -38,7 +38,7 @@ python __anonymous () {
         d.appendVar('DEPENDS', emmc_set_vars_and_get_dependencies(d));
         if (d.getVar('RECOVERY_IMAGE', True) == '1' or
                 d.getVar('GENERATE_AB_OTA_PACKAGE', True) == '1'):
-            if (d.getVar('DEBUG_BUILD', True) == '0'):
+            if (d.getVar('DEBUG_BUILD', True) != '1'):
                 bb.build.addtask('do_recovery_ext4', 'do_build', 'do_makesystem', d)
                 bb.build.addtask('do_gen_otazip_ext4', 'do_build', 'do_recovery_ext4', d)
 }
