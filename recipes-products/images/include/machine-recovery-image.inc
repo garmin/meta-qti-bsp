@@ -73,10 +73,41 @@ do_makesystem() {
 	fi
 }
 
+# The default ubi image generated doesn't have provision for selinux
+# Hence, create a recoveryfs.ubi image which is selinux enabled
+# Do this only when both selinux & nand-boot is enabled
+IMAGE_PREPROCESS_COMMAND_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'selinux nand-boot', 'create_recoveryfs_ubi_img_with_selinux;', '', d)} "
+
+RECOVERYFS_SELINUX_CFG = "${DEPLOY_DIR_IMAGE}/ubinize-recoveryfs-selinux.cfg"
+OUTPUT_UBIFS_IMAGE = "${DEPLOY_DIR_IMAGE}/machine-recovery-image-selinux-${MACHINE}.ubifs"
+OUTPUT_UBI_IMAGE = "${DEPLOY_DIR_IMAGE}/machine-recovery-image-selinux-${MACHINE}.ubi"
+
+create_recoveryfs_ubi_img_with_selinux() {
+    # create ubinize cfg
+    echo \[ubifs\] > "${RECOVERYFS_SELINUX_CFG}"
+    echo mode=ubi >> "${RECOVERYFS_SELINUX_CFG}"
+    echo image="${OUTPUT_UBIFS_IMAGE}" >> "${RECOVERYFS_SELINUX_CFG}"
+    echo vol_id=0 >> "${RECOVERYFS_SELINUX_CFG}"
+    echo vol_type=dynamic >> "${RECOVERYFS_SELINUX_CFG}"
+    echo vol_name=${UBI_VOLNAME} >> "${RECOVERYFS_SELINUX_CFG}"
+    echo vol_flags=autoresize >> "${RECOVERYFS_SELINUX_CFG}"
+
+    # create ubifs image (with selinux option passed) and then ubi image
+    mkfs.ubifs -r ${IMAGE_ROOTFS} --selinux=${SELINUX_FILE_CONTEXTS} -o ${OUTPUT_UBIFS_IMAGE} ${MKUBIFS_ARGS}
+    ubinize -o ${OUTPUT_UBI_IMAGE} ${UBINIZE_ARGS} ${RECOVERYFS_SELINUX_CFG}
+    chmod 644 ${OUTPUT_UBI_IMAGE}
+}
+
 do_rename_recovery_ubi_image() {
     #rename machine-recovery-image.ubi if it exists
     if [ -f "${DEPLOY_DIR_IMAGE}/machine-recovery-image-${MACHINE}.ubi" ]; then
         mv ${DEPLOY_DIR_IMAGE}/machine-recovery-image-${MACHINE}.ubi ${DEPLOY_DIR_IMAGE}/${MACHINE}-recoveryfs.ubi
+    fi
+
+    # if there is "selinux enabled" version of recoveryfs image,
+    # we would like to use that instead
+    if [ -f "${DEPLOY_DIR_IMAGE}/machine-recovery-image-selinux-${MACHINE}.ubi" ]; then
+        mv ${DEPLOY_DIR_IMAGE}/machine-recovery-image-selinux-${MACHINE}.ubi ${DEPLOY_DIR_IMAGE}/${MACHINE}-recoveryfs.ubi
     fi
 }
 

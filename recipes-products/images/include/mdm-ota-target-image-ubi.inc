@@ -2,7 +2,7 @@
 # add the MACHINE name to this list.
 # This is the "only" list that will control whether
 # OTA upgrade will be supported on a target.
-OTA_SUPPORTED_NAND_TARGET_LIST = "sdxpoorwills mdm9607 qcs403-som2"
+OTA_SUPPORTED_NAND_TARGET_LIST = "sdxprairie"
 
 def nand_target_supports_OTA_upgrade(d):
     list_of_supported_targets = d.getVar('OTA_SUPPORTED_NAND_TARGET_LIST');
@@ -148,7 +148,8 @@ do_recovery_ubi() {
         # Keep a copy of file_context.subs_dist & file_contexts.homedirs
         # in the same folder as file_contexts
         # Also append "/system" to each absolute path entry in these files
-        sed -i 's#^/#/system/#g' ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/homedir_template
+        [[ -e ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/homedir_template ]] && \
+            sed -i 's#^/#/system/#g' ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/homedir_template
         grep -v -e '^$' ${IMAGE_ROOTFS}/etc/selinux/mls/contexts/files/file_contexts.subs_dist | \
             grep -v '^[#]' | awk '{print "/system"$1,"/system"$2}' > \
             ${OTA_TARGET_IMAGE_ROOTFS_UBI}/BOOT/RAMDISK/file_contexts.subs_dist
