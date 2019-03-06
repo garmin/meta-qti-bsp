@@ -22,6 +22,8 @@ VBLE = "${@base_contains('DISTRO_FEATURES', 'vble','1', '0', d)}"
 
 VERITY_ENABLED = "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity','1', '0', d)}"
 
+EARLY_ETH = "${@bb.utils.contains('DISTRO_FEATURES', 'early-eth', '1', '0', d)}"
+
 EXTRA_OEMAKE = "'CLANG_BIN=${STAGING_BINDIR_NATIVE}/llvm-arm-toolchain/bin/' \
                 'CLANG_PREFIX=${STAGING_BINDIR_NATIVE}/${TARGET_SYS}/${TARGET_PREFIX}' \
                 'TARGET_ARCHITECTURE=${TARGET_ARCH}'\
@@ -31,7 +33,8 @@ EXTRA_OEMAKE = "'CLANG_BIN=${STAGING_BINDIR_NATIVE}/llvm-arm-toolchain/bin/' \
                 'VERIFIED_BOOT_LE=${VBLE}'\
                 'VERITY_LE=${VERITY_ENABLED}'\
                 'INIT_BIN_LE=\"/sbin/init\"'\
-                'EDK_TOOLS_PATH=${S}/BaseTools'"
+                'EDK_TOOLS_PATH=${S}/BaseTools'\
+                'EARLY_ETH_ENABLED=${EARLY_ETH}'"
 
 EXTRA_OEMAKE_append_qcs40x = " 'DISABLE_PARALLEL_DOWNLOAD_FLASH=1'"
 
