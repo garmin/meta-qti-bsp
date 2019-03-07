@@ -13,8 +13,10 @@ SRC_URI += "file://set-usb-nodes.rules"
 
 # Custom setup for PACKAGECONFIG to get a slimmer systemd.
 # Removed following:
-#   * timesyncd - Chronyd is being used instead for NTP timesync
-#                 Also timesyncd was resulting in higher boot KPI.
+#   * backlight - Loads/Saves Screen Backlight Brightness, not required.
+#   * firstboot - initializes the most basic system settings interactively
+#                  on the first boot if /etc is empty, not required.
+#   * hostname  - No need to change the system's hostname
 #   * ldconfig  - configures dynamic linker run-time bindings.
 #                 ldconfig  creates  the  necessary links and cache to the most
 #                 recent shared libraries found in the directories specified on
@@ -24,28 +26,26 @@ SRC_URI += "file://set-usb-nodes.rules"
 #                 system-ldconfig.service runs "ldconfig -X", but as / is RO
 #                 cache may not be created. Disabling this may introduce app
 #                 start time latency.
-#   * backlight - Loads/Saves Screen Backlight Brightness, not required.
-#   * localed   - systemd-localed is a system service that may be used as
-#                 mechanism to change the system locale settings
-#   * quotacheck  Not using Quota
-#   * vconsole  - Not used
-#   * hostname  - No need to change the system's hostname
-#   * smack     - Not used
-#   * utmp      - No back fill for SysV runlevel changes needed
-#   * resolvd   - Use own network name resolution manager
+#   * localed   - Service used to change the system locale settings, not needed.
+#   * machined  - For tracking local Virtual Machines and Containers, not needed.
+#   * networkd  - Manages network configurations, custom solution is used.
+#   * quotacheck- Not using Quota.
+#   * resolvd   - Use custom network name resolution manager.
+#   * smack     - Not used.
+#   * timesyncd - Chronyd is being used instead for NTP timesync.
+#                 Also timesyncd was resulting in higher boot KPI.
+#   * utmp      - No back fill for SysV runlevel changes needed.
+#   * vconsole  - Not used.
 PACKAGECONFIG = " \
     ${@bb.utils.filter('DISTRO_FEATURES', 'selinux', d)} \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wifi', 'rfkill', '', d)} \
     acl \
     binfmt \
-    firstboot \
     hibernate \
     hostnamed \
     ima \
     kmod \
     logind \
-    machined \
-    networkd \
     polkit \
     randomseed \
     sysusers \
