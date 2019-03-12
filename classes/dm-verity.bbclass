@@ -147,6 +147,7 @@ python make_verity_enabled_system_image () {
     img_size = int(d.getVar("SYSTEM_SIZE_EXT4",True))
     verity_size = int(d.getVar("VERITY_SIZE",True))
     padding_size = partition_size - img_size - verity_size
+    bb.debug(1, "padding_size(%s) = %s - %s - %s" %(padding_size, partition_size, img_size, verity_size))
     assert padding_size >= 0
 
     fec_supported=d.getVar("FEC_SUPPORT",True)
