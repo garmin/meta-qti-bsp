@@ -20,6 +20,8 @@ do_install_append_msm(){
       install -d ${D}/etc/systemd/system/multi-user.target.wants/
       if ${@base_conditional('MACHINE', 'qcs403-som2', 'true', 'false', d)}; then
           sed "s/^gEnable2x2\s*=.*/gEnable2x2=0/" -i ${D}/lib/firmware/wlan/qca_cld/WCNSS_qcom_cfg.ini
+          mkdir -p ${D}/lib/firmware/wlan/qca_cld/wlan_debug
+          ln -sf /lib/firmware/wlan/qca_cld/WCNSS_qcom_cfg.ini ${D}/lib/firmware/wlan/qca_cld/wlan_debug/WCNSS_qcom_cfg.ini
       fi
     if ${@base_conditional('BASEMACHINE', 'apq8009', base_conditional('BASEPRODUCT', 'qsap', 'false', 'true', d), 'true', d)}; then
         if ${@base_conditional('BASEMACHINE', 'qcs40x', 'false', 'true', d)}; then
