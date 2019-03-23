@@ -42,3 +42,5 @@ SYSTEMRW_VOLUME_SIZE ?= "6MiB"
 
 # Formats of root filesystem images.
 IMAGE_FSTYPES += "ubi"
+
+MACHINE_MNT_POINTS = "/persist"

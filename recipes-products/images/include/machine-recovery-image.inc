@@ -187,6 +187,82 @@ create_recoveryfs_squashfs_ubinize_config() {
     echo vol_flags=autoresize >> "${UBINIZE_RECOVERYFS_SQUASHFS_CFG}"
 }
 
+# machine-recovery-image and machine-image both use base-files package.
+# base-files mounts a couple of partitions during bootup.
+# This is fine for mission mode but not recovery mode.
+# We strip out these mount operations from machine-recovery-image.
+remove_mount_operations() {
+    # do this only for systemd-boot, since the mount operations
+    # are being done only for systemd as of now.
+    if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
+        # userdata
+        if [ -L ${IMAGE_ROOTFS}/lib/systemd/system/sysinit.target.wants/data.mount ]; then
+            rm ${IMAGE_ROOTFS}/lib/systemd/system/sysinit.target.wants/data.mount
+        fi
+        # cache
+        if [ -L ${IMAGE_ROOTFS}/lib/systemd/system/sysinit.target.wants/cache.mount ]; then
+            rm ${IMAGE_ROOTFS}/lib/systemd/system/sysinit.target.wants/cache.mount
+        fi
+        # persist
+        if [ -L ${IMAGE_ROOTFS}/lib/systemd/system/sysinit.target.wants/persist.mount ]; then
+            rm ${IMAGE_ROOTFS}/lib/systemd/system/sysinit.target.wants/persist.mount
+        fi
+        # modem on A/B
+        if [ -L ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/firmware-mount.service ]; then
+            rm ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/firmware-mount.service
+        fi
+        # modem on nand + non A/B
+        if [ -L ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/firmware.mount ]; then
+            rm ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/firmware.mount
+        fi
+        # dsp on nand + non A/B
+        if [ -L ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/dsp.mount ]; then
+            rm ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/dsp.mount
+        fi
+        # dsp on A/B
+        if [ -L ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/dsp-mount.service ]; then
+            rm ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/dsp-mount.service
+        fi
+        # bluetooth on nand + non A/B
+        if [ -L ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/bluetooth.mount ]; then
+            rm ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/bluetooth.mount
+        fi
+        # bluetooth on A/B
+        if [ -L ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/bluetooth-mount.service ]; then
+            rm ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/bluetooth-mount.service
+        fi
+        # systemrw
+        if [ -L ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/systemrw.mount ]; then
+            rm ${IMAGE_ROOTFS}/etc/systemd/system/local-fs.target.requires/systemrw.mount
+        fi
+    fi
+}
+
+# Create a recoveryfs image with squashfs in it.
+# This squashfs image will be one of the volumes on a ubi device
+IMAGE_PREPROCESS_COMMAND_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'nand-squashfs', 'create_recoveryfs_squashfs_ubi_img', '', d)} "
+
+RECOVERYFS_SQUASHFS_IMAGE = "${DEPLOY_DIR_IMAGE}/${BASEMACHINE}-recoveryfs.squash"
+RECOVERYFS_SQUASHFS_UBI_IMAGE = "${DEPLOY_DIR_IMAGE}/${BASEMACHINE}-squashfs-recoveryfs.ubi"
+UBINIZE_RECOVERYFS_SQUASHFS_CFG = "${DEPLOY_DIR_IMAGE}/recoveryfs_squashfs_ubinize.cfg"
+
+create_recoveryfs_squashfs_ubi_img() {
+    create_recoveryfs_squashfs_ubinize_config
+    mksquashfs ${IMAGE_ROOTFS} ${RECOVERYFS_SQUASHFS_IMAGE} -noappend -comp xz
+    ubinize -o ${RECOVERYFS_SQUASHFS_UBI_IMAGE} ${UBINIZE_ARGS} ${UBINIZE_RECOVERYFS_SQUASHFS_CFG}
+    chmod 644 ${RECOVERYFS_SQUASHFS_UBI_IMAGE}
+}
+
+create_recoveryfs_squashfs_ubinize_config() {
+    echo \[recoveryfs_volume\] > "${UBINIZE_RECOVERYFS_SQUASHFS_CFG}"
+    echo mode=ubi >> "${UBINIZE_RECOVERYFS_SQUASHFS_CFG}"
+    echo image="${RECOVERYFS_SQUASHFS_IMAGE}" >> "${UBINIZE_RECOVERYFS_SQUASHFS_CFG}"
+    echo vol_id=0 >> "${UBINIZE_RECOVERYFS_SQUASHFS_CFG}"
+    echo vol_type=dynamic >> "${UBINIZE_RECOVERYFS_SQUASHFS_CFG}"
+    echo vol_name=recoveryfs >> "${UBINIZE_RECOVERYFS_SQUASHFS_CFG}"
+    echo vol_flags=autoresize >> "${UBINIZE_RECOVERYFS_SQUASHFS_CFG}"
+}
+
 ROOTFS_POSTPROCESS_COMMAND += " do_fsconfig; remove_mount_operations; "
 
 # Call function makesystem to generate sparse ext4 image

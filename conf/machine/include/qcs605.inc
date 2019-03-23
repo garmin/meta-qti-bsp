@@ -29,6 +29,8 @@ PAGE_SIZE ?= '4096'
 # Max supported inodes
 EXTRA_IMAGECMD ?= "-N 2048"
 
+MACHINE_MNT_POINTS = "/firmware /persist /cache /dsp /bt_firmware"
+
 # Sizes for EXT4 (in bytes)
 SYSTEM_SIZE_EXT4 ?= "3221225472"
 SYSTEMRW_SIZE_EXT4 ?= "8388608"
