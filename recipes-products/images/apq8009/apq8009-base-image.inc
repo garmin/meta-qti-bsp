@@ -54,9 +54,9 @@ IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', 're
 #IMAGE_INSTALL += "${@bb.utils.contains('DISTRO_FEATURES', 'ab-boot-support', 'lib32-recovery', '', d)}"
 
 # Don't install GDB and related pacakges in production builds.
-DEPENDS += "${@base_conditional('USER_BUILD', '1', '', 'gdb-cross-arm', d)}"
-IMAGE_INSTALL += "${@base_conditional('USER_BUILD', '1', '', 'gdb', d)}"
-IMAGE_INSTALL += "${@base_conditional('USER_BUILD', '1', '', 'gdbserver', d)}"
+DEPENDS += "${@oe.utils.conditional('USER_BUILD', '1', '', 'gdb-cross-arm', d)}"
+IMAGE_INSTALL += "${@oe.utils.conditional('USER_BUILD', '1', '', 'gdb', d)}"
+IMAGE_INSTALL += "${@oe.utils.conditional('USER_BUILD', '1', '', 'gdbserver', d)}"
 
 # Location of unsparsed recoveryfs & recovery images
 UNSPARSED_RECOVERYFS_DEST = "${TMPDIR}/work/x86_64-linux/releasetools-native/1.0-r0/releasetools/BOOTABLE_IMAGES"
