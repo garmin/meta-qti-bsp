@@ -26,10 +26,10 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
 
 [Unit]
-Before=local-fs.target
+After=sysinit.target
 
 [Mount]
 Type=ubifs
 What=ubi0:systemrw
 Where=/systemrw
-Options=bulk_read
+Options=bulk_read,rw,rootcontext=system_u:object_r:system_data_t:s0

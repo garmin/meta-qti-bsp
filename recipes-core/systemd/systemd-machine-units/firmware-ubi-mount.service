@@ -31,8 +31,8 @@ SourcePath=/etc/initscripts/firmware-ubi-mount.sh
 DefaultDependencies=no
 
 [Service]
-Restart=no
-ExecStart=/etc/initscripts/firmware-ubi-mount.sh start
+Type=oneshot
+ExecStart=/etc/initscripts/firmware-ubi-mount.sh
 
 [Install]
 WantedBy=local-fs.target

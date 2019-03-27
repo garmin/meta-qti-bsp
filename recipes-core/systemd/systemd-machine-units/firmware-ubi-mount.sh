@@ -40,7 +40,8 @@ FindAndMountUBI () {
     do
         if [ -c $device ]
         then
-            mount -t ubifs /dev/ubi1_0 $dir -o bulk_read
+            test -x /sbin/restorecon && /sbin/restorecon $device
+            mount -t ubifs /dev/ubi1_0 $dir -o bulk_read,context=system_u:object_r:firmware_t:s0
             break
         else
             sleep 0.010

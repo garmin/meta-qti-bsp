@@ -32,4 +32,4 @@ After=sysinit.target
 Type=ubifs
 What=ubi0:usrfs
 Where=data
-Options=bulk_read
+Options=bulk_read,rw,rootcontext=system_u:object_r:data_t:s0

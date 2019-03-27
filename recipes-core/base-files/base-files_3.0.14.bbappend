@@ -43,7 +43,7 @@ do_install_append(){
     install -m 0644 ${WORKDIR}/fstab ${D}${sysconfdir}/fstab
 }
 
-do_install_append_msm() {
+do_install_append() {
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d 0644 ${D}${sysconfdir}/systemd/system
         install -d 0644 ${D}${sysconfdir}/systemd/system/local-fs.target.requires
