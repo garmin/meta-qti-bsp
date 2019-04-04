@@ -33,6 +33,8 @@ Supported combinations are listed below.
       |sa8155         | automotive     | debug perf       |
       |sa8155qdrive   |                |                  |
       +---------------+----------------+------------------+
+      |qtiquingvm     | automotive     | debug perf       |
+      +---------------+----------------+------------------+
       |sdmsteppe      | concam         | debug perf user  |
       +---------------+----------------+------------------+
       |sdm845         | robot          | debug            |

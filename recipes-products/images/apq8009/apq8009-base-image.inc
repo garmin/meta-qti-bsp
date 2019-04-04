@@ -81,7 +81,7 @@ do_process_recovery_images() {
         ${IMAGE_ROOTFS}/recoveryupgrade/recoveryfsimg_length
 }
 
-addtask do_process_recovery_images after do_make_bootimg before do_build
+addtask do_process_recovery_images after do_image_complete before do_build
 
 # Below is to generate sparse ext4 system image (OE by default supports raw ext4 images)
 
