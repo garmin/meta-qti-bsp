@@ -33,6 +33,7 @@ DefaultDependencies=no
 [Service]
 Type=oneshot
 ExecStart=/etc/initscripts/firmware-ubi-mount.sh
+Nice=-20
 
 [Install]
 WantedBy=local-fs.target

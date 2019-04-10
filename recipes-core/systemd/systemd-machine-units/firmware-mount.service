@@ -33,6 +33,7 @@ Type=oneshot
 RemainAfterExit=yes
 PassEnvironment="SLOT_SUFFIX"
 ExecStart=/bin/mount -o noexec,nodev,ro,context=system_u:object_r:firmware_t:s0 -t vfat /dev/disk/by-partlabel/modem${SLOT_SUFFIX} /firmware
+Nice=-20
 
 [Install]
 WantedBy=local-fs.target
