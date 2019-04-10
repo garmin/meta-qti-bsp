@@ -57,6 +57,7 @@ do_install_append () {
     install -d 0644 ${D}${sysconfdir}/initscripts
     install -d 0644 ${D}${systemd_unitdir}/system
     install -d 0644 ${D}${systemd_unitdir}/system/local-fs.target.requires
+    install -d 0644 ${D}${systemd_unitdir}/system/local-fs.target.wants
     install -d 0644 ${D}${systemd_unitdir}/system/sysinit.target.wants
 
     # If the AB boot feature is enabled, then instead of <partition>.mount,
@@ -74,7 +75,7 @@ do_install_append () {
                 else
                     install -m 0644 ${WORKDIR}/data-ubi.mount ${D}${systemd_unitdir}/system/data.mount
                 fi
-                ln -sf ${systemd_unitdir}/system/data.mount ${D}${systemd_unitdir}/system/sysinit.target.wants/data.mount
+                ln -sf ${systemd_unitdir}/system/data.mount ${D}${systemd_unitdir}/system/local-fs.target.wants/data.mount
             fi
         fi
 
