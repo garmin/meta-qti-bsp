@@ -11,7 +11,7 @@ FILES_${PN} += "/lib/*"
 PR = "r0"
 
 SRC_URI = "\
-    http://downloads.sourceforge.net/project/${PN}/${PN}/${PV}/${PN}-${PV}.tar.gz \
+    http://downloads.sourceforge.net/project/libexif/libexif/${PV}/libexif-${PV}.tar.gz \
 "
 
 SRC_URI[md5sum] = "9321c409a3e588d4a99d63063ef4bbb7"
