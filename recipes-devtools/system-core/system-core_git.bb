@@ -111,6 +111,16 @@ do_install_append() {
    fi
 }
 
+do_install_append_mdm() {
+   if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
+      install -d ${D}${systemd_unitdir}/system/local-fs.target.wants/
+      rm -rf ${D}${systemd_unitdir}/system/multi-user.target.wants/adbd.service
+      rm -rf ${D}${systemd_unitdir}/system/multi-user.target.wants/usb.service
+      ln -sf ${systemd_unitdir}/system/adbd.service ${D}${systemd_unitdir}/system/local-fs.target.wants/adbd.service
+      ln -sf ${systemd_unitdir}/system/usb.service ${D}${systemd_unitdir}/system/local-fs.target.wants/usb.service
+   fi
+}
+
 do_install_append_apq8009() {
    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'false', 'true', d)}; then
     install -m 0755 ${S}/debuggerd/start_debuggerd -D ${D}${sysconfdir}/init.d/init_debuggerd
@@ -179,7 +189,7 @@ INITSCRIPT_PARAMS_${PN}-post-boot = "start 90 2 3 4 5 ."
 PACKAGES =+ "${PN}-adbd-dbg ${PN}-adbd ${PN}-adbd-dev"
 FILES_${PN}-adbd-dbg = "${base_sbindir}/.debug/adbd ${libdir}/.debug/libadbd.*"
 FILES_${PN}-adbd     = "${base_sbindir}/adbd ${sysconfdir}/init.d/adbd ${libdir}/libadbd.so.*"
-FILES_${PN}-adbd    += "${systemd_unitdir}/system/adbd.service ${systemd_unitdir}/system/multi-user.target.wants/adbd.service ${systemd_unitdir}/system/ffbm.target.wants/adbd.service ${sysconfdir}/launch_adbd ${sysconfdir}/initscripts/adbd ${sysconfdir}/adb_devid"
+FILES_${PN}-adbd    += "${systemd_unitdir}/system/adbd.service ${systemd_unitdir}/system/multi-user.target.wants/adbd.service ${systemd_unitdir}/system/local-fs.target.wants/adbd.service ${systemd_unitdir}/system/ffbm.target.wants/adbd.service ${sysconfdir}/launch_adbd ${sysconfdir}/initscripts/adbd ${sysconfdir}/adb_devid"
 FILES_${PN}-adbd-dev = "${libdir}/libadbd.so ${libdir}/libadbd.la"
 
 PACKAGES =+ "${PN}-usb-dbg ${PN}-usb"
@@ -187,7 +197,7 @@ FILES_${PN}-usb-dbg  = "${bindir}/.debug/usb_composition_switch"
 FILES_${PN}-usb      = "${sysconfdir}/init.d/usb ${base_sbindir}/usb_composition ${bindir}/usb_composition_switch ${base_sbindir}/usb/compositions/*"
 FILES_${PN}-usb     += "${sysconfdir}/usb/*"
 FILES_${PN}-usb     += "${base_sbindir}/usb/* ${base_sbindir}/usb_debug ${base_sbindir}/usb/debuger/*"
-FILES_${PN}-usb     += "${systemd_unitdir}/system/usb.service ${systemd_unitdir}/system/multi-user.target.wants/usb.service ${systemd_unitdir}/system/ffbm.target.wants/usb.service ${sysconfdir}/initscripts/usb"
+FILES_${PN}-usb     += "${systemd_unitdir}/system/usb.service ${systemd_unitdir}/system/multi-user.target.wants/usb.service ${systemd_unitdir}/system/local-fs.target.wants/usb.service ${systemd_unitdir}/system/ffbm.target.wants/usb.service ${sysconfdir}/initscripts/usb"
 
 PACKAGES =+ "${PN}-post-boot"
 FILES_${PN}-post-boot  = "${sysconfdir}/init.d/init_post_boot"
