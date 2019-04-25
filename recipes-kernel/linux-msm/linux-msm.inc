@@ -1,4 +1,4 @@
-inherit kernel qperf kernel-yocto
+inherit kernel kernel-yocto
 
 DESCRIPTION = "CAF Linux Kernel"
 LICENSE = "GPLv2"

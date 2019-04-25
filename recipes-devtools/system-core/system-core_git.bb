@@ -1,4 +1,4 @@
-inherit autotools pkgconfig systemd update-rc.d qperf useradd
+inherit autotools pkgconfig systemd update-rc.d useradd
 
 DESCRIPTION = "Android system/core components"
 HOMEPAGE = "http://developer.android.com/"
