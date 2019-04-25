@@ -13,6 +13,7 @@ SRC_URI += "file://kgsl.rules"
 SRC_URI += "file://set-usb-nodes.rules"
 SRC_URI += "file://sysctl.conf"
 SRC_URI += "file://platform.conf"
+SRC_URI += "file://sd-bus-Allow-extra-users-to-communicate.patch"
 
 # Custom setup for PACKAGECONFIG to get a slimmer systemd.
 # Removed following:
@@ -32,6 +33,7 @@ SRC_URI += "file://platform.conf"
 #   * localed   - Service used to change the system locale settings, not needed.
 #   * machined  - For tracking local Virtual Machines and Containers, not needed.
 #   * networkd  - Manages network configurations, custom solution is used.
+#   * polkit    - Not used.
 #   * quotacheck- Not using Quota.
 #   * resolvd   - Use custom network name resolution manager.
 #   * smack     - Not used.
@@ -49,7 +51,6 @@ PACKAGECONFIG = " \
     ima \
     kmod \
     logind \
-    polkit \
     randomseed \
     sysusers \
     timedated \
