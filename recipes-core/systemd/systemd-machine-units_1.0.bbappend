@@ -59,6 +59,7 @@ do_install_append () {
     install -d 0644 ${D}${systemd_unitdir}/system/local-fs.target.requires
     install -d 0644 ${D}${systemd_unitdir}/system/local-fs.target.wants
     install -d 0644 ${D}${systemd_unitdir}/system/sysinit.target.wants
+    install -d 0644 ${D}${systemd_unitdir}/system/multi-user.target.wants
 
     # If the AB boot feature is enabled, then instead of <partition>.mount,
     # a <partition-mount>.service invokes mounting the A/B partition as detected at the time of boot.
@@ -99,7 +100,7 @@ do_install_append () {
             else
                 install -m 0644 ${WORKDIR}/cache-ubi.mount ${D}${systemd_unitdir}/system/cache.mount
             fi
-            ln -sf ${systemd_unitdir}/system/cache.mount ${D}${systemd_unitdir}/system/sysinit.target.wants/cache.mount
+            ln -sf ${systemd_unitdir}/system/cache.mount ${D}${systemd_unitdir}/system/multi-user.target.wants/cache.mount
         fi
 
         if [ "$entry" == "/persist" ]; then
@@ -110,7 +111,7 @@ do_install_append () {
                     install -m 0644 ${WORKDIR}/persist-ubi.mount ${D}${systemd_unitdir}/system/persist.mount
                 fi
             fi
-            ln -sf ${systemd_unitdir}/system/persist.mount ${D}${systemd_unitdir}/system/sysinit.target.wants/persist.mount
+            ln -sf ${systemd_unitdir}/system/persist.mount ${D}${systemd_unitdir}/system/multi-user.target.wants/persist.mount
         fi
 
         if [ "$entry" == "/firmware" ]; then
