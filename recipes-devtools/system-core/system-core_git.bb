@@ -71,7 +71,7 @@ do_install_append() {
    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
       install -m 0750 ${S}/adb/start_adbd -D ${D}${sysconfdir}/initscripts/adbd
       install -m 0750 ${S}/logd/start_logd -D ${D}${sysconfdir}/initscripts/logd
-      install -m 0750 ${S}/usb/start_usb -D ${D}${sysconfdir}/initscripts/usb
+      install -m 0755 ${S}/usb/start_usb -D ${D}${sysconfdir}/initscripts/usb
       install -m 0750 ${S}/rootdir/etc/init.qcom.post_boot.sh -D ${D}${sysconfdir}/initscripts/init_post_boot
       install -d ${D}${systemd_unitdir}/system/
       install -d ${D}${systemd_unitdir}/system/multi-user.target.wants/
