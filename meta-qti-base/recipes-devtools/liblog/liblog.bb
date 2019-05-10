@@ -8,6 +8,8 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 PR = "r1"
 
+DEPENDS = "glib-2.0"
+
 FILESPATH =+ "${WORKSPACE}/system/core/:"
 SRC_URI   = "file://liblog"
 SRC_URI  += "file://50-log.rules"
@@ -18,7 +20,9 @@ BBCLASSEXTEND = "native"
 
 EXTRA_OECONF += " --with-core-includes=${WORKSPACE}/system/core/include"
 EXTRA_OECONF += " --disable-static"
-EXTRA_OECONF_append_class-target = " --with-logd-logging"
+
+CFLAGS += " -Dstrlcpy=g_strlcpy "
+LDFLAGS += " -lglib-2.0 "
 
 do_install_append() {
     if [ "${CLASSOVERRIDE}" = "class-target" ]; then

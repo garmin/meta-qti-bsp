@@ -8,6 +8,9 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 FILESPATH =+ "${WORKSPACE}:"
 SRC_URI   = "file://hardware/libhardware/"
+# Get Add-gralloc1.h-from-p-keystone-qcom-branch
+SRC_URI += "https://source.codeaurora.org/quic/le/platform/hardware/libhardware/plain/include/hardware/gralloc1.h?h=keystone/p-keystone-qcom-release;downloadfilename=gralloc1.h;md5sum=5171fc33c1299824ede5756a4da57507"
+
 S = "${WORKDIR}/hardware/libhardware"
 
 PR = "r6"
@@ -19,3 +22,7 @@ EXTRA_OECONF_append_concam = " --enable-camera"
 EXTRA_OECONF_append_sdm845 = " --enable-sensors"
 EXTRA_OECONF_append_sdm845 = " --enable-camera"
 EXTRA_OECONF_append_robot-som = " --enable-camera"
+
+do_install_append () {
+    cp ${WORKDIR}/gralloc1.h ${D}${includedir}/hardware/
+}

@@ -20,7 +20,9 @@ do_fetch () {
 	cp -f ${THISDIR}/files/makefile ${S}
 }
 
-EXTRA_OEMAKE = "INCLUDES='-Imincrypt' LIBS='${libdir}/libmincrypt.a'"
+#EXTRA_OEMAKE = "INCLUDES='-Imincrypt' LIBS='${libdir}/libmincrypt.a'"
+EXTRA_OEMAKE = "INCLUDES='-Imincrypt' LIBS='-lmincrypt'" 
+
 do_configure[noexec]="1"
 do_install() {
 	install -d ${D}${bindir}

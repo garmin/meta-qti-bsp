@@ -10,6 +10,9 @@ FILESPATH =+ "${WORKSPACE}:"
 SRC_URI = "file://system/core/"
 S = "${WORKDIR}/system/core/"
 
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+SRC_URI += "file://0001-Fix-adb-shell-env-issue.patch"
+
 PR = "r19"
 
 DEPENDS += "virtual/kernel openssl glib-2.0 libselinux ext4-utils libunwind libcutils libmincrypt libbase libutils"
@@ -20,7 +23,7 @@ EXTRA_OECONF = " --with-host-os=${HOST_OS} --with-glib"
 EXTRA_OECONF_append = " --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
 EXTRA_OECONF_append = " --with-logd-logging"
 EXTRA_OECONF_append = "${@bb.utils.contains('VARIANT','user',' --disable-debuggerd','',d)}"
-EXTRA_OECONF_append_apq8053 = " --enable-logd-privs"
+EXTRA_OECONF_append = " --disable-libsync"
 
 #Disable default libsync in system/core for 4.4 above kernels
 EXTRA_OECONF_append += "${@oe.utils.version_less_or_equal('PREFERRED_VERSION_linux-msm', '4.4', '', ' --disable-libsync', d)}"
@@ -39,16 +42,8 @@ CPPFLAGS_append_apq8096 += " -DTARGET_IS_64_BIT"
 CPPFLAGS_append_apq8098 += " -DTARGET_IS_64_BIT"
 CPPFLAGS_remove_apq8053-32 = " -DTARGET_IS_64_BIT"
 
-COMPOSITION         = "9025"
-COMPOSITION_apq8009 = "9091"
-COMPOSITION_apq8053 = "901D"
-COMPOSITION_apq8096 = "901D"
-COMPOSITION_apq8098 = "901D"
-COMPOSITION_qcs605 = "901D"
-COMPOSITION_sdm845 = "901D"
-COMPOSITION_sdxpoorwills = "90DB"
-COMPOSITION_sdxprairie = "90DB"
-COMPOSITION_sdmsteppe = "901D"
+
+COMPOSITION = "901D"
 
 QPERM_SERVICE = "${S}/logd/logd.service ${S}/leproperties/leprop.service"
 
@@ -108,6 +103,13 @@ do_install_append() {
       install -m 0755 ${S}/usb/start_usb -D ${D}${sysconfdir}/init.d/usb
       install -m 0755 ${S}/rootdir/etc/init.qcom.post_boot.sh -D ${D}${sysconfdir}/init.d/init_post_boot
    fi
+
+    # update usb.service to depend on var-volatile.mount
+    sed -i -e '/^After/d' ${D}${systemd_unitdir}/system/usb.service
+    sed -i -e '/^Requires/d' ${D}${systemd_unitdir}/system/usb.service
+    sed -i -e '/^Descr/a\RequiresMountsFor=\/var' ${D}${systemd_unitdir}/system/usb.service
+    sed -i -e '/^Descr/a\Requires=var-adb_devid.service var-usb.service' ${D}${systemd_unitdir}/system/usb.service
+    sed -i -e '/^Descr/a\After=var-volatile.mount leprop.service' ${D}${systemd_unitdir}/system/usb.service
 }
 
 do_install_append_mdm() {
@@ -120,49 +122,7 @@ do_install_append_mdm() {
    fi
 }
 
-do_install_append_apq8009() {
-   if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'false', 'true', d)}; then
-    install -m 0755 ${S}/debuggerd/start_debuggerd -D ${D}${sysconfdir}/init.d/init_debuggerd
-   else
-    install -m 0755 ${S}/debuggerd/start_debuggerd -D ${D}${sysconfdir}/initscripts/init_debuggerd
-   fi
-}
 
-#Install rules specific to apq8053 target
-do_install_append_apq8053(){
-
-  DEBUGGERD_NO_INSTALL=${@bb.utils.contains('USER_BUILD','1','no-debuggerd','',d)}
-  if [ "x$DEBUGGERD_NO_INSTALL" == "x" ]; then
-    if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'false', 'true', d)}; then
-      install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/init.d/init_debuggerd
-    else
-      install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/initscripts/init_debuggerd
-    fi
-  fi
-}
-
-do_install_append_apq8096() {
-  if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'false', 'true', d)}; then
-    install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/init.d/init_debuggerd
-  else
-    install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/initscripts/init_debuggerd
-  fi
-}
-do_install_append_apq8017(){
-  if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'false', 'true', d)}; then
-   install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/init.d/init_debuggerd
-  else
-   install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/initscripts/init_debuggerd
-  fi
-}
-
-do_install_append_apq8098(){
-  if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'false', 'true', d)}; then
-   install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/init.d/init_debuggerd
-  else
-   install -m 0755 ${S}/debuggerd/start_debuggerd64 -D ${D}${sysconfdir}/initscripts/init_debuggerd
-  fi
-}
 INITSCRIPT_PACKAGES =+ "${PN}-usb"
 INITSCRIPT_NAME_${PN}-usb = "usb"
 INITSCRIPT_PARAMS_${PN}-usb = "start 30 2 3 4 5 ."

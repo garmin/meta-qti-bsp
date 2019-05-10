@@ -2,9 +2,11 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}-${PV}:"
 DEPENDS = "base-passwd"
 
 SRC_URI_append += "file://fstab"
+SRC_URI_append += "file://${BASEMACHINE}/fstab"
 
 dirs755_append = " /media/cf /media/net /media/ram \
             /media/union /media/realroot /media/hdd /media/mmc1"
+dirs755_append +="/firmware /dsp /bluetooth /var /media/card /persist"
 
 # userdata mount point is present by default in all machines.
 # TODO: Add this path to MACHINE_MNT_POINTS in machine conf.
@@ -41,11 +43,33 @@ do_install_append(){
     fi
 
     install -m 0644 ${WORKDIR}/fstab ${D}${sysconfdir}/fstab
-}
 
-do_install_append() {
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -d 0644 ${D}${sysconfdir}/systemd/system
         install -d 0644 ${D}${sysconfdir}/systemd/system/local-fs.target.requires
     fi
+    
+    # use fstab for mount management
+    rm -rf ${D}${sysconfdir}/systemd/system
+    rm -rf ${D}${systemd_unitdir}/system
+
+    if [ -L ${D}/usr/local ]; then
+        rm ${D}/usr/local
+    fi
+
+    install -m 755 -o diag -g diag -d ${D}/media/card
+    rm -rf ${D}/sdcard
+    ln -s /media/card ${D}/sdcard
 }
+
+
+
+
+
+do_install_append_smack () {
+      # replace the old smack rules from "System _ -----l" to "System _ rwxa--"
+      sed -i "1c System _ rwxa--"  ${D}/${sysconfdir}/smack/accesses.d/default-access-domains
+}
+
+
+
