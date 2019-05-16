@@ -1,0 +1,38 @@
+# Add packages on top of root file system
+# Reference "meta-qti-bsp/recipes-products/images/common/common-base-image.inc"
+
+IMAGE_INSTALL += "binder"
+IMAGE_INSTALL += "bridge-utils"
+IMAGE_INSTALL += "connman"
+IMAGE_INSTALL += "edk2"
+IMAGE_INSTALL += "emac-dwc-eqos"
+IMAGE_INSTALL += "ethtool"
+IMAGE_INSTALL += "iperf3"
+IMAGE_INSTALL += "iproute2"
+IMAGE_INSTALL += "iproute2-ss"
+IMAGE_INSTALL += "iproute2-tc"
+IMAGE_INSTALL += "open-avb"
+#IMAGE_INSTALL += "packagegroup-agl-demo-platform"
+IMAGE_INSTALL += "pciutils"
+IMAGE_INSTALL += "procps"
+IMAGE_INSTALL += "python"
+IMAGE_INSTALL += "resize-service"
+IMAGE_INSTALL += "start-script-ab-slot-util"
+IMAGE_INSTALL += "tcpdump"
+IMAGE_INSTALL += "vlan"
+IMAGE_INSTALL += "wqy-microhei"
+IMAGE_INSTALL += "packagegroup-multimedia"
+IMAGE_INSTALL += "libcap"
+IMAGE_INSTALL += "libcap-bin"
+IMAGE_INSTALL += "attr"
+IMAGE_INSTALL += "libsensors"
+
+IMAGE_INSTALL_remove += "recovery-bin recovery"
+IMAGE_INSTALL_remove += "system-conf"
+IMAGE_INSTALL_remove += "systemd-coredump"
+#IMAGE_INSTALL_remove += "synergy-opensource"
+
+# Temporary disable these paths for yocto2.6 upgrade. 	35
+
+IMAGE_INSTALL_remove += "packagegroup-agl-demo-platform"
+IMAGE_INSTALL_remove += "qcacld32-ll wpa-supplicant-qcacld hostap-daemon-qcacld qcacld-utils"
