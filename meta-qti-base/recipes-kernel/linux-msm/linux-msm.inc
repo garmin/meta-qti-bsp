@@ -31,6 +31,10 @@ SRC_URI   =  "file://kernel \
               ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://virtualization.cfg', '', d)} \
               ${@bb.utils.contains('DISTRO_FEATURES', 'nand-squashfs', 'file://squashfs.cfg', '', d)} \
 	     "
+FILESEXTRAPATHS_append := ":${THISDIR}/files"
+SRC_URI   +=  "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'file://weston.cfg', '', d)}"	
+SRC_URI   +=  "file://cgroup.cfg"		
+SRC_URI   +=  "file://ipc.cfg"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
@@ -47,9 +51,11 @@ do_kernel_checkout[noexec] = "1"
 # extra task for configuration checks
 addtask kernel_configcheck after do_configure before do_compile
 
+
 do_compile () {
     oe_runmake CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS} $use_alternate_initrd
 }
+
 
 do_deploy() {
     if [[ ${KERNEL_IMAGETYPE} != *-dtb ]]; then

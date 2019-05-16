@@ -1,0 +1,38 @@
+From 682f9a6b8bc603ae972f030221f7f53f5af619e7 Mon Sep 17 00:00:00 2001
+From: Xubao Jiang <xubaoj@codeaurora.org>
+Date: Thu, 21 Mar 2019 20:03:22 +0800
+Subject: [PATCH] include sys/sysmacros.h for major minor definations
+
+Change-Id: I8f5254ba6a06f3d338828ac5055697c3f4b14971
+---
+ libkms/linux.c | 1 +
+ xf86drm.c      | 1 +
+ 2 files changed, 2 insertions(+)
+
+diff --git a/libkms/linux.c b/libkms/linux.c
+index 6e0da83..418d7d3 100644
+--- a/libkms/linux.c
++++ b/libkms/linux.c
+@@ -41,6 +41,7 @@
+ #include <unistd.h>
+ #include <sys/stat.h>
+ #include <sys/types.h>
++#include <sys/sysmacros.h>
+ #ifdef HAVE_SYS_MKDEV_H
+ #include <sys/mkdev.h>
+ #endif
+diff --git a/xf86drm.c b/xf86drm.c
+index b981c42..daeb023 100644
+--- a/xf86drm.c
++++ b/xf86drm.c
+@@ -49,6 +49,7 @@
+ #include <signal.h>
+ #include <time.h>
+ #include <sys/types.h>
++#include <sys/sysmacros.h>
+ #include <sys/stat.h>
+ #define stat_t struct stat
+ #include <sys/ioctl.h>
+-- 
+1.9.1
+

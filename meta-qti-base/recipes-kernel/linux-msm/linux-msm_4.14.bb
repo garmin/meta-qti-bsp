@@ -8,7 +8,7 @@ inherit ${@bb.utils.contains('TARGET_KERNEL_ARCH', 'aarch64', 'qtikernel-arch', 
 # TEMP: Disable IPA3 config for sdmsteppe
 SRC_URI_append_sdmsteppe = "file://disableipa3.cfg"
 
-COMPATIBLE_MACHINE = "(qcs40x|sdxprairie|sdmsteppe)"
+COMPATIBLE_MACHINE = "(${BASEMACHINE})"
 KERNEL_IMAGEDEST = "boot"
 
 SRC_DIR   =  "${WORKSPACE}/kernel/msm-4.14"
@@ -16,14 +16,12 @@ S         =  "${WORKDIR}/kernel/msm-4.14"
 PR = "r0"
 
 DEPENDS += "dtc-native llvm-arm-toolchain-native"
+DEPENDS += "${@bb.utils.contains('MACHINE_FEATURES', 'dt-overlay', 'mkdtimg-native', '', d)}"
 
 LDFLAGS_aarch64 = "-O1 --hash-style=gnu --as-needed"
 TARGET_CXXFLAGS += "-Wno-format"
 EXTRA_OEMAKE_append += "INSTALL_MOD_STRIP=1"
-
-do_compile () {
-    oe_runmake CC="${KERNEL_CC}" LD="${KERNEL_LD}" ${KERNEL_EXTRA_ARGS} $use_alternate_initrd
-}
+KERNEL_EXTRA_ARGS += "${@bb.utils.contains('MACHINE_FEATURES', 'dt-overlay', 'DTC_EXT=${STAGING_BINDIR_NATIVE}/dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y', '', d)}"
 
 do_shared_workdir_append () {
         cp Makefile $kerneldir/
@@ -71,6 +69,13 @@ do_shared_workdir_append () {
         # Generate kernel headers
         oe_runmake_call -C ${STAGING_KERNEL_DIR} ARCH=${ARCH} CC="${KERNEL_CC}" LD="${KERNEL_LD}" headers_install O=${STAGING_KERNEL_BUILDDIR}
 }
+
+do_deploy_append() {
+    if ${@bb.utils.contains('MACHINE_FEATURES', 'dt-overlay', 'true', 'false', d)}; then
+        ${STAGING_BINDIR_NATIVE}/mkdtimg create ${DEPLOY_DIR_IMAGE}/dtbo.img ${B}/arch/${ARCH}/boot/dts/qcom/*.dtbo
+    fi
+}
+
 
 do_shared_workdir[dirs] = "${DEPLOY_DIR_IMAGE}"
 
