@@ -1,0 +1,1 @@
+IMAGE_INSTALL_remove += "packagegroup-qti-audio"

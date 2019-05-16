@@ -1,2 +1,2 @@
-IMAGE_INSTALL += "init-audio"
-IMAGE_INSTALL += "audiodlkm"
+IMAGE_INSTALL += "packagegroup-qti-audio"
+
