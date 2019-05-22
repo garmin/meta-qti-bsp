@@ -1,0 +1,138 @@
+From 0edfcdb040d9469f0c75156055d9be03c5b69152 Mon Sep 17 00:00:00 2001
+From: Kasin li <donglil@codeaurora.org>
+Date: Wed, 4 May 2016 16:23:08 +0800
+Subject: [PATCH] outpub_fbdev: follow the work flow of MSM8996
+
+1. There should be a global file handler of fb device.
+2. Vsync should be enable by user
+3. Work around fb blank issue
+---
+ src/compositor-fbdev.c | 57 +++++++++++++++++++++++++++++++++++++++++++++++---
+ 1 file changed, 54 insertions(+), 3 deletions(-)
+
+diff --git a/src/compositor-fbdev.c b/src/compositor-fbdev.c
+index 3f3394f..e655858 100644
+--- a/src/compositor-fbdev.c
++++ b/src/compositor-fbdev.c
+@@ -36,6 +36,8 @@
+ #include <unistd.h>
+ #include <linux/fb.h>
+ #include <linux/input.h>
++#include <stdint.h>
++#include <linux/msm_mdp.h>
+
+ #include <libudev.h>
+
+@@ -43,6 +45,7 @@
+ #include "launcher-util.h"
+ #include "pixman-renderer.h"
+ #include "libinput-seat.h"
++#define MESA_EGL_NO_X11_HEADERS
+ #include "gl-renderer.h"
+ #include "presentation_timing-server-protocol.h"
+
+@@ -82,6 +85,7 @@ struct fbdev_output {
+ 	const char *device; /* ownership shared with fbdev_parameters */
+ 	struct fbdev_screeninfo fb_info;
+ 	void *fb; /* length is fb_info.buffer_length */
++	int fd;
+
+ 	/* pixman details. */
+ 	pixman_image_t *hw_surface;
+@@ -448,7 +452,7 @@ fbdev_frame_buffer_map(struct fbdev_output *output, int fd)
+ 	}
+
+ 	/* Success! */
+-	retval = 0;
++	return 0;
+
+ out_unmap:
+ 	if (retval != 0 && output->fb != NULL)
+@@ -509,8 +513,47 @@ fbdev_output_create(struct fbdev_compositor *compositor,
+ 			weston_log("Mapping frame buffer failed.\n");
+ 			goto out_free;
+ 		}
+-	} else {
+-		close(fb_fd);
++	}
++
++	{
++		int enable = 1;
++		ioctl(fb_fd, MSMFB_OVERLAY_VSYNC_CTRL, &enable);
++
++		struct fb_var_screeninfo info = {0};
++
++		if (ioctl(fb_fd, FBIOGET_VSCREENINFO, &info) == -1)
++			goto out_free;
++
++		info.reserved[0] = 0;
++		info.reserved[1] = 0;
++		info.reserved[2] = 0;
++		info.xoffset = 0;
++		info.yoffset = 0;
++		info.activate = FB_ACTIVATE_NOW;
++
++		info.bits_per_pixel = 24;
++		info.red.offset     = 16;
++		info.red.length     = 8;
++		info.green.offset   = 8;
++		info.green.length   = 8;
++		info.blue.offset    = 0;
++		info.blue.length    = 8;
++		info.transp.offset  = 0;
++		info.transp.length  = 0;
++
++		info.activate = FB_ACTIVATE_VBL;
++
++		info.yoffset = 10;
++		if (ioctl(fb_fd, FBIOPUT_VSCREENINFO, &info) == -1) {
++			weston_log("PUT VINFO error\n");
++			goto out_free;
++		}
++
++		info.yoffset = 0;
++		if (ioctl(fb_fd, FBIOPUT_VSCREENINFO, &info) == -1) {
++			weston_log("PUT VINFO error\n");
++			goto out_free;
++		}
+ 	}
+
+ 	output->base.start_repaint_loop = fbdev_output_start_repaint_loop;
+@@ -587,6 +630,7 @@ fbdev_output_create(struct fbdev_compositor *compositor,
+ 	           output->mode.width, output->mode.height);
+ 	weston_log_continue(STAMP_SPACE "guessing %d Hz and 96 dpi\n",
+ 	                    output->mode.refresh / 1000);
++	output->fd = fb_fd;
+
+ 	return 0;
+
+@@ -601,6 +645,8 @@ out_hw_surface:
+ 	fbdev_frame_buffer_destroy(output);
+ out_free:
+ 	free(output);
++	if (fb_fd >= 0)
++		close(fb_fd);
+
+ 	return -1;
+ }
+@@ -637,6 +683,9 @@ fbdev_output_destroy(struct weston_output *base)
+ 	weston_output_destroy(&output->base);
+
+ 	free(output);
++
++	if (output->fd >= 0)
++		close(output->fd);
+ }
+
+ /* strcmp()-style return values. */
+@@ -703,6 +752,8 @@ fbdev_output_reenable(struct fbdev_compositor *compositor,
+ 			weston_log("Mapping frame buffer failed.\n");
+ 			goto err;
+ 		}
++
++		close(fb_fd);
+ 	}
+
+ 	return 0;
+--
+1.9.1
