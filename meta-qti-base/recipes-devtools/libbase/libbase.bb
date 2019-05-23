@@ -12,8 +12,8 @@ DEPENDS += "libcutils libselinux"
 
 BBCLASSEXTEND = "native"
 
-FILESPATH =+ "${WORKSPACE}/system/core/:"
-SRC_URI   = "file://base"
+SRC_URI = "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=base;subpath=base;nobranch=1"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/core', d)}"
 
 S = "${WORKDIR}/base"
 

@@ -5,13 +5,11 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d79ee9e66bb0f95d3386a7acae780b70 \
                     file://libweston/compositor.c;endline=27;md5=6c53bbbd99273f4f7c4affa855c33c0a"
 
-FILESEXTRAPATHS_prepend := "${WORKSPACE}/graphics/:"
-SRC_DIR = "${WORKSPACE}/graphics/weston/"
-SRC_URI = "file://${@d.getVar('SRC_DIR', True).replace('${WORKSPACE}/graphics/', '')}"
-REPO_SRC_URI = "file://${@d.getVar('SRC_DIR', True).replace('${WORKSPACE}/graphics/', '')}"
+SRC_URI = "${PATH_TO_REPO}/graphics/weston/.git;protocol=${PROTO};destsuffix=weston;nobranch=1"
 S = "${WORKDIR}/weston"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/graphics/weston', d)}"
 
-SRC_URI_append = "\
+SRC_URI_append = "  \
     file://0001-make-error-portable.patch \
     file://0001-weston-launch-Provide-a-default-version-that-doesn-t.patch \
     file://weston.service_caf \

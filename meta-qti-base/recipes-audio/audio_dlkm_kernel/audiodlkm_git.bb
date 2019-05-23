@@ -11,9 +11,9 @@ PR = "r0"
 
 DEPENDS = "virtual/kernel"
 
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI = "file://vendor/qcom/opensource/audio-kernel/"
-SRC_URI += "file://${BASEMACHINE}/"
+SRC_URI = "${PATH_TO_REPO}/vendor/qcom/opensource/audio-kernel/.git;protocol=${PROTO};destsuffix=vendor/qcom/opensource/audio-kernel;nobranch=1"
+SRC_URI_append = " file://${BASEMACHINE}/"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/vendor/qcom/opensource/audio-kernel', d)}"
 
 S = "${WORKDIR}/vendor/qcom/opensource/audio-kernel"
 

@@ -13,9 +13,8 @@ DEPENDS += "liblog"
 BBCLASSEXTEND = "native"
 
 FILESEXTRAPATHS_append := ":${THISDIR}/files"
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI = "file://system/core/"
-SRC_URI_append = "\
+SRC_URI = "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=system/core;nobranch=1"
+SRC_URI_append = "  \
 	file://0001-libcutils-Remove-autotools-support.patch;apply=no \
 	https://source.codeaurora.org/quic/le/platform/system/core/patch/?id=c2d8aad8d70aeb4d50f077f552044b85ef6c64b9;downloadfilename=0001-libcutils-ashmem-fortify-and-comply-with-Android-cod.patch;md5sum=e84ac5eb35c16ec10dd537393b7f0cd5;sha256sum=88d5e213db61aa65c3e4def24722d2bc24af27d0ecefe5ae9e389819a4026f11;apply=no \
 	https://source.codeaurora.org/quic/le/platform/system/core/patch/?id=1186f3a5ad6581fae6e284fef4bfcefe50462cda;downloadfilename=0002-libcutils-ashmem-check-fd-validity.patch;md5sum=23e846e5f788d8354f22bfcca1b97dfa;sha256sum=090299fe5acb998918d0a970318f4a8a3d6ffd8511bcff7ae50fa27cbdd92399;apply=no \
@@ -25,6 +24,7 @@ SRC_URI_append = "\
 	file://0001-libcutils-Add-autotools-support.patch;apply=no \
 	"
 
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/core', d)}"
 S = "${WORKDIR}/system/core/libcutils"
 
 EXTRA_OECONF += " --with-core-includes=${WORKDIR}/system/core/include"

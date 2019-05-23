@@ -3,9 +3,9 @@ SECTION = "multimedia"
 LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/${LICENSE};md5=550794465ba0ec5312d6919e203a55f9"
 
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI = "file://hardware/qcom/media/"
+SRC_URI = "${PATH_TO_REPO}/hardware/qcom/media/.git;protocol=${PROTO};destsuffix=hardware/qcom/media;nobranch=1"
 S = "${WORKDIR}/hardware/qcom/media"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/hardware/qcom/media', d)}"
 
 PR = "r1"
 DEPENDS = "virtual/kernel"
