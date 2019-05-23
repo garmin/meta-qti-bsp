@@ -1,0 +1,61 @@
+From fe3e1baa76b61b93362b74d29428f0508d5be9b3 Mon Sep 17 00:00:00 2001
+From: Lei wang <leiwan@codeaurora.org>
+Date: Tue, 7 May 2019 10:42:27 +0800
+Subject: [PATCH] systemd: Make root's home directory configurable
+
+oe patch does not work well with systemd 239, need
+change the source code to make that work.
+
+Signed-off-by: Lei wang <leiwan@codeaurora.org>
+---
+ src/basic/user-util.c | 4 ++--
+ src/nspawn/nspawn.c   | 4 ++--
+ 2 files changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/src/basic/user-util.c b/src/basic/user-util.c
+index a562a39..0fcaaf4 100644
+--- a/src/basic/user-util.c
++++ b/src/basic/user-util.c
+@@ -111,7 +111,7 @@ int get_user_creds(
+                         *gid = 0;
+ 
+                 if (home)
+-                        *home = "/root";
++                        *home = ROOTHOMEDIR;
+ 
+                 if (shell)
+                         *shell = "/bin/sh";
+@@ -420,7 +420,7 @@ int get_home_dir(char **_h) {
+         /* Hardcode home directory for root and nobody to avoid NSS */
+         u = getuid();
+         if (u == 0) {
+-                h = strdup("/root");
++                h = strdup(ROOTHOMEDIR);
+                 if (!h)
+                         return -ENOMEM;
+ 
+diff --git a/src/nspawn/nspawn.c b/src/nspawn/nspawn.c
+index 56877bd..1dfb6f0 100644
+--- a/src/nspawn/nspawn.c
++++ b/src/nspawn/nspawn.c
+@@ -2672,7 +2672,7 @@ static int inner_child(
+         if (envp[n_env])
+                 n_env++;
+ 
+-        if ((asprintf((char**)(envp + n_env++), "HOME=%s", home ? home: "/root") < 0) ||
++        if ((asprintf((char**)(envp + n_env++), "HOME=%s", home ? home: ROOTHOMEDIR) < 0) ||
+             (asprintf((char**)(envp + n_env++), "USER=%s", arg_user ? arg_user : "root") < 0) ||
+             (asprintf((char**)(envp + n_env++), "LOGNAME=%s", arg_user ? arg_user : "root") < 0))
+                 return log_oom();
+@@ -2751,7 +2751,7 @@ static int inner_child(
+         } else {
+                 if (!arg_chdir)
+                         /* If we cannot change the directory, we'll end up in /, that is expected. */
+-                        (void) chdir(home ?: "/root");
++                        (void) chdir(home ?: ROOTHOMEDIR);
+ 
+                 execle("/bin/bash", "-bash", NULL, env_use);
+                 execle("/bin/sh", "-sh", NULL, env_use);
+-- 
+1.9.1
+
