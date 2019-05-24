@@ -1,29 +1,14 @@
 inherit qimage
 
-#  Defined in qimage.bbclass. Following is the order of priority.
-#  P1: <basemachine>/<basemachine>-<distro>-base-image.inc
-#  P2: <basemachine>/<basemachine>-base-image.inc
-#  P3: common/common-base-image.inc
-include ${@get_bblayer_img_inc('base', d)}
+include ${BASEMACHINE}/${BASEMACHINE}-${PRODUCT}-image.inc
 
-require include/mdm-bootimg.inc
-DEPENDS += " mkbootimg-native"
+IMAGE_LINGUAS = ""
 
-require include/mdm-ota-target-image-ubi.inc
-require include/mdm-ota-target-image-ext4.inc
+DEPENDS += " mkbootimg-native ext4-utils-native "
 
-MULTILIBRE_ALLOW_REP =. "/usr/include/python2.7/*|${base_bindir}|${base_sbindir}|${bindir}|${sbindir}|${libexecdir}|${sysconfdir}|${nonarch_base_libdir}/udev|/lib/modules/[^/]*/modules.*|"
+EXTRA_IMAGECMD_ext4 = "-i 4096 -b 4096"
 
-do_fsconfig() {
- chmod go-r ${IMAGE_ROOTFS}/etc/passwd || :
- chmod -R o-rwx ${IMAGE_ROOTFS}/etc/init.d/ || :
- if [ "${DISTRO_NAME}" == "msm-user" ]; then
-  if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
-    rm ${IMAGE_ROOTFS}/lib/systemd/system/sys-kernel-debug.mount
-  else
-    sed -i '/mount -t debugfs/ d' ${IMAGE_ROOTFS}/etc/init.d/sysfs.sh
-  fi
- fi
-}
+# default value for rootfs size
+IMAGE_ROOTFS_SIZE ?= "1048576"
 
-ROOTFS_POSTPROCESS_COMMAND += "do_fsconfig; "
+SSTATE_MANFILEPREFIX="${@bb.utils.contains('PERF_BUILD', '1', '${SSTATE_MANIFESTS}/manifest-${SSTATE_MANMACH}-${PN}-perf', '${SSTATE_MANIFESTS}/manifest-${SSTATE_MANMACH}-${PN}' , d)}"

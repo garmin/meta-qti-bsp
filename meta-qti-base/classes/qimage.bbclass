@@ -67,7 +67,7 @@ python rootfs_ignore_packages() {
 # Call function makesystem to generate sparse ext4 image
 python __anonymous () {
     machine = d.getVar("MACHINE", True)
-    if (machine!="sdxpoorwills") and (machine!="mdm9607") and (machine!="sdxprairie"):
+    if (machine!="sdxpoorwills") and (machine!="mdm9607") and (machine!="sdxprairie") and (machine!="sa8155") and (machine!="sa8155qdrive") and (machine!="qtiquingvm"):
         bb.build.addtask('makesystem', 'do_build', 'do_rootfs', d)
 }
 
