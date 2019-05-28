@@ -30,9 +30,12 @@ IMAGE_INSTALL += "libsensors"
 IMAGE_INSTALL_remove += "recovery-bin recovery"
 IMAGE_INSTALL_remove += "system-conf"
 IMAGE_INSTALL_remove += "systemd-coredump"
-#IMAGE_INSTALL_remove += "synergy-opensource"
 
-# Temporary disable these paths for yocto2.6 upgrade. 	35
-
-IMAGE_INSTALL_remove += "packagegroup-agl-demo-platform"
-IMAGE_INSTALL_remove += "qcacld32-ll wpa-supplicant-qcacld hostap-daemon-qcacld qcacld-utils"
+# DISPLAY Open source Packages
+IMAGE_INSTALL += "libdrm"
+IMAGE_INSTALL += "wayland"
+IMAGE_INSTALL += "wayland-ivi-extension"
+IMAGE_INSTALL += "weston"
+IMAGE_INSTALL += "weston-examples"
+IMAGE_INSTALL += "display-hal-linux"
+IMAGE_INSTALL += "display-commonsys-intf-linux"
