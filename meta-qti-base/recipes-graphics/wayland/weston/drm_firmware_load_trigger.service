@@ -1,0 +1,10 @@
+[Unit]
+Description=DRM Firmware Load
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/bin/touch /dev/dri/card0
+
+[Install]
+WantedBy=multi-user.target
