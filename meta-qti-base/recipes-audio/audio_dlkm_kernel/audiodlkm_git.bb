@@ -23,7 +23,7 @@ FILES_${PN}+="/etc/initscripts/start_audio_le"
 FILES_${PN}+= "${systemd_unitdir}/system/audio.service"
 FILES_${PN}+= "${systemd_unitdir}/system/multi-user.target.wants/audio.service"
 
-EXTRA_OEMAKE += "TARGET_SUPPORT=${BASEMACHINE}"
+EXTRA_OEMAKE += "TARGET_SUPPORT=sa8155"
 
 # Disable parallel make
 PARALLEL_MAKE = ""
