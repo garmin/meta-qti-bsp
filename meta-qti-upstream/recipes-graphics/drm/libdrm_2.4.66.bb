@@ -10,12 +10,13 @@ LIC_FILES_CHKSUM = "file://xf86drm.c;beginline=9;endline=32;md5=c8a3b961af7667c5
 PROVIDES = "drm"
 DEPENDS = "libpthread-stubs udev libpciaccess"
 
-FILESEXTRAPATHS_prepend := "${WORKSPACE}/graphics/:${THISDIR}/${PN}:"
-SRC_URI = "file://libdrm/ \
-           file://0001-include-sys-sysmacros.h-for-major-minor-definations.patch \
+SRC_URI = "http://dri.freedesktop.org/libdrm/${BP}.tar.bz2 \
+           file://installtests.patch \
+           file://0001-tests-kms-steal-crtc-Include-sys-select.h.patch \
           "
 
-S = "${WORKDIR}/libdrm"
+SRC_URI[md5sum] = "c6809c48538d6e5999588832045ff014"
+SRC_URI[sha256sum] = "79cb8e988749794edfb2d777b298d5292eff353bbbb71ed813589e61d2bc2d76"
 
 inherit autotools pkgconfig
 
