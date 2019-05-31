@@ -10,4 +10,5 @@ RDEPENDS_${PN} = "\
     audiodlkm \
     pulseaudio-module-codec-control \
     agl-audio-plugin \
+    pulseaudio-module-acdb \
 "
