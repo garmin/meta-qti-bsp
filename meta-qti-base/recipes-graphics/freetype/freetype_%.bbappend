@@ -11,7 +11,7 @@ SRC_URI[sha256sum] = "a3c603ed84c3c2495f9c9331fe6bba3bb0ee65e06ec331e0a0fb521582
 
 BINCONFIG = "${bindir}/freetype-config"
 
-inherit autotools pkgconfig binconfig-disabled multilib_header
+inherit autotools pkgconfig binconfig-disabled
 
 #Apply the patch for successful compilation.
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
