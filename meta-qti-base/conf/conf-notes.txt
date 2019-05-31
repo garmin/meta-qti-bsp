@@ -9,6 +9,7 @@ Supported combinations are listed below.
       +---------------+----------------+------------------+
       |sa8155         | automotive     | debug perf       |
       |sa8155qdrive   |                |                  |
+      |sa8155ivi      |                |                  |
       +---------------+----------------+------------------+
       |qtiquingvm     | automotive     | debug perf       |
       +---------------+----------------+------------------+
