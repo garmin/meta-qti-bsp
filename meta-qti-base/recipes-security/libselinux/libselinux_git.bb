@@ -8,8 +8,9 @@ PR = "r0"
 
 DEPENDS = "libpcre libmincrypt liblog libcutils"
 
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI = "file://external/libselinux/"
+SRC_URI = "${PATH_TO_REPO}/external/libselinux/.git;protocol=${PROTO};destsuffix=external/libselinux;nobranch=1"
 S = "${WORKDIR}/external/libselinux"
+
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/external/libselinux', d)}"
 
 EXTRA_OECONF = " --with-pcre --with-core-includes=${WORKSPACE}/system/core/include"

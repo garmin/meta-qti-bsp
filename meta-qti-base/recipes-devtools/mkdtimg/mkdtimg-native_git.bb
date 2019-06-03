@@ -10,10 +10,10 @@ PROVIDES = "mkdtimg-native"
 DEPENDS += " dtc-native"
 
 PR = "r1"
-FILESPATH =+ "${WORKSPACE}/system/:"
-SRC_URI = "file://libufdt"
+SRC_URI = "${PATH_TO_REPO}/system/libufdt/.git;protocol=${PROTO};destsuffix=libufdt;nobranch=1"
 S = "${WORKDIR}/libufdt"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/libufdt', d)}"
 
 # let libufdt suport autoconf
 FILESEXTRAPATHS_append := "${THISDIR}/files:"
-SRC_URI += "file://0001-libufdt-support-autoconf-compile.patch"
+SRC_URI_append = " file://0001-libufdt-support-autoconf-compile.patch"

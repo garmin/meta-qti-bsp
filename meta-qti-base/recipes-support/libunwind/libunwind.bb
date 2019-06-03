@@ -6,8 +6,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/MIT;md5=0835ad
 DEPENDS = "libatomic-ops"
 
 PR = "r0"
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI = "file://external/libunwind/"
+SRC_URI   =  "${PATH_TO_REPO}/external/libunwind/.git;protocol=${PROTO};destsuffix=external/libunwind;nobranch=1"
 S = "${WORKDIR}/external/libunwind"
 
-
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/external/libunwind', d)}"

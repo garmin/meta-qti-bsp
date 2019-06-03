@@ -4,9 +4,8 @@ DESCRIPTION = "Open AVB"
 LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/BSD;md5=3775480a712fc46a69647678acb234cb"
 
-FILESEXTRAPATHS_prepend := "${WORKSPACE}/external:"
-SRC_URI = "file://open-avb"
-
+SRC_URI   =  "${PATH_TO_REPO}/external/open-avb/.git;protocol=${PROTO};destsuffix=open-avb;nobranch=1"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/external/open-avb', d)}"
 PR = "r0"
 PV = "0.1"
 

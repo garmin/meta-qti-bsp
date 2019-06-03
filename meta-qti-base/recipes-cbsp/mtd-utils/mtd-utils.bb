@@ -12,9 +12,8 @@ DEPENDS += "${@bb.utils.contains("DISTRO_FEATURES", "selinux", "libselinux", "",
 
 PV = "2.0.0"
 
-FILESPATH =+ "${WORKSPACE}/filesystems:"
-SRC_URI = "file://mtd-utils"
-
+SRC_URI = "${PATH_TO_REPO}/filesystems/mtd-utils/.git;protocol=${PROTO};destsuffix=mtd-utils;nobranch=1"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/filesystems/mtd-utils', d)}"
 S = "${WORKDIR}/mtd-utils"
 
 # xattr support creates an additional compile-time dependency on acl because
@@ -53,7 +52,7 @@ ALTERNATIVE_LINK_NAME[flash_eraseall] = "${sbindir}/flash_eraseall"
 # Use higher priority than busybox's flash_eraseall (created when built with CONFIG_FLASH_ERASEALL)
 ALTERNATIVE_PRIORITY[flash_eraseall] = "100"
 
-MTD_TEST_BIN_PATH = "${WORKSPACE}/filesystems/bin/target/mtd-utils"
+MTD_TEST_BIN_PATH = "${SRC_DIR_ROOT}/filesystems/bin/target/mtd-utils"
 do_install () {
 	oe_runmake install DESTDIR=${D} SBINDIR=${sbindir} MANDIR=${mandir} INCLUDEDIR=${includedir}
 
