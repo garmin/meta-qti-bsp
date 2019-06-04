@@ -13,7 +13,6 @@ S = "${WORKDIR}/vendor/qcom/opensource/commonsys-intf/display"
 DEPENDS += "display-hal-linux"
 DEPENDS += "libhardware"
 
-EXTRA_OECONF = " --with-core-includes=${WORKSPACE}/system/core/include"
 EXTRA_OECONF += " --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
 
 LDFLAGS += "-llog -lhardware -lutils -lcutils"
@@ -21,13 +20,17 @@ LDFLAGS += "-llog -lhardware -lutils -lcutils"
 CPPFLAGS += "-DTARGET_HEADLESS"
 CPPFLAGS += "-DVENUS_COLOR_FORMAT"
 CPPFLAGS += "-DPAGE_SIZE=4096"
-CPPFLAGS += "-I${WORKSPACE}/vendor/qcom/opensource/commonsys-intf/display/gralloc"
-CPPFLAGS += "-I${WORKSPACE}/vendor/qcom/opensource/commonsys-intf/display/libqdmetadata"
-CPPFLAGS += "-I${WORKSPACE}/vendor/qcom/opensource/commonsys-intf/display/include"
-CPPFLAGS += "-I${WORKSPACE}/hardware/libhardware/include"
+CPPFLAGS += "-I${WORKDIR}/vendor/qcom/opensource/commonsys-intf/display/gralloc"
+CPPFLAGS += "-I${WORKDIR}/vendor/qcom/opensource/commonsys-intf/display/libqdmetadata"
+CPPFLAGS += "-I${WORKDIR}/vendor/qcom/opensource/commonsys-intf/display/include"
 
 FILES_${PN} = "${libdir}/*.so"
 FILES_${PN}-dev = "${includedir}"
+
+do_install_append() {
+    install -d ${D}${includedir}
+    install ${S}/gralloc/*.h ${D}${includedir}
+}
 
 INHIBIT_PACKAGE_STRIP="1"
 INHIBIT_PACKAGE_DEBUG_SPLIT="1"
