@@ -1,5 +1,3 @@
-#require ../common-image.inc
-
 IMAGE_INSTALL += " \
     packagegroup-qti-core-minimal \
     packagegroup-qti-audio \
