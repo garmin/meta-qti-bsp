@@ -10,9 +10,9 @@ GSTREAMER_1_0_OMX_CORE_NAME = "${libdir}/libOmxCore.so"
 LIC_FILES_CHKSUM = "file://COPYING;md5=4fbd65380cdd255951079008b364516c \
                     file://omx/gstomx.h;beginline=1;endline=21;md5=5c8e1fca32704488e76d2ba9ddfa935f"
 
-FILESPATH =+ "${WORKSPACE}/gstreamer:"
-SRC_URI = "file://gst-omx"
-SRC_URI += "git://anongit.freedesktop.org/gstreamer/common;destsuffix=gst-omx/common;branch=master;name=common"
+SRC_URI =  "${PATH_TO_REPO}/gstreamer/gst-omx/.git;protocol=${PROTO};destsuffix=gst-omx;nobranch=1;name=omx"
+SRC_URI_append = " ${CAF_GIT}/gstreamer/common;destsuffix=gst-omx/common;branch=gstreamer/common/master;name=common"
+SRCREV_omx = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/gstreamer/gst-omx', d)}"
 SRCREV_common = "1f5d3c3163cc3399251827235355087c2affa790"
 S = "${WORKDIR}/gst-omx"
 

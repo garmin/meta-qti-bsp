@@ -25,16 +25,20 @@ KERNEL_PRIORITY           = "9001"
 # Add V=1 to KERNEL_EXTRA_ARGS for verbose
 KERNEL_EXTRA_ARGS        += "O=${B}"
 
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI   =  "file://kernel \
-	      ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'file://systemd.cfg', '', d)} \
-              ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', 'file://virtualization.cfg', '', d)} \
-              ${@bb.utils.contains('DISTRO_FEATURES', 'nand-squashfs', 'file://squashfs.cfg', '', d)} \
+SRC_URI   =  "${PATH_TO_REPO}/kernel/msm-4.14/.git;protocol=${PROTO};destsuffix=kernel/msm-4.14;nobranch=1"
+
+SRC_URI_append = "  \
+              ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' file://systemd.cfg', '', d)} \
+              ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', ' file://virtualization.cfg', '', d)} \
+              ${@bb.utils.contains('DISTRO_FEATURES', 'nand-squashfs', ' file://squashfs.cfg', '', d)} \
 	     "
+
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/kernel/msm-4.14', d)}"
+
 FILESEXTRAPATHS_append := ":${THISDIR}/files"
-SRC_URI   +=  "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'file://weston.cfg', '', d)}"	
-SRC_URI   +=  "file://cgroup.cfg"		
-SRC_URI   +=  "file://ipc.cfg"
+SRC_URI_append =  "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' file://weston.cfg', '', d)}"
+SRC_URI_append =  " file://cgroup.cfg"
+SRC_URI_append =  " file://ipc.cfg"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"

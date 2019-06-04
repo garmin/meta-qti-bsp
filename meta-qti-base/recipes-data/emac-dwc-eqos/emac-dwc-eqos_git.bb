@@ -14,11 +14,11 @@ FILES_${PN}     += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/extra/*"
 do_unpack[deptask] = "do_populate_sysroot"
 PR = "r0"
 
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI = "file://data-kernel/drivers/emac-dwc-eqos/"
-SRC_URI += "file://emac_dwc_eqos_start_stop_le"
-SRC_URI += "file://setup_avtp_routing_le"
-SRC_URI += "file://emac_dwc_eqos.service"
+SRC_URI   =  "${PATH_TO_REPO}/data-kernel/.git;protocol=${PROTO};destsuffix=data-kernel/drivers/emac-dwc-eqos;subpath=drivers/emac-dwc-eqos;nobranch=1"
+SRC_URI_append = " file://emac_dwc_eqos_start_stop_le"
+SRC_URI_append = " file://setup_avtp_routing_le"
+SRC_URI_append = " file://emac_dwc_eqos.service"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/data-kernel', d)}"
 
 S = "${WORKDIR}/data-kernel/drivers/emac-dwc-eqos/"
 

@@ -11,10 +11,10 @@ PR       = "r1"
 BUILD_OS = "linux"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
-FILESPATH =+ "${WORKSPACE}/bootable/bootloader/:"
 
-SRC_URI = "file://edk2"
+SRC_URI   =  "${PATH_TO_REPO}/bootable/bootloader/edk2/.git;protocol=${PROTO};destsuffix=edk2;nobranch=1"
 S         =  "${WORKDIR}/edk2"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/bootable/bootloader/edk2', d)}"
 
 INSANE_SKIP_${PN} = "arch"
 

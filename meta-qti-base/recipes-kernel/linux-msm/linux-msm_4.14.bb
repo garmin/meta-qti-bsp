@@ -6,12 +6,12 @@ inherit sdllvm
 inherit ${@bb.utils.contains('TARGET_KERNEL_ARCH', 'aarch64', 'qtikernel-arch', '', d)}
 
 # TEMP: Disable IPA3 config for sdmsteppe
-SRC_URI_append_sdmsteppe = "file://disableipa3.cfg"
+SRC_URI_append_sdmsteppe = " file://disableipa3.cfg"
 
 COMPATIBLE_MACHINE = "(${BASEMACHINE})"
 KERNEL_IMAGEDEST = "boot"
 
-SRC_DIR   =  "${WORKSPACE}/kernel/msm-4.14"
+SRC_DIR   =  "${SRC_DIR_ROOT}/kernel/msm-4.14"
 S         =  "${WORKDIR}/kernel/msm-4.14"
 PR = "r0"
 

@@ -8,9 +8,9 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 PR = "r1"
 
-FILESPATH =+ "${WORKSPACE}/system/core/:"
-SRC_URI   = "file://libion"
+SRC_URI   =  "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=libion;subpath=libion;nobranch=1"
 
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/core', d)}"
 S = "${WORKDIR}/libion"
 DEPENDS += "virtual/kernel liblog"
 

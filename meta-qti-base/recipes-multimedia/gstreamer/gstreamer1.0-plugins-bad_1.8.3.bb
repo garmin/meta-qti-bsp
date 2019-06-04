@@ -9,11 +9,11 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=73a5855a8119deb017f5f13cf327095d \
                     file://COPYING.LIB;md5=21682e4e8fea52413fd26c60acb907e5 \
                     file://gst/tta/crc32.h;beginline=12;endline=29;md5=27db269c575d1e5317fffca2d33b3b50"
 
-FILESPATH =+ "${WORKSPACE}/gstreamer:"
-SRC_URI = "file://gst-plugins-bad"
-SRC_URI += "${CAF_GIT}/gstreamer/common;destsuffix=gst-plugins-bad/common;branch=gstreamer/common/master;name=common"
+SRC_URI   =  "${PATH_TO_REPO}/gstreamer/gst-plugins-bad/.git;protocol=${PROTO};destsuffix=gst-plugins-bad;nobranch=1;name=bad"
+SRC_URI_append = " ${CAF_GIT}/gstreamer/common;destsuffix=gst-plugins-bad/common;branch=gstreamer/common/master;name=common"
 
 GI_DATA_ENABLED="0"
+SRCREV_bad = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/gstreamer/gst-plugins-bad', d)}"
 SRCREV_common = "6f2d2093e84cc0eb99b634fa281822ebb9507285"
 S = "${WORKDIR}/gst-plugins-bad"
 
