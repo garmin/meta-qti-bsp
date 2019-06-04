@@ -12,6 +12,7 @@ RDEPENDS_${PN} += "\
     pciutils \
     rfkill \
     hostap-daemon-qcacld \
+    wireless-tools \
     iw \
     qcacld32-ll-hasting \
     qcacld32-ll-genoa \
