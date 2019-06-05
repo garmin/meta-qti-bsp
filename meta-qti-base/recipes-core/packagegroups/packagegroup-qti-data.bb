@@ -11,7 +11,6 @@ ALLOW_EMPTY_${PN} = "1"
 RDEPENDS_${PN} += "\
     bridge-utils \
     connman \
-    emac-dwc-eqos \
     ethtool \
     iperf3 \
     iproute2 \
