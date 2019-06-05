@@ -9,6 +9,8 @@ PACKAGES = "\
 ALLOW_EMPTY_${PN} = "1"
 
 RDEPENDS_${PN} += "\
+    pciutils \
+    rfkill \
     hostap-daemon-qcacld \
     iw \
     qcacld32-ll-hasting \
