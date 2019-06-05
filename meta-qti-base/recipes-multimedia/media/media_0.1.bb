@@ -7,6 +7,7 @@ SRC_URI = "${PATH_TO_REPO}/hardware/qcom/media/.git;protocol=${PROTO};destsuffix
 S = "${WORKDIR}/hardware/qcom/media"
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/hardware/qcom/media', d)}"
 
+
 PR = "r1"
 DEPENDS = "virtual/kernel"
 DEPENDS += "glib-2.0"
@@ -18,6 +19,8 @@ DEPENDS += "libhardware"
 DEPENDS += "mm-video-noship"
 DEPENDS += "display-hal-linux"
 DEPENDS += "display-commonsys-intf-linux"
+DEPENDS += "libhardware"
+DEPENDS += "media-plugin-headers"
 
 # Need the kernel headers
 PACKAGE_ARCH = "${MACHINE_ARCH}"
@@ -34,9 +37,7 @@ EXTRA_OECONF_append =" --with-adreno-includes=${STAGING_INCDIR}/adreno"
 
 EXTRA_OECONF_append =" --with-cutils-headers=${STAGING_INCDIR}/cutils/"
 EXTRA_OECONF_append =" --with-log-headers=${STAGING_INCDIR}/log/"
-EXTRA_OECONF_append =" --with-videolibs-headers=${WORKDIR}/video/lib/mm-video-noship/utils/inc"
 EXTRA_OECONF_append =" --with-usr-include-headers=${STAGING_INCDIR}/"
-EXTRA_OECONF_append = "--with-libhardware-headers=${WORKSPACE}/hardware/libhardware "
 
 
 EXTRA_OECONF_append =" --enable-use-glib="yes""
@@ -70,11 +71,20 @@ LDFLAGS += "-lEGL"
 LDFLAGS += "-lqdMetaData"
 
 do_install_append() {
-install -d ${D}${includedir}/mm-core
-install -m 0644 ${S}/mm-core/inc/*.h -D ${D}${includedir}/mm-core/
+   install -d ${D}${includedir}/mm-core
+   install -m 0644 ${S}/mm-core/inc/*.h -D ${D}${includedir}/mm-core/
+   install -d ${D}${includedir}/venc/inc
+   install -m 0644 ${S}/mm-video-v4l2/vidc/venc/inc/omx_video_common.h -D ${D}${includedir}/venc/inc/
+   install -m 0644 ${S}/mm-video-v4l2/vidc/venc/inc/omx_video_base.h -D ${D}${includedir}/venc/inc/
 
-install -d ${D}${includedir}/libstagefrighthw
-install -m 0644 ${S}/libstagefrighthw/QComOMXMetadata.h -D ${D}${includedir}/libstagefrighthw/
+   install -d ${D}${includedir}/vdec/inc
+   install -m 0644 ${S}/mm-video-v4l2/vidc/vdec/inc/omx_vdec.h -D ${D}${includedir}/vdec/inc/
+
+   install -m 0644 ${S}/mm-video-v4l2/vidc/common/inc/*.h -D ${D}${includedir}/
+   install -d ${D}${includedir}/libstagefrighthw
+   install -m 0644 ${S}/libstagefrighthw/QComOMXMetadata.h -D ${D}${includedir}/libstagefrighthw/
+   install -m 0644 ${S}/libc2dcolorconvert/C2DColorConverter.h ${D}${includedir}/
+
 }
 
 FILES_${PN}-dev = "\
@@ -89,4 +99,7 @@ FILES_${PN} = "\
 #Skips check for .so symlinks
 INSANE_SKIP_${PN} = "dev-so"
 FILES_${PN} += "${includedir}/mm-core/* \
-                ${includedir}/libstagefrighthw/* "
+                ${includedir}/libstagefrighthw/* \
+                ${includedir}/venc/inc/* \
+                ${includedir}/vdec/inc/* \
+                ${includedir}/*"
