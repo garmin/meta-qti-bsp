@@ -29,8 +29,8 @@
 
 export ROS_ROOT=/opt/ros/indigo
 export PATH=$PATH:/opt/ros/indigo/bin
-export LD_LIBRARY_PATH=/opt/ros/indigo/lib:/opt/ros/indigo/lib64/python3.5/site-packages
-export PYTHONPATH=/opt/ros/indigo/lib/python2.7/site-packages:/opt/ros/indigo/lib/python3.5/site-packages:/opt/ros/indigo/lib64/python2.7/site-packages:/opt/ros/indigo/lib64/python3.5/site-packages
+export LD_LIBRARY_PATH=/opt/ros/indigo/lib:/opt/ros/indigo/lib/python3.5/site-packages
+export PYTHONPATH=/opt/ros/indigo/lib/python2.7/site-packages:/opt/ros/indigo/lib/python3.5/site-packages:/opt/ros/indigo/lib64/python2.7/site-packages:/opt/ros/indigo/lib/python3.5/site-packages
 export ROS_MASTER_URI=http://localhost:11311
 export CMAKE_PREFIX_PATH=/opt/ros/indigo
 export ROS_PACKAGE_PATH=/opt/ros/indigo/share:/opt/ros/indigo/stacks
