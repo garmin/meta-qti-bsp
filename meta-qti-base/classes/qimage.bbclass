@@ -64,12 +64,6 @@ python rootfs_ignore_packages() {
     d.setVar("PACKAGE_INSTALL_ATTEMPTONLY", ' '.join(atmt_only_pkgs))
 }
 
-# Call function makesystem to generate sparse ext4 image
-python __anonymous () {
-    machine = d.getVar("MACHINE", True)
-    if (machine!="sdxpoorwills") and (machine!="mdm9607") and (machine!="sdxprairie") and (machine!="sa8155") and (machine!="sa8155qdrive") and (machine!="qtiquingvm"):
-        bb.build.addtask('makesystem', 'do_build', 'do_rootfs', d)
-}
 
 ### Generate system.img #####
 # Alter system image size if varity is enabled.
