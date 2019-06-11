@@ -31,13 +31,12 @@ SYSTEMD_SERVICE_${PN} = "weston.service"
 DEPENDS = "libxkbcommon gdk-pixbuf pixman cairo glib-2.0 jpeg"
 DEPENDS += "wayland wayland-native wayland-protocols libinput virtual/egl pango gbm-headers gbm"
 DEPENDS += "libion libsync"
-DEPENDS += "display-hal-linux display-noship-linux gbm-headers display-ship-linux"
+DEPENDS += "display-hal-linux display-noship-linux gbm-headers display-ship-linux display-hal-headers"
+DEPENDS += "${@bb.utils.contains('BASEMACHINE', 'qtiquingvm', 'libuhab', '', d)}"
 
 TARGET_CFLAGS += "-idirafter ${STAGING_KERNEL_DIR}/include/"
 TARGET_CFLAGS += "-I${STAGING_INCDIR}/libdrm"
 TARGET_CFLAGS += "-I${STAGING_INCDIR}/sdm"
-TARGET_CFLAGS += "-I${WORKSPACE}/display/display-hal/include"
-TARGET_CFLAGS += "-I${WORKSPACE}/display/display-hal/libdebug"
 TARGET_CFLAGS += "-I${STAGING_INCDIR}/sdm/core"
 TARGET_CFLAGS += "-I${STAGING_KERNEL_BUILDDIR}/usr/include"
 TARGET_CPPFLAGS += "-I${STAGING_INCDIR}/qcom/display"
@@ -115,7 +114,7 @@ do_install_append() {
 	install -d ${D}${WESTON_INI_CONFIG}
 	install -m 0644 ${WORKDIR}/weston.ini_caf ${D}${WESTON_INI_CONFIG}/weston.ini
 	# expose weston protocol to /usr/share/weston as video may use it
-	install ${WORKSPACE}/graphics/weston/protocol/*.xml ${D}${datadir}/weston
+	install ${WORKDIR}/weston/protocol/*.xml ${D}${datadir}/weston
 }
 
 PACKAGES += "${PN}-examples"

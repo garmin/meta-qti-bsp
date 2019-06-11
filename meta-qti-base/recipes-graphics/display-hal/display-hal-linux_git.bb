@@ -22,7 +22,6 @@ DEPENDS += "libdrm"
 #DEPENDS += "adreno"
 DEPENDS += "gbm-headers"
 
-EXTRA_OECONF = " --with-core-includes=${WORKSPACE}/system/core/include"
 EXTRA_OECONF += " --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
 
 EXTRA_OECONF += " --enable-sdmhaldrm"
@@ -32,15 +31,14 @@ CPPFLAGS += "-DCOMPILE_DRM"
 CPPFLAGS += "-DTARGET_HEADLESS"
 CPPFLAGS += "-DVENUS_COLOR_FORMAT"
 CPPFLAGS += "-DPAGE_SIZE=4096"
-CPPFLAGS += "-I${WORKSPACE}/display/display-hal/libdrmutils"
-CPPFLAGS += "-I${WORKSPACE}/display/display-hal/gpu_tonemapper"
-CPPFLAGS += "-I${WORKSPACE}/display/display-hal/libqdutils"
-CPPFLAGS += "-I${WORKSPACE}/display/display-hal/libqservice"
-CPPFLAGS += "-I${WORKSPACE}/display/display-hal/sdm/include"
-CPPFLAGS += "-I${WORKSPACE}/display/display-hal/include"
-CPPFLAGS += "-I${WORKSPACE}/display/display-hal/libdebug"
-CPPFLAGS += "-I${WORKSPACE}/display/display-hal/gralloc"
-CPPFLAGS += "-I${WORKSPACE}/system/core/include"
+CPPFLAGS += "-I${WORKDIR}/display/display-hal/libdrmutils"
+CPPFLAGS += "-I${WORKDIR}/display/display-hal/gpu_tonemapper"
+CPPFLAGS += "-I${WORKDIR}/display/display-hal/libqdutils"
+CPPFLAGS += "-I${WORKDIR}/display/display-hal/libqservice"
+CPPFLAGS += "-I${WORKDIR}/display/display-hal/sdm/include"
+CPPFLAGS += "-I${WORKDIR}/display/display-hal/include"
+CPPFLAGS += "-I${WORKDIR}/display/display-hal/libdebug"
+CPPFLAGS += "-I${WORKDIR}/display/display-hal/gralloc"
 CPPFLAGS += "-I${STAGING_INCDIR}/libdrm"
 
 # fix for uapi msm_drm.h header file related compilation issue
@@ -50,8 +48,8 @@ do_install_append () {
     # libhardware expects to find /usr/lib/hw/gralloc.*.so
     install -d ${D}/usr/lib/hw
     ln -s /usr/lib/libgralloc.so ${D}/usr/lib/hw/gralloc.default.so
-    cp -fR ${WORKSPACE}/display/display-hal/include/* ${STAGING_INCDIR}
-    cp -fR ${WORKSPACE}/display/display-hal/gpu_tonemapper/*.h ${STAGING_INCDIR}
+    cp -fR ${WORKDIR}/display/display-hal/include/* ${STAGING_INCDIR}
+    cp -fR ${WORKDIR}/display/display-hal/gpu_tonemapper/*.h ${STAGING_INCDIR}
 }
 
 FILES_${PN} = "${libdir}/*.so"
