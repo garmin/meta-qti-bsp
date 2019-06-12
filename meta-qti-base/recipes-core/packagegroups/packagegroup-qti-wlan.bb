@@ -11,9 +11,9 @@ ALLOW_EMPTY_${PN} = "1"
 RDEPENDS_${PN} += "\
     hostap-daemon-qcacld \
     iw \
-    qcacld32-ll \
+    qcacld32-ll-hasting \
     qcacld32-ll-genoa \
     qcacld32-ll-rome \
     wlan-sigma-dut \
-    wpa-supplicant-qcacld \
+    wpa-supplicant \
     "

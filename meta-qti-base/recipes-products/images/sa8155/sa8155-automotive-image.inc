@@ -8,4 +8,5 @@ IMAGE_INSTALL += " \
     packagegroup-qti-multimedia\
     packagegroup-qti-security \
     packagegroup-qti-vnw \
+    packagegroup-qti-wlan \
     "
