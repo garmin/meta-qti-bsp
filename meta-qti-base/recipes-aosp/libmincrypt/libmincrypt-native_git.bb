@@ -8,10 +8,10 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 PR = "r1"
 
-SRC_URI   =  "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=libmincrypt;subpath=libmincrypt;nobranch=1"
+SRC_URI   =  "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=system/core;nobranch=1"
 
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/core', d)}"
 
-S = "${WORKDIR}/libmincrypt"
+S = "${WORKDIR}/system/core/libmincrypt"
 
-EXTRA_OECONF = " --with-core-includes=${WORKSPACE}/system/core/include"
+EXTRA_OECONF = " --with-core-includes=${WORKDIR}/system/core/include"

@@ -10,11 +10,10 @@ PR = "r1"
 
 DEPENDS = "libselinux-native libsparse-native libcutils-native libpcre-native"
 
-FILESPATH =+ "${WORKSPACE}/system/extras/:"
-SRC_URI = "file://ext4_utils"
+SRC_URI   =  "${PATH_TO_REPO}/system/extras/.git;protocol=${PROTO};destsuffix=ext4_utils;subpath=ext4_utils;nobranch=1"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/extras', d)}"
+
 
 S = "${WORKDIR}/ext4_utils"
-
-EXTRA_OECONF = "--with-core-includes=${WORKSPACE}/system/core/include"
 
 CPPFLAGS += "-I${STAGING_INCDIR}/libselinux"

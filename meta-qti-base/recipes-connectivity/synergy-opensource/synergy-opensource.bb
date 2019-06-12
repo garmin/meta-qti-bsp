@@ -6,12 +6,11 @@ LICENSE = "BSD-3-Clause"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
 ${LICENSE};md5=550794465ba0ec5312d6919e203a55f9"
 
-DEPENDS = "cmake cmake-native dbus synergy"
+DEPENDS = "cmake cmake-native dbus synergy pulseaudio"
 
-FILESEXTRAPATHS_prepend := "${WORKSPACE}/:"
-SRC_URI = "file://synergy"
+SRC_URI = "${PATH_TO_REPO}/synergy/synergy-opensource/.git;protocol=${PROTO};destsuffix=synergy/synergy-opensource;nobranch=1"
 
-SRCREV = "${AUTOREV}"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/synergy/synergy-opensource', d)}"
 
 # Remove -Wl,--hash-style=gnu from it to avoid qa error for the prebuilt lib
 LDFLAGS = "-Wl,-O1"

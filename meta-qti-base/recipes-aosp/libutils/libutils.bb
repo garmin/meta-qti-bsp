@@ -8,16 +8,16 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 PR = "r1"
 
-SRC_URI   =  "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=libutils;subpath=libutils;nobranch=1"
+SRC_URI   =  "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=system/core;nobranch=1"
 
-S = "${WORKDIR}/libutils"
+S = "${WORKDIR}/system/core/libutils"
 
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/core', d)}"
 
 DEPENDS += "safe-iop"
 
-EXTRA_OECONF += "--with-system-core-includes=${WORKSPACE}/system/core/include"
-EXTRA_OECONF += "--with-liblog-includes=${WORKSPACE}/system/core/liblog"
+EXTRA_OECONF += "--with-system-core-includes=${WORKDIR}/system/core/include"
+EXTRA_OECONF += "--with-liblog-includes=${WORKDIR}/system/core/liblog"
 
 FILES_${PN}-dbg    = "${libdir}/.debug/libutils.*"
 FILES_${PN}        = "${libdir}/libutils.so.* ${libdir}/pkgconfig/*"

@@ -78,7 +78,7 @@ do_deploy_append() {
 
 do_configure_prepend () {
 		mkdir -p ${S}/drivers/net/ethernet/qualcomm/emac_dwc_eqos
-		cp -f ${WORKSPACE}/data-kernel/drivers/emac-dwc-eqos/* ${S}/drivers/net/ethernet/qualcomm/emac_dwc_eqos/
+		cp -f ${WORKDIR}/data-kernel/drivers/emac-dwc-eqos/* ${S}/drivers/net/ethernet/qualcomm/emac_dwc_eqos/
 		rm ${S}/drivers/net/ethernet/qualcomm/emac_dwc_eqos/Makefile
 		rm ${S}/drivers/net/ethernet/qualcomm/emac_dwc_eqos/Makefile.am
 		rm ${S}/drivers/net/ethernet/qualcomm/emac_dwc_eqos/Kbuild

@@ -4,8 +4,8 @@
 #
 inherit autotools-brokensep pkgconfig
 
-FILESPATH        =+ "${WORKSPACE}:"
+FILESPATH        =+ "${SRC_DIR_ROOT}:"
 
-SRC_URI          = "file://${@d.getVar('SRC_DIR', True).replace('${WORKSPACE}/', '')}"
+SRC_URI          = "file://${@d.getVar('SRC_DIR', True).replace('${SRC_DIR_ROOT}/', '')}"
 
 PACKAGE_ARCH    ?= "${MACHINE_ARCH}"

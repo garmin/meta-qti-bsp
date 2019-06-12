@@ -12,12 +12,12 @@ DEPENDS += "libcutils libselinux"
 
 BBCLASSEXTEND = "native"
 
-SRC_URI = "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=base;subpath=base;nobranch=1"
+SRC_URI = "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=system/core;nobranch=1"
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/core', d)}"
 
-S = "${WORKDIR}/base"
+S = "${WORKDIR}/system/core/base"
 
-EXTRA_OECONF += "--with-core-sourcedir=${WORKSPACE}/system/core"
+EXTRA_OECONF += "--with-core-sourcedir=${WORKDIR}/system/core"
 
 FILES_${PN}-dbg    = "${libdir}/.debug/libbase.*"
 FILES_${PN}        = "${libdir}/libbase.so.* ${libdir}/pkgconfig/*"

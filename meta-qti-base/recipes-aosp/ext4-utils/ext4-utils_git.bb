@@ -14,7 +14,5 @@ SRC_URI   =  "${PATH_TO_REPO}/system/extras/.git;protocol=${PROTO};destsuffix=ex
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/extras', d)}"
 S = "${WORKDIR}/ext4_utils"
 
-EXTRA_OECONF = "--with-core-includes=${WORKSPACE}/system/core/include"
-
 CPPFLAGS += "-I${STAGING_INCDIR}/libselinux"
 CPPFLAGS += "-I${STAGING_INCDIR}/cutils"
