@@ -8,4 +8,6 @@ PACKAGES = "${PN}"
 RDEPENDS_${PN} = "\
     init-audio \
     audiodlkm \
+    pulseaudio-module-codec-control \
+    agl-audio-plugin \
 "
