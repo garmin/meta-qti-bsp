@@ -21,4 +21,9 @@ do_install_append_auto(){
 	install -m 0755 ${S}/qcom/wlan/sdx_auto/*.sh ${D}/usr/bin
 }
 
-
+do_install_append_automotive(){
+	install -d ${D}/etc/misc/wifi
+	install -m 0644 ${S}/qcom/wlan/msm_auto/*.conf ${D}/etc/misc/wifi
+	install -d ${D}/usr/bin
+	install -m 0755 ${S}/qcom/wlan/msm_auto/*.sh ${D}/usr/bin
+}
