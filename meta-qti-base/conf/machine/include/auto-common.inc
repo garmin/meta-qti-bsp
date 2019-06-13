@@ -41,7 +41,7 @@ PREFERRED_VERSION_libdrm  = "2.4.66"
 LICENSE_FLAGS_WHITELIST = "commercial_gstreamer1.0-libav commercial_gstreamer1.0-omx"
 LICENSE_FLAGS_WHITELIST += "commercial_gstreamer1.0-plugins-ugly commercial_opencore-amr"
 
-
+INCOMPATIBLE_LICENSE = "GPL-3.0 LGPL-3.0 AGPL-3.0"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
@@ -51,7 +51,7 @@ SERIAL_CONSOLES = "115200;ttyMSM0"
 
 DISTRO ?= "automotive"
 
-EXTRA_IMAGE_FEATURES = "tools-debug"
+# EXTRA_IMAGE_FEATURES = "tools-debug"
 
 # DISTRO_FEATURES_append = " ro-rootfs"
 
