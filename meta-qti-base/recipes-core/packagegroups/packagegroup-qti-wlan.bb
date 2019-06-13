@@ -18,4 +18,5 @@ RDEPENDS_${PN} += "\
     qcacld32-ll-rome \
     wlan-sigma-dut \
     wpa-supplicant \
+    system-conf \
     "
