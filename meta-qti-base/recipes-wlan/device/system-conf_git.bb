@@ -7,12 +7,11 @@ ${LICENSE};md5=550794465ba0ec5312d6919e203a55f9"
 PR = "r0"
 
 
-FILESPATH =+ "${WORKSPACE}:"
 # Provide a baseline
-SRC_URI = "file://device/"
-
+SRC_URI = "${PATH_TO_REPO}/device/qcom/wlan/.git;protocol=${PROTO};destsuffix=device/qcom/wlan;nobranch=1"
 # Update for each machine
 S = "${WORKDIR}/device"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/device/qcom/wlan', d)}"
 
 do_install_append_auto(){
 	install -d ${D}/etc/misc/wifi

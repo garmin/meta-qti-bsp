@@ -18,11 +18,17 @@ DEPENDS = "rtsp-alg"
 DEPENDS_remove_automotive = "rtsp-alg"
 DEPENDS_automotive += "llvm-arm-toolchain-native"
 
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI = "file://wlan/qcacld-3.0/"
-SRC_URI += "file://wlan/qca-wifi-host-cmn/"
-SRC_URI += "file://wlan/fw-api/"
-SRC_URI_append_automotive = " file://device/qcom/wlan/msm_auto/WCNSS_qcom_cfg_qca6390.ini"
+SRC_URI = "${PATH_TO_REPO}/wlan/qcacld-3.0/.git;protocol=${PROTO};destsuffix=wlan/qcacld-3.0;nobranch=1;name=qcacld \
+           ${PATH_TO_REPO}/wlan/qca-wifi-host-cmn/.git;protocol=${PROTO};destsuffix=wlan/qca-wifi-host-cmn;nobranch=1;name=qca-wifi-host-cmn \
+           ${PATH_TO_REPO}/wlan/fw-api/.git;protocol=${PROTO};destsuffix=wlan/fw-api/;nobranch=1;name=fw-api \
+           "
+
+SRC_URI_append_automotive = " ${PATH_TO_REPO}/device/qcom/wlan/.git;protocol=${PROTO};destsuffix=device/qcom/wlan/msm_auto;subpath=msm_auto;nobranch=1;name=wlan"
+
+SRCREV_qcacld = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/wlan/qcacld-3.0', d)}"
+SRCREV_qca-wifi-host-cmn = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/wlan/qca-wifi-host-cmn', d)}"
+SRCREV_fw-api = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/wlan/fw-api', d)}"
+SRCREV_wlan = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/device/qcom/wlan', d)}"
 
 S1 = "${WORKDIR}/wlan/qca-wifi-host-cmn/"
 S = "${WORKDIR}/wlan/qcacld-3.0/"

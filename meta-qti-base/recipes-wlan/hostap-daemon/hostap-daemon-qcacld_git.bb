@@ -5,9 +5,10 @@ inherit pkgconfig
 
 PR = "${INC_PR}.2"
 
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI = "file://external/wpa_supplicant_8/"
-SRC_URI += "file://defconfig-qcacld"
+SRC_URI   = "${PATH_TO_REPO}/external/wpa_supplicant_8/.git;protocol=${PROTO};destsuffix=external/wpa_supplicant_8;nobranch=1"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/external/wpa_supplicant_8', d)}"
+
+SRC_URI_append = " file://defconfig-qcacld"
 DEPENDS = "pkgconfig libnl openssl"
 
 S = "${WORKDIR}/external/wpa_supplicant_8/hostapd/"
