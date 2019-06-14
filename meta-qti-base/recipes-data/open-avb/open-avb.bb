@@ -33,6 +33,8 @@ do_compile() {
 	mkdir -p ${S}/daemons/maap/build
 	oe_runmake daemons_all
 	make avtp_pipeline
+	oe_runmake libgptp
+	oe_runmake libgptp_test
 }
 
 do_install() {
@@ -45,10 +47,20 @@ do_install() {
 	install ${S}/lib/avtp_pipeline/build/bin/* ${D}/${bindir}/avb
 	mkdir -p ${D}/${libdir}/
 	install ${S}/lib/avtp_pipeline/build/lib/*.so ${D}/${libdir}
+	install ${S}/examples/libgptp_test/libgptp_test ${D}/${bindir}/avb
+	install ${S}/lib/libgptp/*.so ${D}/${libdir}
+
+	mkdir -p ${D}/${includedir}/
+	install ${S}/lib/libgptp/gptp_helper.h ${D}${includedir}
 }
 
 FILES_${PN} =+ "${bindir}/avb/*"
 FILES_${PN} =+ "${libdir}/*"
 FILES_${PN}-dev = ""
 FILES_${PN}-dbg += "${bindir}/avb/.debug/*"
+
+INSANE_SKIP_${PN} += "installed-vs-shipped"
+
+INHIBIT_PACKAGE_STRIP="1"
+INHIBIT_PACKAGE_DEBUG_SPLIT="1"
 
