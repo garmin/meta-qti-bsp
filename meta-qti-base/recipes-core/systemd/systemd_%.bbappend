@@ -2,11 +2,27 @@ FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 SRC_URI += " file://0001-systemd-add-slotselect-support-in-fstab.patch "
 SRC_URI += " file://0033-systemd-Make-root-s-home-directory-configurable-2.patch "
 
+
+# Remove backlight ldconfig
+#   * backlight - Loads/Saves Screen Backlight Brightness, not required.
+#   * ldconfig  - configures dynamic linker run-time bindings.
+#                 ldconfig  creates  the  necessary links and cache to the most
+#                 recent shared libraries found in the directories specified on
+#                 the command line, in the file /etc/ld.so.conf, and in the
+#                 trusted directories (/lib and /usr/lib).  The cache (created
+#                 at /etc/ld.so.cache) is used by the run-time linker ld-linux.so.
+#                 system-ldconfig.service runs "ldconfig -X", but as / is read-only
+#                 cache may not be created. Disabling this may introduce app
+#                 start time latency.
+PACKAGECONFIG = " backlight ldconfig "
+
 do_install_append () {
-    # Use kernel rules for network iface
+    # Use kernel rules for network iface name
     sed -i  's/^NamePolicy.*/NamePolicy=kernel/g' ${D}/lib/systemd/network/99-default.link
+
+    #Remove privatetmp=true from hostname service
     sed -i  '/^PrivateTmp.*/d' ${D}/lib/systemd/system/systemd-hostnamed.service
 
-    # Remove orignal 60-persistent-v4l.rules
+    # Remove orignal 60-persistent-v4l.rules which is not applicable for QTI video
     rm ${D}/lib/udev/rules.d/60-persistent-v4l.rules
 }
