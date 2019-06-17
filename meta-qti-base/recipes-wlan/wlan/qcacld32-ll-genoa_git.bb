@@ -6,6 +6,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/${LICENSE};md5
 
 _MODNAME = "qcn7605"
 FILES_${PN}     += "lib/firmware/wlan/*"
+FILES_${PN}     += "lib/firmware/*"
 FILES_${PN}     += "lib/modules/${KERNEL_VERSION}/extra/${_MODNAME}.ko"
 PROVIDES_NAME   = "kernel-module-${_MODNAME}"
 RPROVIDES_${PN} += "${PROVIDES_NAME}-${KERNEL_VERSION}"
@@ -92,6 +93,18 @@ do_install_append_automotive() {
     install -d ${D}${bindir}
     install -D -m 0755 ${WORKDIR}/init.qti.wlan_on.sh ${D}${bindir}/init.qti.wlan_on.sh
     install -D -m 0755 ${WORKDIR}/init.qti.wlan_off.sh ${D}${bindir}/init.qti.wlan_off.sh
+
+    install -d ${D}/lib/firmware/${_MODNAME}/
+    ln -sf /firmware/image/${_MODNAME}/sbl_rddm.mbn ${D}/lib/firmware/${_MODNAME}/
+    mv ${D}/lib/firmware/${_MODNAME}/sbl_rddm.mbn ${D}/lib/firmware/${_MODNAME}/amss.bin
+
+    #For GNA04.1 boardid = 0xff
+    ln -sf /firmware/image/${_MODNAME}/bdwlan03.b01 ${D}/lib/firmware/${_MODNAME}/
+    mv ${D}/lib/firmware/${_MODNAME}/bdwlan03.b01 ${D}/lib/firmware/${_MODNAME}/bdwlan.bin
+    #For GNA04.1 boardid = 0x301
+    ln -sf /firmware/image/${_MODNAME}/bdwlan03.b01 ${D}/lib/firmware/${_MODNAME}/
+    mv ${D}/lib/firmware/${_MODNAME}/bdwlan03.b01 ${D}/lib/firmware/${_MODNAME}/bdwlan.b0301
+
     # Install systemd service file
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
         install -m 0644 ${WORKDIR}/init_qti_wlan_auto.service -D ${D}${systemd_unitdir}/system/init_qti_wlan_auto.service
