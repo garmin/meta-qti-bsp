@@ -23,8 +23,6 @@ EXTRA_OECONF = " \
               "
 CPPFLAGS += "-I${STAGING_KERNEL_BUILDDIR}/usr/include"
 
-EXTRA_OECONF_append ="--enable-encoder-heic=yes"
-
 do_configure_prepend() {
 	cd ${S}
 	./autogen.sh --noconfigure
