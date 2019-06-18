@@ -14,7 +14,7 @@ SRC_URI += " file://0033-systemd-Make-root-s-home-directory-configurable-2.patch
 #                 system-ldconfig.service runs "ldconfig -X", but as / is read-only
 #                 cache may not be created. Disabling this may introduce app
 #                 start time latency.
-PACKAGECONFIG = " backlight ldconfig "
+PACKAGECONFIG_remove = " backlight ldconfig "
 
 do_install_append () {
     # Use kernel rules for network iface name
