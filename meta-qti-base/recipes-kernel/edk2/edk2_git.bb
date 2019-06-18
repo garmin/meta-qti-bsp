@@ -2,7 +2,7 @@ inherit deploy
 DESCRIPTION = "UEFI bootloader"
 LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
-${LICENSE};md5=0835ade698e0bcf8506ecda2f7b4f302"
+${LICENSE};md5=3775480a712fc46a69647678acb234cb"
 
 PROVIDES = "virtual/bootloader"
 PV       = "3.0"
@@ -75,5 +75,5 @@ python sstate_task_prefunc () {
     sstate_clean(shared_state, d)
 }
 
-INCSUFFIX = "${@bb.utils.conditional('QTI_BASE_PROP', "Y", 'edk2', 'none',d)}"
+INCSUFFIX = "${@bb.utils.contains('QTI_BASE_PROP', "Y", 'edk2', 'none',d)}"
 include ${INCSUFFIX}.inc
