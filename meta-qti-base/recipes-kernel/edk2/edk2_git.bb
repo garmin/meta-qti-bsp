@@ -2,7 +2,7 @@ inherit deploy
 DESCRIPTION = "UEFI bootloader"
 LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/\
-${LICENSE};md5=0835ade698e0bcf8506ecda2f7b4f302"
+${LICENSE};md5=3775480a712fc46a69647678acb234cb"
 
 PROVIDES = "virtual/bootloader"
 PV       = "3.0"
@@ -24,7 +24,7 @@ VERITY_ENABLED = "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity','1', '0', 
 
 EARLY_ETH = "${@bb.utils.contains('DISTRO_FEATURES', 'early-eth', '1', '0', d)}"
 
-EXTRA_OEMAKE = "'CLANG_BIN=${STAGING_BINDIR_NATIVE}/llvm-arm-toolchain/bin/' \
+EXTRA_OEMAKE = "'CLANG_BIN=${CLANG_BIN_PATH}' \
                 'CLANG_PREFIX=${STAGING_BINDIR_NATIVE}/${TARGET_SYS}/${TARGET_PREFIX}' \
                 'TARGET_ARCHITECTURE=${TARGET_ARCH}'\
                 'BUILDDIR=${S}'\
@@ -74,3 +74,6 @@ python sstate_task_prefunc () {
         os.system(cmd)
     sstate_clean(shared_state, d)
 }
+
+INCSUFFIX = "${@bb.utils.contains('QTI_BASE_PROP', "Y", 'edk2', 'none',d)}"
+include ${INCSUFFIX}.inc

@@ -14,6 +14,7 @@ RDEPENDS_${PN} += "\
     "
 
 RDEPENDS_${PN} += "\
+    kernel-modules \
     system-core-adbd \
     system-core-leprop \
     system-core-logd \
