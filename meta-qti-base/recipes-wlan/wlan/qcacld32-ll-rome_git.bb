@@ -1,5 +1,5 @@
 
-inherit autotools-brokensep module qperf
+inherit autotools-brokensep module qperf module-sign
 
 DESCRIPTION = "Qualcomm Atheros WLAN CLD3.0 low latency driver"
 LICENSE = "ISC"
@@ -149,18 +149,6 @@ do_install_append_auto() {
     fi
 }
 
-do_module_signing() {
-    if [ -f ${STAGING_KERNEL_BUILDDIR}/signing_key.priv ]; then
-        bbnote "Signing ${PN} module"
-        ${STAGING_KERNEL_DIR}/scripts/sign-file sha512 ${STAGING_KERNEL_BUILDDIR}/signing_key.priv ${STAGING_KERNEL_BUILDDIR}/signing_key.x509 ${PKGDEST}/${PROVIDES_NAME}/lib/modules/${KERNEL_VERSION}/extra/${_MODNAME}.ko
-    elif [ -f ${STAGING_KERNEL_BUILDDIR}/certs/signing_key.pem ]; then
-        ${STAGING_KERNEL_BUILDDIR}/scripts/sign-file sha512 ${STAGING_KERNEL_BUILDDIR}/certs/signing_key.pem ${STAGING_KERNEL_BUILDDIR}/certs/signing_key.x509 ${PKGDEST}/${PN}/lib/modules/${KERNEL_VERSION}/extra/${_MODNAME}.ko
-    else
-        bbnote "${PN} module is not being signed"
-    fi
-}
-
-addtask module_signing after do_package before do_package_write_ipk
 do_compile_automotive() {
     if [ -e Makefile -o -e makefile -o -e GNUmakefile ]; then
         qoe_runmake CROSS_COMPILE=${CROSS_COMPILE} ${KERNEL_EXTRA_ARGS}|| die "make failed"
