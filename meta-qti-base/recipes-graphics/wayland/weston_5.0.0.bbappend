@@ -4,8 +4,6 @@ S = "${WORKDIR}/graphics/weston"
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/graphics/weston', d)}"
 
 SRC_URI_append = "  \
-    file://0001-make-error-portable.patch \
-    file://0001-weston-launch-Provide-a-default-version-that-doesn-t.patch \
     file://weston.service_caf \
     file://weston.ini_caf \
     file://drm_firmware_load_trigger.service \
