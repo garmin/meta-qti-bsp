@@ -1,6 +1,6 @@
 inherit qimage
 
-include ${BASEMACHINE}/${BASEMACHINE}-${PRODUCT}-image.inc
+include ${BASEMACHINE}/${BASEMACHINE}-automotive-image.inc
 
 IMAGE_LINGUAS = ""
 
