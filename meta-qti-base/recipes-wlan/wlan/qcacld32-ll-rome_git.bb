@@ -128,9 +128,10 @@ do_install_append_automotive() {
     ln -sf /firmware/image/${_MODNAME}/bdwlan30.bin ${D}/lib/firmware/${_MODNAME}/
     ln -sf /firmware/image/${_MODNAME}/bdwlan30.b31 ${D}/lib/firmware/${_MODNAME}/
     ln -sf /firmware/image/${_MODNAME}/bdwlan30.b00 ${D}/lib/firmware/${_MODNAME}/
-    ln -sf /firmware/image/${_MODNAME}/qwlan30.bin  ${D}/lib/firmware/${_MODNAME}/
-    ln -sf /firmware/image/${_MODNAME}/utf30.bin  ${D}/lib/firmware/${_MODNAME}/
-    ln -sf /firmware/image/${_MODNAME}/otp30.bin  ${D}/lib/firmware/${_MODNAME}/
+    ln -sf /firmware/image/${_MODNAME}/qwlan30.bin ${D}/lib/firmware/${_MODNAME}/
+    ln -sf /firmware/image/${_MODNAME}/utf30.bin ${D}/lib/firmware/${_MODNAME}/
+    ln -sf /firmware/image/${_MODNAME}/otp30.bin ${D}/lib/firmware/${_MODNAME}/
+    ln -sf /firmware/image/${_MODNAME}/data.msc ${D}/lib/firmware/${_MODNAME}/
 
     # Install systemd service file
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
