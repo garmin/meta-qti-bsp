@@ -21,6 +21,8 @@ EXTRA_OECONF = " \
                --with-omx-header-path=${STAGING_INCDIR}/mm-core \
                --with-protocal-xml-path=${STAGING_DATADIR}/weston \
               "
+EXTRA_OECONF_append =" --enable-target-vpu554='yes'"
+
 CPPFLAGS += "-I${STAGING_KERNEL_BUILDDIR}/usr/include"
 
 do_configure_prepend() {
