@@ -98,6 +98,7 @@ do_install_append_automotive() {
     ln -sf /firmware/image/${_MODNAME}/amss.bin ${D}/lib/firmware/${_MODNAME}/
     ln -sf /firmware/image/${_MODNAME}/amss20.bin ${D}/lib/firmware/${_MODNAME}/
     ln -sf /firmware/image/${_MODNAME}/bdwlan02.e01 ${D}/lib/firmware/${_MODNAME}/
+    ln -sf /firmware/image/${_MODNAME}/bdwlan02.e02 ${D}/lib/firmware/${_MODNAME}/
     ln -sf /firmware/image/${_MODNAME}/bdwlan.elf ${D}/lib/firmware/${_MODNAME}/
     ln -sf /firmware/image/${_MODNAME}/m3.bin ${D}/lib/firmware/${_MODNAME}/
 

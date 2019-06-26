@@ -95,8 +95,7 @@ do_install_append_automotive() {
     install -D -m 0755 ${WORKDIR}/init.qti.wlan_off.sh ${D}${bindir}/init.qti.wlan_off.sh
 
     install -d ${D}/lib/firmware/${_MODNAME}/
-    ln -sf /firmware/image/${_MODNAME}/sbl_rddm.mbn ${D}/lib/firmware/${_MODNAME}/
-    mv ${D}/lib/firmware/${_MODNAME}/sbl_rddm.mbn ${D}/lib/firmware/${_MODNAME}/amss.bin
+    ln -sf /firmware/image/${_MODNAME}/amss.bin ${D}/lib/firmware/${_MODNAME}/
 
     #For GNA04.1 boardid = 0xff
     ln -sf /firmware/image/${_MODNAME}/bdwlan03.b01 ${D}/lib/firmware/${_MODNAME}/
