@@ -3,3 +3,7 @@ AGL_APPS_remove = " \
     "
 
 AGL_APIS = " "
+
+RDEPENDS_${PN}_remove = " \
+    ${MOST_HVAC} \
+    "
