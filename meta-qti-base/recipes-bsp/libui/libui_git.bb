@@ -8,15 +8,14 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 PR = "r1"
 
-DEPENDS = "binder liblog libcutils libhardware libselinux glib-2.0"
+DEPENDS = "binder liblog libcutils libhardware libselinux glib-2.0 system-core"
 DEPENDS += " ${@oe.utils.version_less_or_equal('PREFERRED_VERSION_linux-msm', '4.4', '', 'libsync', d)}"
 
-FILESPATH =+ "${WORKSPACE}:"
-SRC_URI   = "file://frameworks/libui"
-
+SRC_URI = "${PATH_TO_REPO}/frameworks/.git;protocol=${PROTO};destsuffix=frameworks;nobranch=1"
 S = "${WORKDIR}/frameworks/libui"
+SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/frameworks', d)}"
 
-EXTRA_OECONF += " --with-core-includes=${WORKSPACE}/system/core/include --with-glib"
+EXTRA_OECONF = "--with-glib"
 
 CFLAGS += "-I${STAGING_INCDIR}/libselinux"
 
