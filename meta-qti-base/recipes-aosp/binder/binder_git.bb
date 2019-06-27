@@ -10,11 +10,11 @@ PR = "r0"
 
 DEPENDS = "liblog libcutils libhardware libselinux system-core glib-2.0"
 
-SRC_URI  = "${PATH_TO_REPO}/frameworks/.git;protocol=${PROTO};destsuffix=binder;subpath=binder;nobranch=1"
+SRC_URI  = "${PATH_TO_REPO}/frameworks/.git;protocol=${PROTO};destsuffix=frameworks/binder;subpath=binder;nobranch=1"
 SRC_URI_append = " file://servicemanager.service"
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/frameworks', d)}"
 
-S = "${WORKDIR}/binder"
+S = "${WORKDIR}/frameworks/binder"
 
 EXTRA_OECONF += " --with-glib"
 

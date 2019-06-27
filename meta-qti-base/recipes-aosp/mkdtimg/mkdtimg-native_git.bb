@@ -10,8 +10,8 @@ PROVIDES = "mkdtimg-native"
 DEPENDS += " dtc-native"
 
 PR = "r1"
-SRC_URI = "${PATH_TO_REPO}/system/libufdt/.git;protocol=${PROTO};destsuffix=libufdt;nobranch=1"
-S = "${WORKDIR}/libufdt"
+SRC_URI = "${PATH_TO_REPO}/system/libufdt/.git;protocol=${PROTO};destsuffix=system/libufdt;nobranch=1"
+S = "${WORKDIR}/system/libufdt"
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/libufdt', d)}"
 
 # let libufdt suport autoconf

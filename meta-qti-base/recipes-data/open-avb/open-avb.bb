@@ -4,14 +4,14 @@ DESCRIPTION = "Open AVB"
 LICENSE = "BSD"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/BSD;md5=3775480a712fc46a69647678acb234cb"
 
-SRC_URI   =  "${PATH_TO_REPO}/external/open-avb/.git;protocol=${PROTO};destsuffix=open-avb;nobranch=1"
+SRC_URI   =  "${PATH_TO_REPO}/external/open-avb/.git;protocol=${PROTO};destsuffix=external/open-avb;nobranch=1"
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/external/open-avb', d)}"
 PR = "r0"
 PV = "0.1"
 
 DEPENDS += "alsa-lib libpcap pciutils cmake-native glib-2.0 gstreamer1.0 gstreamer1.0-plugins-base"
 
-S = "${WORKDIR}/open-avb"
+S = "${WORKDIR}/external/open-avb"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 

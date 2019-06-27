@@ -8,10 +8,10 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 
 PR = "r1"
 
-SRC_URI   =  "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=libion;subpath=libion;nobranch=1"
+SRC_URI   =  "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=system/core/libion;subpath=libion;nobranch=1"
 
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/core', d)}"
-S = "${WORKDIR}/libion"
+S = "${WORKDIR}/system/core/libion"
 DEPENDS += "virtual/kernel liblog"
 
 EXTRA_OECONF += " --disable-static"

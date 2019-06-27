@@ -43,7 +43,7 @@ do_install() {
     USES_SEC_POLICY_MULTIPLE_DEFAULT_SIGN=1 \
     USES_SEC_POLICY_INTEGRITY_CHECK=1 \
     python ${SIGNING_TOOLS_DIR}/SecImage/sectools_builder.py \
-        -i ${WORKDIR}/abl.elf \
+        -i ${S}/../abl.elf \
         -t ${D}/boot \
         -g abl \
         --soc_hw_version ${SOC_HW_VERSION} \

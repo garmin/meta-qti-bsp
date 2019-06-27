@@ -7,11 +7,11 @@ ${LICENSE};md5=89aea4e17d99a7cacdbeed46a0096b10"
 HOMEPAGE = "http://android.git.kernel.org/?p=platform/system/core.git"
 PROVIDES = "mkbootimg-native"
 
-S = "${WORKDIR}/mkbootimg"
+S = "${WORKDIR}/system/core/mkbootimg"
 DEPENDS = "libmincrypt-native"
 
-SRC_URI  =  "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=mkbootimg;subpath=mkbootimg;nobranch=1"
-SRC_URI_append = " file://makefile;subdir=mkbootimg"
+SRC_URI  =  "${PATH_TO_REPO}/system/core/.git;protocol=${PROTO};destsuffix=system/core/mkbootimg;subpath=mkbootimg;nobranch=1"
+SRC_URI_append = " file://makefile;subdir=system/core/mkbootimg"
 
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/core', d)}"
 PR = "r6"

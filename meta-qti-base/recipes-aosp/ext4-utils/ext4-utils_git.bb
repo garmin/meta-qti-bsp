@@ -10,9 +10,9 @@ PR = "r1"
 
 DEPENDS = "libselinux libsparse libcutils libpcre"
 
-SRC_URI   =  "${PATH_TO_REPO}/system/extras/.git;protocol=${PROTO};destsuffix=ext4_utils;subpath=ext4_utils;nobranch=1"
+SRC_URI   =  "${PATH_TO_REPO}/system/extras/.git;protocol=${PROTO};destsuffix=system/extras/ext4_utils;subpath=ext4_utils;nobranch=1"
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/system/extras', d)}"
-S = "${WORKDIR}/ext4_utils"
+S = "${WORKDIR}/system/extras/ext4_utils"
 
 CPPFLAGS += "-I${STAGING_INCDIR}/libselinux"
 CPPFLAGS += "-I${STAGING_INCDIR}/cutils"
