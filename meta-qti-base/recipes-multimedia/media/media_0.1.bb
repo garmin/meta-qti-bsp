@@ -12,7 +12,7 @@ PR = "r1"
 DEPENDS = "virtual/kernel"
 DEPENDS += "glib-2.0"
 DEPENDS += "virtual/libc"
-DEPENDS += "libion libcutils libutils system-core"
+DEPENDS += "libion libcutils libutils libui system-core"
 DEPENDS += "weston"
 DEPENDS += "adreno-headers"
 DEPENDS += "libhardware"
@@ -47,6 +47,7 @@ EXTRA_OECONF_append =" --enable-target-${SOC_FAMILY}="yes""
 EXTRA_OECONF_append =" --enable-target-uses-media-extensions="no""
 EXTRA_OECONF_append =" --enable-build-mm-video="yes""
 EXTRA_OECONF_append =" --enable-is-ubwc-supported="yes""
+EXTRA_OECONF_append =" --enable-build-swcodec="yes""
 
 
 CPPFLAGS += "-I${STAGING_INCDIR} \
@@ -59,7 +60,9 @@ CPPFLAGS += "-I${STAGING_INCDIR} \
              -I${STAGING_INCDIR}/c++ \
              -I${STAGING_INCDIR}/c++/${TARGET_SYS} \
              -I${STAGING_INCDIR}/ion_headers  \
-             -I${STAGING_INCDIR}/disp-commonsys-intf/display"
+             -I${STAGING_INCDIR}/disp-commonsys-intf/display \
+             -I${STAGING_INCDIR}/mm-video/swvdec \
+             -I${STAGING_INCDIR}/mm-video/swvenc"
 
 CPPFLAGS += "-include stdint.h"
 
