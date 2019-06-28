@@ -13,4 +13,5 @@ IMAGE_INSTALL += " \
     packagegroup-qti-ros \
     packagegroup-qti-qdrive \
     packagegroup-qti-tools \
+    packagegroup-qti-location-hal \
     "
