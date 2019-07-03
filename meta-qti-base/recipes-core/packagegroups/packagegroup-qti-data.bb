@@ -11,6 +11,7 @@ ALLOW_EMPTY_${PN} = "1"
 RDEPENDS_${PN} += "\
     bridge-utils \
     connman \
+    connman-client \
     ethtool \
     iperf3 \
     iproute2 \
