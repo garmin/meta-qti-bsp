@@ -10,20 +10,21 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/${LICENSE};md5
 PR = "r0"
 
 DEPENDS = "virtual/kernel"
+AUDIO_BUILD_TARGET = "auto-audio-target"
 
 SRC_URI = "${PATH_TO_REPO}/vendor/qcom/opensource/audio-kernel/.git;protocol=${PROTO};destsuffix=vendor/qcom/opensource/audio-kernel;nobranch=1"
-SRC_URI_append = " file://${BASEMACHINE}/"
+SRC_URI_append = " file://${AUDIO_BUILD_TARGET}/"
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/vendor/qcom/opensource/audio-kernel', d)}"
 
 S = "${WORKDIR}/vendor/qcom/opensource/audio-kernel"
 
 FILES_${PN} += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/extra/*"
 FILES_${PN} += "${sysconfdir}/*"
-FILES_${PN}+="/etc/initscripts/start_audio_le"
-FILES_${PN}+= "${systemd_unitdir}/system/audio.service"
-FILES_${PN}+= "${systemd_unitdir}/system/multi-user.target.wants/audio.service"
+FILES_${PN} +="/etc/initscripts/start_audio_le"
+FILES_${PN} += "${systemd_unitdir}/system/audio.service"
+FILES_${PN} += "${systemd_unitdir}/system/multi-user.target.wants/audio.service"
 
-EXTRA_OEMAKE += "TARGET_SUPPORT=sa8155"
+EXTRA_OEMAKE += "TARGET_SUPPORT=${BASEMACHINE}"
 
 # Disable parallel make
 PARALLEL_MAKE = ""
@@ -47,9 +48,9 @@ do_install_append() {
   install -m 0644 ${S}/sound/* ${D}${includedir}/audio-kernel/sound
 
   if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
-  install -m 0755 ${WORKDIR}/${BASEMACHINE}/audio_load.conf -D ${D}${sysconfdir}/modules-load.d/audio_load.conf
+  install -m 0755 ${WORKDIR}/${AUDIO_BUILD_TARGET}/audio_load.conf -D ${D}${sysconfdir}/modules-load.d/audio_load.conf
   else
-    install -m 0755 ${WORKDIR}/${BASEMACHINE}/audio_load.conf -D ${D}${sysconfdir}/modules/audio_load.conf
+    install -m 0755 ${WORKDIR}/${AUDIO_BUILD_TARGET}/audio_load.conf -D ${D}${sysconfdir}/modules/audio_load.conf
   fi
 
    for i in $(find ${D}/${nonarch_base_libdir}/modules/${KERNEL_VERSION}/extra/. -name "*.ko"); do
@@ -63,10 +64,10 @@ do_install_append() {
 }
 
 do_install_append_mdm() {
-  install -m 0755 ${WORKDIR}/${BASEMACHINE}/audio_load.conf -D ${D}${sysconfdir}/modprobe.d/audio_load.conf
+  install -m 0755 ${WORKDIR}/${AUDIO_BUILD_TARGET}/audio_load.conf -D ${D}${sysconfdir}/modprobe.d/audio_load.conf
   install -d ${D}${sysconfdir}/initscripts
-  install -m 0755 ${WORKDIR}/${BASEMACHINE}/start_audio_le ${D}${sysconfdir}/initscripts
-  install -m 0644 ${WORKDIR}/${BASEMACHINE}/audio.service -D ${D}${systemd_unitdir}/system/audio.service
+  install -m 0755 ${WORKDIR}/${AUDIO_BUILD_TARGET}/start_audio_le ${D}${sysconfdir}/initscripts
+  install -m 0644 ${WORKDIR}/${AUDIO_BUILD_TARGET}/audio.service -D ${D}${systemd_unitdir}/system/audio.service
   install -d ${D}${systemd_unitdir}/system/multi-user.target.wants/
 # enable the service for multi-user.target
    ln -sf ${systemd_unitdir}/system/audio.service \
