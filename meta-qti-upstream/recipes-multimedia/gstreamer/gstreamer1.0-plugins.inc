@@ -1,4 +1,4 @@
-SUMMARY = "Plugins for the GStreamer multimedia framework 1.x"
+UMMARY = "Plugins for the GStreamer multimedia framework 1.x"
 HOMEPAGE = "http://gstreamer.freedesktop.org/"
 BUGTRACKER = "https://bugzilla.gnome.org/enter_bug.cgi?product=Gstreamer"
 SECTION = "multimedia"
@@ -28,6 +28,8 @@ EXTRA_OECONF = " \
     --disable-examples \
 "
 
+SRC_URI_append = " file://0001-introspection.m4-prefix-pkgconfig-paths-with-PKG_CON.patch"
+
 delete_pkg_m4_file() {
 	# This m4 file is out of date and is missing PKG_CONFIG_SYSROOT_PATH tweaks which we need for introspection
 	rm "${S}/common/m4/pkg.m4" || true
@@ -50,5 +52,3 @@ do_configure[prefuncs] += " delete_pkg_m4_file patch_gtk_doc_makefiles"
 
 PACKAGES_DYNAMIC = "^${PN}-.*"
 
-# qemu-mips64: error while loading shared libraries: .../recipe-sysroot/usr/lib/libgthread-2.0.so.0: ELF file data encoding not little-endian
-EXTRA_OECONF_append_mips64 = " --disable-introspection "

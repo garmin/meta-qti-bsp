@@ -1,15 +1,13 @@
 DEFAULT_PREFERENCE = "-1"
 
-require gstreamer1.0-plugins-bad.inc
-
+SRC_URI_remove = " \
+    file://0001-Makefile.am-don-t-hardcode-libtool-name-when-running.patch \
+"
+SRC_URI_remove += " file://0001-introspection.m4-prefix-pkgconfig-paths-with-PKG_CON.patch"
 DEPENDS += "gbm"
 
-LIC_FILES_CHKSUM = "file://COPYING;md5=73a5855a8119deb017f5f13cf327095d \
-                    file://gst/tta/filters.h;beginline=12;endline=29;md5=8a08270656f2f8ad7bb3655b83138e5a \
-                    file://COPYING.LIB;md5=21682e4e8fea52413fd26c60acb907e5 \
-                    file://gst/tta/crc32.h;beginline=12;endline=29;md5=27db269c575d1e5317fffca2d33b3b50"
 
-SRC_URI   =  "${PATH_TO_REPO}/gstreamer/gst-plugins-bad/.git;protocol=${PROTO};destsuffix=gstreamer/gst-plugins-bad;nobranch=1;name=bad"
+SRC_URI = "${PATH_TO_REPO}/gstreamer/gst-plugins-bad/.git;protocol=${PROTO};destsuffix=gstreamer/gst-plugins-bad;nobranch=1;name=bad"
 SRC_URI_append = " ${CAF_GIT}/gstreamer/common;destsuffix=gstreamer/gst-plugins-bad/common;branch=gstreamer/common/master;name=common"
 
 GI_DATA_ENABLED="0"
@@ -25,8 +23,15 @@ PACKAGECONFIG = " \
     orc \
     hls \
     "
+PACKAGECONFIG_GL = "${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'gles2 egl', '', d)}"
 
+PACKAGECONFIG[dc1394]          = "--enable-dc1394,--disable-dc1394,libdc1394"
 PACKAGECONFIG[wayland] = "--enable-wayland --enable-egl,--disable-wayland --disable-egl,wayland virtual/egl"
+PACKAGECONFIG[hls]             = "--enable-hls --with-hls-crypto=nettle,--disable-hls,nettle"
+ACKAGECONFIG[kms]             = "--enable-kms,--disable-kms,libdrm"
+PACKAGECONFIG[openjpeg]        = "--enable-openjpeg,--disable-openjpeg,openjpeg"
+PACKAGECONFIG[vulkan]          = "--enable-vulkan,--disable-vulkan,vulkan"
+PACKAGECONFIG[wayland]         = "--enable-wayland,--disable-wayland,wayland-native wayland wayland-protocols libdrm"
 
 EXTRA_OECONF = " \
                 --disable-accurip \
@@ -196,10 +201,13 @@ EXTRA_OECONF = " \
                 "
 EXTRA_OECONF_append =" --with-protocal-xml-path=${STAGING_DATADIR}/weston"
 CPPFLAGS += "-I${STAGING_KERNEL_BUILDDIR}/usr/include"
+
 do_configure_prepend() {
 	cd ${S}
 	./autogen.sh --noconfigure
 	cd ${B}
 }
-
+do_compile_prepend() {
+    export GIR_EXTRA_LIBS_PATH="${B}/gst-libs/gst/allocators/.libs"
+}
 

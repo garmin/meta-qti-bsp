@@ -1,16 +1,13 @@
 DEFAULT_PREFERENCE = "-1"
 
-require gstreamer1.0-omx.inc
 
 DEPENDS += "media"
 RDEPENDS_${PN} = "media"
 GSTREAMER_1_0_OMX_TARGET = "generic"
 GSTREAMER_1_0_OMX_CORE_NAME = "${libdir}/libOmxCore.so"
 
-LIC_FILES_CHKSUM = "file://COPYING;md5=4fbd65380cdd255951079008b364516c \
-                    file://omx/gstomx.h;beginline=1;endline=21;md5=5c8e1fca32704488e76d2ba9ddfa935f"
 
-SRC_URI =  "${PATH_TO_REPO}/gstreamer/gst-omx/.git;protocol=${PROTO};destsuffix=gstreamer/gst-omx;nobranch=1;name=omx"
+SRC_URI = "${PATH_TO_REPO}/gstreamer/gst-omx/.git;protocol=${PROTO};destsuffix=gstreamer/gst-omx;nobranch=1;name=omx"
 SRC_URI_append = " ${CAF_GIT}/gstreamer/common;destsuffix=gstreamer/gst-omx/common;branch=gstreamer/common/master;name=common"
 SRCREV_omx = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/gstreamer/gst-omx', d)}"
 SRCREV_common = "1f5d3c3163cc3399251827235355087c2affa790"
@@ -25,6 +22,13 @@ EXTRA_OECONF_append =" --enable-target-vpu554='yes'"
 
 CPPFLAGS += "-I${STAGING_KERNEL_BUILDDIR}/usr/include"
 
+delete_pkg_m4_file() {
+    # Delete m4 files which we provide patched versions of but will be ignored
+    # if these exist
+	rm -f "${S}/common/m4/pkg.m4"
+	rm -f "${S}/common/m4/gtk-doc.m4"
+}
+do_configure[prefuncs] += "delete_pkg_m4_file"
 do_configure_prepend() {
 	cd ${S}
 	./autogen.sh --noconfigure

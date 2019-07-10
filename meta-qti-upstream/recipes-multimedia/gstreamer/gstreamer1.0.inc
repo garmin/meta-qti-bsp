@@ -14,6 +14,9 @@ inherit autotools pkgconfig gettext upstream-version-is-even gobject-introspecti
 # (it has a custom INTROSPECTION_INIT macro, and so must be used instead of our common introspection.m4 file)
 acpaths = "-I ${S}/common/m4 -I ${S}/m4"
 
+SRC_URI_append = " \
+    file://0001-introspection.m4-prefix-pkgconfig-paths-with-PKG_CON.patch \
+"
 
 PACKAGECONFIG ??= ""
 
@@ -21,11 +24,11 @@ PACKAGECONFIG[debug] = "--enable-debug,--disable-debug"
 PACKAGECONFIG[tests] = "--enable-tests,--disable-tests"
 PACKAGECONFIG[valgrind] = "--enable-valgrind,--disable-valgrind,valgrind,"
 PACKAGECONFIG[gst-tracer-hooks] = "--enable-gst-tracer-hooks,--disable-gst-tracer-hooks,"
-PACKAGECONFIG[unwind] = "--with-unwind,--without-unwind,libunwind"
-PACKAGECONFIG[dw] = "--with-dw,--without-dw,elfutils"
+PACKAGECONFIG[trace-historic] = "--enable-trace,--disable-trace,"
 
 EXTRA_OECONF = " \
     --disable-dependency-tracking \
+    --disable-docbook \
     --disable-examples \
 "
 
@@ -66,3 +69,4 @@ do_configure[prefuncs] += " delete_pkg_m4_file patch_gtk_doc_makefiles"
 do_compile_prepend() {
         export GIR_EXTRA_LIBS_PATH="${B}/gst/.libs:${B}/libs/gst/base/.libs"
 }
+
