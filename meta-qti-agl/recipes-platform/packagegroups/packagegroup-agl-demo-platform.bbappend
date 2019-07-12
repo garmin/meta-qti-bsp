@@ -1,5 +1,6 @@
 AGL_APPS_remove = " \
     virtual/navigation \
+    virtual/mixer \
     "
 
 AGL_APIS = " "
