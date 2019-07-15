@@ -20,4 +20,5 @@ RDEPENDS_${PN} += "\
     iproute2-tc \
     tcpdump \
     vlan \
+    strongswan \
     "
