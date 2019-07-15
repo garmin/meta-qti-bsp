@@ -12,6 +12,7 @@ RDEPENDS_${PN} += "\
     bridge-utils \
     connman \
     connman-client \
+    net-tools \
     ethtool \
     iperf3 \
     iproute2 \
