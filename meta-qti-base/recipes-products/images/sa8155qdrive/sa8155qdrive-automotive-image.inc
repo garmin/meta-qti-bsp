@@ -12,4 +12,5 @@ IMAGE_INSTALL += " \
     packagegroup-qti-vnw \
     packagegroup-qti-ros \
     packagegroup-qti-qdrive \
+    packagegroup-qti-tools \
     "
