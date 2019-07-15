@@ -57,4 +57,3 @@ addtask fix_sysroot after do_install before do_populate_sysroot
 
 FILES_${PN} = "${libdir}/*.so"
 FILES_${PN} += "${libdir}/hw/gralloc.default.so"
-INSANE_SKIP_${PN} = "dev-so"

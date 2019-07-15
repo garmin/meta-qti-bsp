@@ -56,10 +56,8 @@ do_install() {
 
 FILES_${PN} =+ "${bindir}/avb/*"
 FILES_${PN} =+ "${libdir}/*"
-FILES_${PN}-dev = ""
+FILES_${PN}-dev = "${includedir}/*"
 FILES_${PN}-dbg += "${bindir}/avb/.debug/*"
-
-INSANE_SKIP_${PN} += "installed-vs-shipped"
 
 INHIBIT_PACKAGE_STRIP="1"
 INHIBIT_PACKAGE_DEBUG_SPLIT="1"
