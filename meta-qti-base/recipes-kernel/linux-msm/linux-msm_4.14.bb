@@ -72,6 +72,11 @@ do_deploy_append() {
     if ${@bb.utils.contains('MACHINE_FEATURES', 'dt-overlay', 'true', 'false', d)}; then
         ${STAGING_BINDIR_NATIVE}/mkdtimg create ${DEPLOY_DIR_IMAGE}/dtbo.img ${B}/arch/${ARCH}/boot/dts/qcom/*.dtbo
     fi
+
+    if ${@bb.utils.contains('BASEMACHINE', 'qtiquingvm', 'true', 'false', d)}; then
+        cp -f ${B}/arch/${ARCH}/boot/Image ${DEPLOY_DIR_IMAGE}/linux-lv.img
+        cp -f ${B}/arch/${ARCH}/boot/dts/qcom/*.dtb ${DEPLOY_DIR_IMAGE}/
+    fi
 }
 
 do_configure_prepend () {
