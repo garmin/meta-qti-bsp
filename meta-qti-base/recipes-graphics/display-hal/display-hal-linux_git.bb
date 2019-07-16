@@ -7,8 +7,6 @@ ${LICENSE};md5=3775480a712fc46a69647678acb234cb"
 
 PR = "r8"
 
-PACKAGES = "${PN}"
-
 SRC_DIR = "${SRC_DIR_ROOT}/display/display-hal"
 SRC_URI = "${PATH_TO_REPO}/display/display-hal/.git;protocol=${PROTO};destsuffix=display/display-hal;nobranch=1"
 S = "${WORKDIR}/display/display-hal"
@@ -50,20 +48,34 @@ do_install_append () {
     ln -s /usr/lib/libgralloc.so ${D}/usr/lib/hw/gralloc.default.so
     cp -fR ${WORKDIR}/display/display-hal/include/* ${STAGING_INCDIR}
     cp -fR ${WORKDIR}/display/display-hal/gpu_tonemapper/*.h ${STAGING_INCDIR}
+
+    cd ${D}${libdir}
+    install libdisplaydebug.so libdisplaydebug.so.0.0.0
+    ln -sf libdisplaydebug.so.0.0.0 libdisplaydebug.so
+    ln -sf libdisplaydebug.so.0.0.0 libdisplaydebug.so.0
+
+    install libdrmutils.so libdrmutils.so.0.0.0
+    ln -sf libdrmutils.so.0.0.0 libdrmutils.so
+    ln -sf libdrmutils.so.0.0.0 libdrmutils.so.0
+
+    install libqdutils.so libqdutils.so.0.0.0
+    ln -sf libqdutils.so.0.0.0 libqdutils.so
+    ln -sf libqdutils.so.0.0.0 libqdutils.so.0
+
+    install libqservice.so libqservice.so.0.0.0
+    ln -sf libqservice.so.0.0.0 libqservice.so
+    ln -sf libqservice.so.0.0.0 libqservice.so.0
+
+    install libsdmcore.so libsdmcore.so.0.0.0
+    ln -sf libsdmcore.so.0.0.0 libsdmcore.so
+    ln -sf libsdmcore.so.0.0.0 libsdmcore.so.0
+
+    install libsdmutils.so libsdmutils.so.0.0.0
+    ln -sf libsdmutils.so.0.0.0 libsdmutils.so
+    ln -sf libsdmutils.so.0.0.0 libsdmutils.so.0
 }
 
-FILES_${PN} = "${libdir}/*.so"
-FILES_${PN} += "/usr/lib/hw/gralloc.default.so"
+FILES_${PN}-dev += "${libdir}/hw/gralloc.default.so"
 
-FILES_${PN} += " \
-   ${libdir}/* \
-   ${includedir} \
-   ${includedir}/utils \
-   ${includedir}/private \
-   ${includedir}/core \
-"
-
-PACKAGES = "${PN}"
-INSANE_SKIP_${PN} = "dev-so"
 INHIBIT_PACKAGE_STRIP="1"
 INHIBIT_PACKAGE_DEBUG_SPLIT="1"
