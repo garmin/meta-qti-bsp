@@ -39,16 +39,15 @@ EXTRA_OECONF_append =" --with-cutils-headers=${STAGING_INCDIR}/cutils/"
 EXTRA_OECONF_append =" --with-log-headers=${STAGING_INCDIR}/log/"
 EXTRA_OECONF_append =" --with-usr-include-headers=${STAGING_INCDIR}/"
 
-
-EXTRA_OECONF_append =" --enable-use-glib="yes""
-EXTRA_OECONF_append =" --enable-target-uses-ion="yes""
-EXTRA_OECONF_append =" --enable-target-uses-gbm="yes""
-EXTRA_OECONF_append =" --enable-target-${SOC_FAMILY}="yes""
-EXTRA_OECONF_append =" --enable-target-uses-media-extensions="no""
-EXTRA_OECONF_append =" --enable-build-mm-video="yes""
-EXTRA_OECONF_append =" --enable-is-ubwc-supported="yes""
-EXTRA_OECONF_append =" --enable-build-swcodec="yes""
-
+EXTRA_OECONF_append =" --enable-use-glib='yes'"
+EXTRA_OECONF_append =" --enable-target-uses-ion='yes'"
+EXTRA_OECONF_append =" --enable-target-uses-gbm='yes'"
+EXTRA_OECONF_append =" --enable-target-${SOC_FAMILY}='yes'"
+EXTRA_OECONF_append =" --enable-target-uses-media-extensions='no'"
+EXTRA_OECONF_append =" --enable-build-mm-video='yes'"
+EXTRA_OECONF_append =" --enable-is-ubwc-supported='yes'"
+EXTRA_OECONF_append =" --enable-build-swcodec='yes'"
+EXTRA_OECONF_append =" --enable-target-output-deinterlaced='yes'"
 
 CPPFLAGS += "-I${STAGING_INCDIR} \
              -I${STAGING_INCDIR}/drm \
