@@ -41,6 +41,7 @@ FILESEXTRAPATHS_append := ":${THISDIR}/files"
 SRC_URI_append =  "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' file://weston.cfg', '', d)}"
 SRC_URI_append =  " file://cgroup.cfg"
 SRC_URI_append =  " file://ipc.cfg"
+SRC_URI_append =  " file://memhotplug.cfg"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
