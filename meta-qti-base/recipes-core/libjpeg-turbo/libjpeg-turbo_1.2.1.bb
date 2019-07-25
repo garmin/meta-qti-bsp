@@ -32,7 +32,6 @@ These tools allow for the compression, decompression, transformation and display
 FILES_jpeg-tools =  "${bindir}/*"
 
 FILES_libturbojpeg = "${libdir}/libturbojpeg.so"
-INSANE_SKIP_libturbojpeg = "dev-so"
 
 BBCLASSEXTEND = "native"
 DEPENDS = "nasm-native"
