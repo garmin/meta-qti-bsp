@@ -6,7 +6,7 @@ inherit ${@bb.utils.contains('TARGET_KERNEL_ARCH', 'aarch64', 'qtikernel-arch', 
 # TEMP: Disable IPA3 config for sdmsteppe
 SRC_URI_append_sdmsteppe = " file://disableipa3.cfg"
 
-COMPATIBLE_MACHINE = "(${BASEMACHINE})"
+COMPATIBLE_MACHINE = "(${BASEMACHINE}|sa8195p)"
 KERNEL_IMAGEDEST = "boot"
 
 SRC_DIR   =  "${SRC_DIR_ROOT}/kernel/msm-4.14"

@@ -53,7 +53,7 @@ pkg_postinst_${PN} () {
 }
 
 do_module_signing() {
-    if [ ${BASEMACHINE} == qcs40x ] || [ "${MACHINE}" == "sa8155" ] || [ "${MACHINE}" == "sa8155qdrive" ]; then
+    if [ "${MACHINE}" == "sa8195" || [ "${MACHINE}" == "sa8155" ] || [ "${MACHINE}" == "sa8155qdrive" ]; then
     if [ -f  ${STAGING_KERNEL_BUILDDIR}/certs/signing_key.pem ]; then
 	    bbnote "Signing ${PN} module ${i}"
         for i in $(find ${PKGDEST}/${PN}/${nonarch_base_libdir}/modules/${KERNEL_VERSION}/extra/ -name "*.ko"); do
