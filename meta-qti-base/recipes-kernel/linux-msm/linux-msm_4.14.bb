@@ -73,7 +73,7 @@ do_deploy_append() {
         ${STAGING_BINDIR_NATIVE}/mkdtimg create ${DEPLOY_DIR_IMAGE}/dtbo.img ${B}/arch/${ARCH}/boot/dts/qcom/*.dtbo
     fi
 
-    if ${@bb.utils.contains('BASEMACHINE', 'qtiquingvm', 'true', 'false', d)}; then
+    if ${@bb.utils.contains('DISTRO_FEATURES', 'q-hypervisor', 'true', 'false', d)}; then
         cp -f ${B}/arch/${ARCH}/boot/Image ${DEPLOY_DIR_IMAGE}/linux-lv.img
         cp -f ${B}/arch/${ARCH}/boot/dts/qcom/*.dtb ${DEPLOY_DIR_IMAGE}/
     fi
