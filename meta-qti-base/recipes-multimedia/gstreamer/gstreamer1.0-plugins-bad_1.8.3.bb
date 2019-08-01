@@ -203,4 +203,3 @@ do_configure_prepend() {
 }
 
 
-INSANE_SKIP_${PN} += "installed-vs-shipped"

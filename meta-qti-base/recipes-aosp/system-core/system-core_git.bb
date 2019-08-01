@@ -162,7 +162,6 @@ FILES_${PN}-usb     += "${systemd_unitdir}/system/usb.service ${systemd_unitdir}
 PACKAGES =+ "${PN}-post-boot"
 FILES_${PN}-post-boot  = "${sysconfdir}/init.d/init_post_boot"
 FILES_${PN}-post-boot += "${systemd_unitdir}/system/init_post_boot.service ${systemd_unitdir}/system/multi-user.target.wants/init_post_boot.service ${systemd_unitdir}/system/ffbm.target.wants/init_post_boot.service ${sysconfdir}/initscripts/init_post_boot"
-INSANE_SKIP_${PN}-post-boot = "file-rdeps"
 
 PACKAGES =+ "${PN}-logd-dbg ${PN}-logd"
 FILES_${PN}-logd-dbg  = "${base_sbindir}/.debug/logd"

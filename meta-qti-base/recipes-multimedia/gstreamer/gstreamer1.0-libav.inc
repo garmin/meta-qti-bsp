@@ -47,5 +47,3 @@ FILES_${PN}-staticdev += "${libdir}/gstreamer-1.0/*.a"
 ARM_INSTRUCTION_SET_armv4 = "arm"
 ARM_INSTRUCTION_SET_armv5 = "arm"
 
-# ffmpeg/libav disables PIC on some platforms (e.g. x86-32)
-INSANE_SKIP_${PN} = "textrel"

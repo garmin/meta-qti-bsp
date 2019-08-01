@@ -81,5 +81,4 @@ do_install_append() {
 
 FILES_${PN}-staticdev += "${libdir}/*.a"
 FILES_${PN} += "${libdir}/*"
-INSANE_SKIP_${PN} += "dev-so"
 FILES_${PN} += "${systemd_unitdir}/system/ ${sysconfdir}/"

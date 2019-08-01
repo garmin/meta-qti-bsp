@@ -22,4 +22,3 @@ do_configure_prepend() {
 	cd ${B}
 }
 
-INSANE_SKIP_${PN} += "installed-vs-shipped"
