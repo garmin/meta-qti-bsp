@@ -23,7 +23,7 @@ SYSTEMD_SERVICE_${PN} = "weston.service"
 DEPENDS +="gbm-headers gbm"
 DEPENDS += "libion libsync"
 DEPENDS += "display-hal-linux display-noship-linux gbm-headers display-ship-linux display-hal-headers"
-DEPENDS += "${@bb.utils.contains('BASEMACHINE', 'qtiquingvm', 'libuhab', '', d)}"
+DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'q-hypervisor', 'libuhab', '', d)}"
 
 TARGET_CFLAGS += "-idirafter ${STAGING_KERNEL_BUILDDIR}/include/"
 TARGET_CFLAGS += "-I${STAGING_INCDIR}/libdrm"
