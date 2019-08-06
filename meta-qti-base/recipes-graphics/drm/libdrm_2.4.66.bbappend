@@ -8,3 +8,4 @@ SRC_URI_append = " file://0001-include-sys-sysmacros.h-for-major-minor-definatio
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/graphics/libdrm', d)}"
 
 S = "${WORKDIR}/graphics/libdrm"
+EXTRA_OECONF += "${@bb.utils.contains('DISTRO_FEATURES', 'q-hypervisor', '--enable-drm_fe=yes', '', d)}"
