@@ -12,6 +12,7 @@ RDEPENDS_${PN} += "\
     bridge-utils \
     connman \
     connman-client \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'q-hypervisor', 'setup-network', '', d)} \
     net-tools \
     ethtool \
     iperf3 \
