@@ -1,5 +1,5 @@
 # Assign a larger rootfs size for sa8155qdrive  platforms
-IMAGE_ROOTFS_SIZE = "1572864"
+IMAGE_ROOTFS_SIZE = "1703936"
 
 IMAGE_INSTALL += " \
     packagegroup-qti-core-minimal \
