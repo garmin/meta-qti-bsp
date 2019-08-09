@@ -80,12 +80,14 @@ do_install_append() {
    install -m 0644 ${S}/mm-video-v4l2/vidc/venc/inc/omx_video_base.h -D ${D}${includedir}/venc/inc/
 
    install -d ${D}${includedir}/vdec/inc
-   install -m 0644 ${S}/mm-video-v4l2/vidc/vdec/inc/omx_vdec.h -D ${D}${includedir}/vdec/inc/
+   install -m 0644 ${S}/mm-video-v4l2/vidc/vdec/inc/*.h -D ${D}${includedir}/vdec/inc/
 
    install -m 0644 ${S}/mm-video-v4l2/vidc/common/inc/*.h -D ${D}${includedir}/
    install -d ${D}${includedir}/libstagefrighthw
    install -m 0644 ${S}/libstagefrighthw/QComOMXMetadata.h -D ${D}${includedir}/libstagefrighthw/
    install -m 0644 ${S}/libc2dcolorconvert/C2DColorConverter.h ${D}${includedir}/
+   install -d ${D}${includedir}/libarbitrarybytes
+   install -m 0644 ${S}/libarbitrarybytes/inc/*.h -D ${D}${includedir}/libarbitrarybytes/
 
 }
 
