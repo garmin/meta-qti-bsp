@@ -38,10 +38,8 @@ PREFERRED_VERSION_iproute2         ?= "4.11"
 
 PREFERRED_VERSION_libdrm  = "2.4.66"
 
-LICENSE_FLAGS_WHITELIST = "commercial_gstreamer1.0-libav commercial_gstreamer1.0-omx"
+LICENSE_FLAGS_WHITELIST += "commercial_gstreamer1.0-libav commercial_gstreamer1.0-omx"
 LICENSE_FLAGS_WHITELIST += "commercial_gstreamer1.0-plugins-ugly commercial_opencore-amr"
-
-INCOMPATIBLE_LICENSE = "GPL-3.0 LGPL-3.0 AGPL-3.0"
 
 MACHINE_DISPLAY_WIDTH_PIXELS ?= "480"
 MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
@@ -49,29 +47,11 @@ MACHINE_DISPLAY_HEIGHT_PIXELS ?= "640"
 SERIAL_CONSOLE ?= "${@['', '115200 ttyMSM0'][d.getVar('VARIANT', True) == ('' or 'debug')]}"
 SERIAL_CONSOLES = "115200;ttyMSM0"
 
-DISTRO ?= "automotive"
-
 # EXTRA_IMAGE_FEATURES = "tools-debug"
-
-# DISTRO_FEATURES_append = " ro-rootfs"
-
-# Use systemd init manager.
-DISTRO_FEATURES_remove = "sysvinit"
-DISTRO_FEATURES_append = " systemd"
-DISTRO_FEATURES_BACKFILL_CONSIDERED += "sysvinit"
-VIRTUAL-RUNTIME_dev_manager = "udev"
-VIRTUAL-RUNTIME_init_manager = "systemd"
-
-# Change Image features for systemd.
-IMAGE_DEV_MANAGER = "udev"
-IMAGE_INIT_MANAGER = "systemd"
-IMAGE_INITSCRIPTS = ""
 
 PAGE_SIZE ?= '4096'
 IMAGE_ROOTFS_ALIGNMENT = "4096"
 EXTRA_IMAGECMD_ext4 += " -b 4096 "
-
-MACHINE_FEATURES += "kernel26 keyboard"
 
 # Temporary disable these paths for yocto2.6 upgrade.
 WARN_TO_ERROR_QA_remove += "unknown-configure-option"
