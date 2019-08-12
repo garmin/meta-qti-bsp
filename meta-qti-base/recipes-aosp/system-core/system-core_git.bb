@@ -95,6 +95,15 @@ do_install_append() {
           ${D}${systemd_unitdir}/system/multi-user.target.wants/leprop.service
       ln -sf ${systemd_unitdir}/system/leprop.service \
           ${D}${systemd_unitdir}/system/ffbm.target.wants/leprop.service
+
+    # update usb.service to depend on var-volatile.mount
+      sed -i -e '/^After/d' ${D}${systemd_unitdir}/system/usb.service
+      sed -i -e '/^Requires/d' ${D}${systemd_unitdir}/system/usb.service
+      sed -i -e '/^Descr/a\RequiresMountsFor=\/var' ${D}${systemd_unitdir}/system/usb.service
+      sed -i -e '/^Descr/a\Requires=var-adb_devid.service var-usb.service' ${D}${systemd_unitdir}/system/usb.service
+      sed -i -e '/^Descr/a\After=var-volatile.mount leprop.service' ${D}${systemd_unitdir}/system/usb.service
+      sed -i -e '/^ExecStartPre/d' ${D}${systemd_unitdir}/system/usb.service
+
    else
       install -m 0755 ${S}/adb/start_adbd -D ${D}${sysconfdir}/init.d/adbd
       if [ ${BASEMACHINE} != "apq8053" ]; then
@@ -103,14 +112,6 @@ do_install_append() {
       install -m 0755 ${S}/usb/start_usb -D ${D}${sysconfdir}/init.d/usb
       install -m 0755 ${S}/rootdir/etc/init.qcom.post_boot.sh -D ${D}${sysconfdir}/init.d/init_post_boot
    fi
-
-    # update usb.service to depend on var-volatile.mount
-    sed -i -e '/^After/d' ${D}${systemd_unitdir}/system/usb.service
-    sed -i -e '/^Requires/d' ${D}${systemd_unitdir}/system/usb.service
-    sed -i -e '/^Descr/a\RequiresMountsFor=\/var' ${D}${systemd_unitdir}/system/usb.service
-    sed -i -e '/^Descr/a\Requires=var-adb_devid.service var-usb.service' ${D}${systemd_unitdir}/system/usb.service
-    sed -i -e '/^Descr/a\After=var-volatile.mount leprop.service' ${D}${systemd_unitdir}/system/usb.service
-    sed -i -e '/^ExecStartPre/d' ${D}${systemd_unitdir}/system/usb.service
 }
 
 do_install_append_mdm() {
