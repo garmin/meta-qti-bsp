@@ -8,16 +8,8 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/${LICENSE};md5
 # Other targets : modulename = wlan.ko, chip name -
 
 python __anonymous () {
-     if d.getVar('BASEMACHINE', True) == 'mdm9650':
-         d.setVar('WLAN_MODULE_NAME', 'wlan_sdio')
-         d.setVar('CHIP_NAME', 'qca9377')
-     elif d.getVar('BASEMACHINE', True) == 'sdx20':
-         d.setVar('WLAN_MODULE_NAME', 'wlan_sdio')
-         d.setVar('CHIP_NAME', 'qca9377')
-         d.setVar('WLAN_MODULE_TARGET_NAME', 'wlan_sdio_cld20')
-     else:
-         d.setVar('WLAN_MODULE_NAME', 'wlan')
-         d.setVar('CHIP_NAME', '')
+     d.setVar('WLAN_MODULE_NAME', 'wlan')
+     d.setVar('CHIP_NAME', '')
 }
 
 FILES_${PN}     += "lib/firmware/wlan/*"
@@ -70,13 +62,7 @@ do_install_append_sdx20 () {
 
 do_module_signing() {
     if [ -f ${STAGING_KERNEL_BUILDDIR}/signing_key.priv ]; then
-        if [ ${BASEMACHINE} == "apq8017" ]; then
-            ${STAGING_KERNEL_DIR}/scripts/sign-file sha512 ${STAGING_KERNEL_BUILDDIR}/signing_key.priv ${STAGING_KERNEL_BUILDDIR}/signing_key.x509 ${PKGDEST}/${PROVIDES_NAME}/lib/modules/${KERNEL_VERSION}/extra/${WLAN_MODULE_NAME}.ko
-        elif [ ${BASEMACHINE} == "sdx20" ]; then
-            ${STAGING_KERNEL_DIR}/scripts/sign-file sha512 ${STAGING_KERNEL_BUILDDIR}/signing_key.priv ${STAGING_KERNEL_BUILDDIR}/signing_key.x509 ${PKGDEST}/${PROVIDES_NAME}/lib/modules/${KERNEL_VERSION}/extra/${WLAN_MODULE_TARGET_NAME}.ko
-        else
-            ${STAGING_KERNEL_DIR}/scripts/sign-file sha512 ${STAGING_KERNEL_BUILDDIR}/signing_key.priv ${STAGING_KERNEL_BUILDDIR}/signing_key.x509 ${PKGDEST}/${PN}/lib/modules/${KERNEL_VERSION}/extra/${WLAN_MODULE_NAME}.ko
-        fi
+        ${STAGING_KERNEL_DIR}/scripts/sign-file sha512 ${STAGING_KERNEL_BUILDDIR}/signing_key.priv ${STAGING_KERNEL_BUILDDIR}/signing_key.x509 ${PKGDEST}/${PN}/lib/modules/${KERNEL_VERSION}/extra/${WLAN_MODULE_NAME}.ko
     fi
 }
 
