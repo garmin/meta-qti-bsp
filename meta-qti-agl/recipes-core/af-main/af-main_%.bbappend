@@ -4,6 +4,8 @@ do_install_append_class-target() {
     # Fix afm-system-setup.service reset issue
     sed -i -e '/^Type/a\RemainAfterExit=yes' ${D}${systemd_system_unitdir}/afm-system-setup.service
     sed -i -e 's/mkdir/mkdir -p/' ${D}${systemd_system_unitdir}/afm-system-setup.service
+    sed -i -e '/^PAMName/a\ExecStartPre=/bin/systemctl  daemon-reload' ${D}${systemd_system_unitdir}/afm-user-session@.service
+    sed -i -e '/^ExecStartPre/a\ExecStartPre=/etc/init.d/smack reload' ${D}${systemd_system_unitdir}/afm-user-session@.service
 }
 
 
