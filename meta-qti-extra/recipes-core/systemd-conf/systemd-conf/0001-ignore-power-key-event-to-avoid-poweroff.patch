@@ -1,0 +1,31 @@
+From 24dfe61fb2f967d0ebbb9dc803c03dfc6cafe32e Mon Sep 17 00:00:00 2001
+From: Yimin Peng <yiminp@codeaurora.org>
+Date: Wed, 17 Jul 2019 11:20:52 +0800
+Subject: [PATCH] ignore power key event to avoid poweroff.
+
+Systemd's default behavior on handling PowerKey is
+to go shutdown flow. But this key event is used as
+wakeup source for embedded platforms to restore from
+suspend now.
+
+Signed-off-by: Yimin Peng <yiminp@codeaurora.org>
+---
+ src/login/logind.conf.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/login/logind.conf.in b/src/login/logind.conf.in
+index 1029e29..0c35496 100644
+--- a/src/login/logind.conf.in
++++ b/src/login/logind.conf.in
+@@ -18,7 +18,7 @@
+ #KillOnlyUsers=
+ #KillExcludeUsers=root
+ #InhibitDelayMaxSec=5
+-#HandlePowerKey=poweroff
++HandlePowerKey=ignore
+ #HandleSuspendKey=suspend
+ #HandleHibernateKey=hibernate
+ #HandleLidSwitch=suspend
+-- 
+1.9.1
+
