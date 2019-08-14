@@ -1,0 +1,29 @@
+From 60eee3696b1797c75cb3c09d60b3a3f91fde5a1c Mon Sep 17 00:00:00 2001
+From: Xubao Jiang <xubaoj@codeaurora.org>
+Date: Thu, 15 Aug 2019 13:18:46 +0800
+Subject: [PATCH 2/2] bootcontrol: update bootdev dir
+
+The device directory path on Linux platform is "/dev/disk/by-partlabel".
+
+Change-Id: I8c65cef749e18afd825de17b3ad6e0036fec48b9
+Signed-off-by: Xubao Jiang <xubaoj@codeaurora.org>
+---
+ boot_control.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/boot_control.cpp b/boot_control.cpp
+index 7319f9a..f2f41e5 100644
+--- a/boot_control.cpp
++++ b/boot_control.cpp
+@@ -48,7 +48,7 @@ extern "C" {
+ #include <cutils/properties.h>
+ #include "gpt-utils.h"
+ 
+-#define BOOTDEV_DIR "/dev/block/bootdevice/by-name"
++#define BOOTDEV_DIR "/dev/disk/by-partlabel"
+ #define BOOT_IMG_PTN_NAME "boot"
+ #define LUN_NAME_END_LOC 14
+ #define BOOT_SLOT_PROP "ro.boot.slot_suffix"
+-- 
+2.7.4
+
