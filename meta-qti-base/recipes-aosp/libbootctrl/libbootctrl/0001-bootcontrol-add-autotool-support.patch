@@ -1,0 +1,62 @@
+From 7ac2dd8b919aaaa335e95b263686253c7711d0ba Mon Sep 17 00:00:00 2001
+From: Xubao Jiang <xubaoj@codeaurora.org>
+Date: Thu, 15 Aug 2019 13:16:51 +0800
+Subject: [PATCH 1/2] bootcontrol: add autotool support
+
+To build boot_control using autotool on Linux platform, add Makefile.am and
+configure.ac
+
+Change-Id: I82aa99fab9ca09b43450b5652002a34c29b0daf6
+Signed-off-by: Xubao Jiang <xubaoj@codeaurora.org>
+---
+ Makefile.am  |  6 ++++++
+ configure.ac | 24 ++++++++++++++++++++++++
+ 2 files changed, 30 insertions(+)
+ create mode 100644 Makefile.am
+ create mode 100644 configure.ac
+
+diff --git a/Makefile.am b/Makefile.am
+new file mode 100644
+index 0000000..84f892f
+--- /dev/null
++++ b/Makefile.am
+@@ -0,0 +1,6 @@
++# Build libboot_contrl
++lib_LTLIBRARIES             := libboot_control.la
++
++libboot_control_la_SOURCES  := boot_control.cpp
++
++libboot_control_la_LDFLAGS := -lcutils -llog -lz -lrecovery_updater_msm
+diff --git a/configure.ac b/configure.ac
+new file mode 100644
+index 0000000..e0b05a1
+--- /dev/null
++++ b/configure.ac
+@@ -0,0 +1,24 @@
++AC_PREREQ(2.61)
++AC_INIT([libbootctrl],1.0.0)
++AM_INIT_AUTOMAKE([-Wall gnu foreign])
++AC_CONFIG_SRCDIR([Makefile.am])
++AC_CONFIG_HEADERS([config.h])
++AC_CONFIG_MACRO_DIR([m4])
++
++# Check for programs
++AM_PROG_AS
++AC_PROG_CC
++AM_PROG_CC_C_O
++AC_PROG_LIBTOOL
++AC_PROG_AWK
++AC_PROG_CPP
++AC_PROG_CXX
++AC_PROG_INSTALL
++AC_PROG_LN_S
++AC_PROG_MAKE_SET
++PKG_PROG_PKG_CONFIG
++
++AC_CONFIG_FILES([ \
++    Makefile \
++])
++AC_OUTPUT
+-- 
+2.7.4
+
