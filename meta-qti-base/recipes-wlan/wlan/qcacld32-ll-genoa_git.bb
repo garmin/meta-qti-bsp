@@ -66,8 +66,6 @@ do_compile_prepend_automotive() {
     #In yocto system, get build tag by 'git log' in wlan src dir instead of 'git reflog' in work dir
     sed -i -e '/^ifeq ($(CONFIG_BUILD_TAG), y)/,/^endif/{/^ifeq ($(CONFIG_BUILD_TAG), y)/!{/^endif/!d}}' ${S}/Kbuild
     sed -i -e '/^ifeq ($(CONFIG_BUILD_TAG), y)/a\
-WLAN_ROOT_LV = ${WORKSPACE}/wlan/qcacld-3.0\
-WLAN_CMN_LV = ${WORKSPACE}/wlan/qca-wifi-host-cmn\
 CLD_IDS = $(shell cd "$(WLAN_ROOT_LV)" && git log -1 | sed -nE '\''s/^\\s*Change-Id: (I[0-f]{10})[0-f]{30}\\s*\$\$/\\1/p'\'')\
 CMN_IDS = $(shell cd "$(WLAN_CMN_LV)" && git log -1 | sed -nE '\''s/^\\s*Change-Id: (I[0-f]{10})[0-f]{30}\\s*\$\$/\\1/p'\'')\
 TIMESTAMP = $(shell date -u +'%Y-%m-%dT%H:%M:%SZ')\
