@@ -25,8 +25,8 @@ KERNEL_PRIORITY           = "9001"
 # Add V=1 to KERNEL_EXTRA_ARGS for verbose
 KERNEL_EXTRA_ARGS        += "O=${B}"
 
-SRC_URI   =  "${PATH_TO_REPO}/kernel/msm-4.14/.git;protocol=${PROTO};destsuffix=kernel/msm-4.14;nobranch=1;name=kernel \
-              ${PATH_TO_REPO}/data-kernel/.git;protocol=${PROTO};destsuffix=data-kernel;nobranch=1;name=data"
+SRC_URI   =  "${PATH_TO_REPO}/kernel/msm-4.14/.git;protocol=${PROTO};destsuffix=kernel/msm-4.14;usehead=1 \
+              ${PATH_TO_REPO}/data-kernel/.git;protocol=${PROTO};destsuffix=data-kernel;usehead=1"
 
 SRC_URI_append = "  \
               ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' file://systemd.cfg', '', d)} \
@@ -34,8 +34,8 @@ SRC_URI_append = "  \
               ${@bb.utils.contains('DISTRO_FEATURES', 'nand-squashfs', ' file://squashfs.cfg', '', d)} \
 	     "
 
-SRCREV_kernel = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/kernel/msm-4.14', d)}"
-SRCREV_data = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/data-kernel', d)}"
+SRCREV = "${AUTOREV}"
+SRCREV_FORMAT = "kernel_data"
 
 FILESEXTRAPATHS_append := ":${THISDIR}/files"
 SRC_URI_append =  "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' file://weston.cfg', '', d)}"
