@@ -1,4 +1,5 @@
 #This bbappend are from AGL
+inherit distro_features_check
 
 SRC_URI += "\
 https://source.codeaurora.org/quic/le/AGL/meta-agl/plain/meta-ivi-common/recipes-multimedia/pulseaudio/pulseaudio-10.0/0001-install-files-for-a-module-development.patch?h=automotivelinux/eel;downloadfilename=0001-install-files-for-a-module-development.patch;md5sum=0ad43d60adc2746787f2266ac647363d;sha256sum=cbbb1bf93bf3ba4ac4e6f3f1b0a4d83fa8d99d4a044021a6e4c6667257b1e755 \
@@ -36,3 +37,4 @@ PACKAGES =+ "pulseaudio-module-dev"
 
 FILES_pulseaudio-module-dev = "${includedir}/pulsemodule/* ${libdir}/pkgconfig/pulseaudio-module-devel.pc"
 
+REQUIRED_DISTRO_FEATURES = "systemd"
