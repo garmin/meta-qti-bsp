@@ -16,3 +16,7 @@ pkg_postinst_${PN}-policy () {
     fi
     exit 0
 }
+
+FILESEXTRAPATHS_prepend := "${THISDIR}/file:"
+
+SRC_URI_append = " file://0001-Updated-smack-rules-for-agl-application.patch"
