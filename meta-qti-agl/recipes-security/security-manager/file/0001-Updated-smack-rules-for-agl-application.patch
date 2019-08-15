@@ -1,0 +1,34 @@
+From 335b1d647036cbaae6389c96147710c487e2eec0 Mon Sep 17 00:00:00 2001
+From: Nan Zhang <nanzha@codeaurora.org>
+Date: Thu, 15 Aug 2019 13:42:43 +0800
+Subject: [PATCH] Updated smack rules for agl application.
+
+Change-Id: Ice97bc8acf2a884d0162195de61291e4688b094a
+Signed-off-by: Nan Zhang <nanzha@codeaurora.org>
+---
+ policy/app-rules-template.smack | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/policy/app-rules-template.smack b/policy/app-rules-template.smack
+index 910f40c..cc50f3f 100644
+--- a/policy/app-rules-template.smack
++++ b/policy/app-rules-template.smack
+@@ -1,10 +1,11 @@
+ System ~APP~ rwxa
+ System ~PKG~ rwxat
+-~APP~ System wx
+-~APP~ System::Shared rx
++~APP~ System rwx
++~APP~ System::Shared rwx
+ ~APP~ System::Run rwxat
+ ~APP~ System::Log rwxa
+-~APP~ _ l
+-~APP~ User::Home rxl
++~APP~ _ rwxal
++~APP~ User::Home rwxl
+ ~APP~ User::App-Shared rwxat
+ ~APP~ ~PKG~ rwxat
++~APP~ ~APP~ rwxat
+-- 
+1.9.1
+
