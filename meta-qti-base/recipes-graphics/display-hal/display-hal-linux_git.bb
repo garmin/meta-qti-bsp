@@ -10,9 +10,9 @@ PR = "r8"
 PACKAGES = "${PN}"
 
 SRC_DIR = "${SRC_DIR_ROOT}/display/display-hal"
-SRC_URI = "${PATH_TO_REPO}/display/display-hal/.git;protocol=${PROTO};destsuffix=display/display-hal;nobranch=1"
+SRC_URI = "${PATH_TO_REPO}/display/display-hal/.git;protocol=${PROTO};destsuffix=display/display-hal;usehead=1"
 S = "${WORKDIR}/display/display-hal"
-SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR}', d)}"
+SRCREV = "${AUTOREV}"
 
 DEPENDS += "system-core"
 DEPENDS += "libhardware"
