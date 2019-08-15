@@ -25,4 +25,8 @@ EXTRA_OECONF_append_robot-som = " --enable-camera"
 
 do_install_append () {
     cp ${WORKDIR}/gralloc1.h ${D}${includedir}/hardware/
+    cp ${WORKDIR}/hardware/libhardware/include/hardware/camera3.h ${D}${includedir}/hardware/
+    cp ${WORKDIR}/hardware/libhardware/include/hardware/camera_common.h ${D}${includedir}/hardware/
+    cp ${WORKDIR}/hardware/libhardware/include/hardware/camera.h ${D}${includedir}/hardware/
+    cp ${WORKDIR}/hardware/libhardware/include/hardware/sensors.h ${D}${includedir}/hardware/
 }
