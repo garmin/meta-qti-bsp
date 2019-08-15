@@ -12,8 +12,6 @@ INC_PR = "r5"
 
 DEPENDS = "openssl libnl"
 
-SRC_URI = "file://${WORKSPACE}/external/hostap"
-
 S = "${WORKDIR}/hostap/wpa_supplicant"
 
 do_install() {

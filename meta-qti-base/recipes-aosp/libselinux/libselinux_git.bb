@@ -13,4 +13,4 @@ S = "${WORKDIR}/external/libselinux"
 
 SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/external/libselinux', d)}"
 
-EXTRA_OECONF = " --with-pcre --with-core-includes=${WORKSPACE}/system/core/include"
+EXTRA_OECONF = " --with-pcre"
