@@ -1,0 +1,29 @@
+From 444041b1af3e33a04581351629f533623f6aa02c Mon Sep 17 00:00:00 2001
+From: Nan Zhang <nanzha@codeaurora.org>
+Date: Fri, 16 Aug 2019 14:52:42 +0800
+Subject: [PATCH] Afm-user-setup: disable the soft link to wayland-0.
+
+A soft link to wayland-0 causes the communication to fail.
+
+Change-Id: Ib115cfac435c5010ee8d14adf9cf7957630de2d0
+Signed-off-by: Nan Zhang <nanzha@codeaurora.org>
+---
+ conf/system/afm-user-setup.sh.in | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/conf/system/afm-user-setup.sh.in b/conf/system/afm-user-setup.sh.in
+index 076676f..e966292 100644
+--- a/conf/system/afm-user-setup.sh.in
++++ b/conf/system/afm-user-setup.sh.in
+@@ -28,7 +28,7 @@ dodir_usrshr $udir/usrshr
+ 
+ doln() {
+ 	if ! test -e $2; then
+-		ln -sf $1 $2
++#		ln -sf $1 $2
+ 		chown -h $uid:$uid $2
+ 		chsmack -a '*' $2
+ 	fi
+-- 
+1.9.1
+
