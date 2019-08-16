@@ -3,10 +3,11 @@ DEFAULT_PREFERENCE = "-1"
 SRC_URI_remove = " \
     file://0001-introspection.m4-prefix-pkgconfig-paths-with-PKG_CON.patch \
 "
-SRC_URI = "${PATH_TO_REPO}/gstreamer/gstreamer/.git;protocol=${PROTO};destsuffix=gstreamer/gstreamer;nobranch=1;name=gstreamer"
+SRC_URI   =  "${PATH_TO_REPO}/gstreamer/gstreamer/.git;protocol=${PROTO};destsuffix=gstreamer/gstreamer;usehead=1"
 SRC_URI_append = " ${CAF_GIT}/gstreamer/common;destsuffix=gstreamer/gstreamer/common;branch=gstreamer/common/master;name=common"
 
-SRCREV_gstreamer = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/gstreamer/gstreamer', d)}"
+SRCREV = "${AUTOREV}"
+SRCREV_FORMAT = "gstreamer_common"
 
 DEPENDS = "gobject-introspection bison-native"
 
