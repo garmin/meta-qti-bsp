@@ -60,24 +60,46 @@ do_shared_workdir_append () {
 
         cp ${STAGING_KERNEL_DIR}/scripts/gen_initramfs_list.sh $kerneldir/scripts/
 
-        # Copy vmlinux and zImage into deplydir for boot.img creation
-        install -m 0644 ${KERNEL_OUTPUT_DIR}/${KERNEL_IMAGETYPE} ${DEPLOY_DIR_IMAGE}/${KERNEL_IMAGETYPE}
-        install -m 0644 vmlinux ${DEPLOY_DIR_IMAGE}
-
         # Generate kernel headers
         oe_runmake_call -C ${STAGING_KERNEL_DIR} ARCH=${ARCH} CC="${KERNEL_CC}" LD="${KERNEL_LD}" headers_install O=${STAGING_KERNEL_BUILDDIR}
 }
 
 do_deploy_append() {
     if ${@bb.utils.contains('MACHINE_FEATURES', 'dt-overlay', 'true', 'false', d)}; then
-        ${STAGING_BINDIR_NATIVE}/mkdtimg create ${DEPLOY_DIR_IMAGE}/dtbo.img ${B}/arch/${ARCH}/boot/dts/qcom/*.dtbo
+        ${STAGING_BINDIR_NATIVE}/mkdtimg create ${DEPLOYDIR}/dtbo.img ${B}/arch/${ARCH}/boot/dts/qcom/*.dtbo
     fi
 
     if ${@bb.utils.contains('DISTRO_FEATURES', 'q-hypervisor', 'true', 'false', d)}; then
-        cp -f ${B}/arch/${ARCH}/boot/Image ${DEPLOY_DIR_IMAGE}/linux-lv.img
-        cp -f ${B}/arch/${ARCH}/boot/dts/qcom/*.dtb ${DEPLOY_DIR_IMAGE}/
+        cp -f ${B}/arch/${ARCH}/boot/Image ${DEPLOYDIR}/linux-lv.img
+        cp -f ${B}/arch/${ARCH}/boot/dts/qcom/*.dtb ${DEPLOYDIR}/
     fi
 }
+
+nand_boot_flag = "${@bb.utils.contains('DISTRO_FEATURES', 'nand-boot', '1', '0', d)}"
+
+do_deploy () {
+    extra_mkbootimg_params=""
+    if [ ${nand_boot_flag} == "1" ]; then
+        extra_mkbootimg_params='--tags-addr ${KERNEL_TAGS_OFFSET}'
+    fi
+
+    # Make bootimage
+    ${STAGING_BINDIR_NATIVE}/mkbootimg --kernel ${D}/${KERNEL_IMAGEDEST}/${KERNEL_IMAGETYPE}-${KERNEL_VERSION} \
+        --ramdisk /dev/null \
+        --cmdline "${KERNEL_CMD_PARAMS}" \
+        --pagesize ${PAGE_SIZE} \
+        --base ${KERNEL_BASE} \
+        --ramdisk_offset 0x0 \
+        ${extra_mkbootimg_params} --output ${DEPLOYDIR}/${BOOTIMAGE_TARGET}
+    # Copy vmlinux and zImage into deplydir for boot.img creation
+    install -m 0644 ${KERNEL_OUTPUT_DIR}/${KERNEL_IMAGETYPE} ${DEPLOYDIR}/${KERNEL_IMAGETYPE}
+    install -m 0644 vmlinux ${DEPLOYDIR}
+}
+
+inherit qsigning
+
+#Sign boot image after generation
+do_deploy[postfuncs] += "sign_bootimg"
 
 do_configure_prepend () {
 		mkdir -p ${S}/drivers/net/ethernet/qualcomm/emac_dwc_eqos
@@ -108,6 +130,6 @@ do_rebuild_dtb(){
 
 addtask do_rebuild_dtb after do_patch before do_compile
 
-do_shared_workdir[dirs] = "${DEPLOY_DIR_IMAGE}"
+do_shared_workdir[dirs] = "${DEPLOYDIR}"
 
 INHIBIT_PACKAGE_STRIP = "1"
