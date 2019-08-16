@@ -12,9 +12,9 @@ PR = "r0"
 DEPENDS = "virtual/kernel"
 AUDIO_BUILD_TARGET = "auto-audio-target"
 
-SRC_URI = "${PATH_TO_REPO}/vendor/qcom/opensource/audio-kernel/.git;protocol=${PROTO};destsuffix=vendor/qcom/opensource/audio-kernel;nobranch=1"
+SRC_URI = "${PATH_TO_REPO}/vendor/qcom/opensource/audio-kernel/.git;protocol=${PROTO};destsuffix=vendor/qcom/opensource/audio-kernel;usehead=1"
 SRC_URI_append = " file://${AUDIO_BUILD_TARGET}/"
-SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/vendor/qcom/opensource/audio-kernel', d)}"
+SRCREV = "${AUTOREV}"
 
 S = "${WORKDIR}/vendor/qcom/opensource/audio-kernel"
 
