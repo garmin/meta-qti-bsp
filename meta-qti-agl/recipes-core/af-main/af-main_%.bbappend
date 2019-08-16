@@ -36,3 +36,7 @@ pkg_postinst_${PN} () {
 
 pkg_postinst_ontarget_${PN} () {
 }
+
+FILESEXTRAPATHS_prepend := "${THISDIR}/file:"
+
+SRC_URI_append = "file://0001-Afm-user-setup-disable-the-soft-link-to-wayland-0.patch "
