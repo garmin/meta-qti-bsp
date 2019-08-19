@@ -21,15 +21,15 @@ do_populate_lic[noexec] = "1"
 do_package_qa[noexec] = "1"
 do_qa_configure[noexec] = "1"
 
-include ${MACHINE}/${MACHINE}-dm-verity-image.inc
+include ${BASEMACHINE}/${BASEMACHINE}-dm-verity-image.inc
 
 do_make_system_image () {
   # generate verity image
   mkdir -p ${DEPLOY_DIR_IMAGE}/dm-verity
   dd if=/dev/zero of=${DEPLOY_DIR_IMAGE}/dm-verity/hashtable.img bs=1M count=1
   #export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${TMPDIR}/sysroots/${BUILD_SYS}/lib:${TMPDIR}/sysroots/${BUILD_SYS}/usr/lib
-  veritysetup format ${DEPLOY_DIR_IMAGE}/machine-image-${MACHINE}.ext4 ${DEPLOY_DIR_IMAGE}/dm-verity/hashtable.img > ${DEPLOY_DIR_IMAGE}/dm-verity/hash_info.txt
-  cat ${DEPLOY_DIR_IMAGE}/machine-image-${MACHINE}.ext4 ${DEPLOY_DIR_IMAGE}/dm-verity/hashtable.img > ${DEPLOY_DIR_IMAGE}/dm-verity/machine-image-${MACHINE}.ext4
+  veritysetup format ${DEPLOY_DIR_IMAGE}/machine-image-${BASEMACHINE}.ext4 ${DEPLOY_DIR_IMAGE}/dm-verity/hashtable.img > ${DEPLOY_DIR_IMAGE}/dm-verity/hash_info.txt
+  cat ${DEPLOY_DIR_IMAGE}/machine-image-${BASEMACHINE}.ext4 ${DEPLOY_DIR_IMAGE}/dm-verity/hashtable.img > ${DEPLOY_DIR_IMAGE}/dm-verity/machine-image-${BASEMACHINE}.ext4
 }
 
 python do_make_dm_verity_image(){

@@ -47,7 +47,7 @@ python do_generate_verity_dts(){
 }
 
 do_rebuild_dtb(){
-    KERNEL_BUILD=${TMPDIR}/work-shared/${MACHINE}/kernel-build-artifacts
-    KERNEL_SOURCE=${TMPDIR}/work-shared/${MACHINE}/kernel-source
+    KERNEL_BUILD=${TMPDIR}/work-shared/${BASEMACHINE}/kernel-build-artifacts
+    KERNEL_SOURCE=${TMPDIR}/work-shared/${BASEMACHINE}/kernel-source
     cp ${DEPLOY_DIR_IMAGE}/dm-verity/dm-verity-boot.dtsi ${KERNEL_SOURCE}/arch/arm64/boot/dts/qcom
 }
