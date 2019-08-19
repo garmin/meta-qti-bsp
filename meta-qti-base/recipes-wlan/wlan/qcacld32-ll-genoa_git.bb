@@ -48,7 +48,7 @@ LDFLAGS_aarch64_automotive = "-O1 --hash-style=gnu --as-needed"
 # The common header file, 'wlan_nlink_common.h' can be installed from other
 # qcacld recipes too. To suppress the duplicate detection error, add it to
 # SSTATE_DUPWHITELIST.
-SSTATE_DUPWHITELIST += "${STAGING_DIR}/${MACHINE}${includedir}/qcacld/wlan_nlink_common.h"
+SSTATE_DUPWHITELIST += "${STAGING_DIR}/${BASEMACHINE}${includedir}/qcacld/wlan_nlink_common.h"
 
 inherit systemd
 SRC_URI_append_automotive = " file://init_qti_wlan_auto.service"
