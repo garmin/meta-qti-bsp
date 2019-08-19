@@ -8,6 +8,7 @@ file://0008-Pulseaudio-service-need-to-wait-for-sound-card-ready.patch \
 file://0003-default.pa-Load-agl-audio-plugin-module.patch \
 file://0006-Support-PulseAudio-Client-API-for-Module-Codec-Control.patch \
 file://0001-pulseaudio-config-default.pa-to-disable-default-ALSA.patch \
+file://0001-udev-Add-rules-for-QTI-SA8155.patch \
 "
 
 RDEPENDS_pulseaudio-server += "\
