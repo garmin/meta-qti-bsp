@@ -48,7 +48,7 @@ PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
 
 KBRANCH ?= ""
 KMETA = "kernel-meta"
-KMACHINE ?= "${MACHINE}"
+KMACHINE ?= "${BASEMACHINE}"
 KCONFIG_MODE = "--alldefconfig"
 KBUILD_DEFCONFIG ?= "${KERNEL_CONFIG}"
 LINUX_VERSION_EXTENSION = "${@['-perf', ''][d.getVar('VARIANT', True) == ('' or 'debug')]}"

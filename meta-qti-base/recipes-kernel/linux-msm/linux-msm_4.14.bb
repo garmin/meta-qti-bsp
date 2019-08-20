@@ -99,8 +99,8 @@ do_configure_prepend () {
 
 
 do_rebuild_dtb(){
-    KERNEL_BUILD=${TMPDIR}/work-shared/${MACHINE}/kernel-build-artifacts
-    KERNEL_SOURCE=${TMPDIR}/work-shared/${MACHINE}/kernel-source
+    KERNEL_BUILD=${TMPDIR}/work-shared/${BASEMACHINE}/kernel-build-artifacts
+    KERNEL_SOURCE=${TMPDIR}/work-shared/${BASEMACHINE}/kernel-source
     if [ -f ${DEPLOY_DIR_IMAGE}/dm-verity/dm-verity-boot.dtsi ] && [ ${KERNEL_ROOTDEVICE} == "/dev/dm-0" ]; then
         cp ${DEPLOY_DIR_IMAGE}/dm-verity/dm-verity-boot.dtsi ${KERNEL_SOURCE}/arch/arm64/boot/dts/qcom
     fi
