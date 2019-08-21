@@ -18,7 +18,7 @@ SRC_URI   =  "${PATH_TO_REPO}/data-kernel/.git;protocol=${PROTO};destsuffix=data
 SRC_URI_append = " file://emac_dwc_eqos_start_stop_le"
 SRC_URI_append = " file://setup_avtp_routing_le"
 SRC_URI_append = " file://emac_dwc_eqos.service"
-SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/data-kernel', d)}"
+SRCREV = "${AUTOREV}"
 
 S = "${WORKDIR}/data-kernel/drivers/emac-dwc-eqos/"
 

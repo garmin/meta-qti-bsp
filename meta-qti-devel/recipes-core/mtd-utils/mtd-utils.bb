@@ -13,7 +13,7 @@ DEPENDS += "${@bb.utils.contains("DISTRO_FEATURES", "selinux", "libselinux", "",
 PV = "2.0.0"
 
 SRC_URI = "${PATH_TO_REPO}/filesystems/mtd-utils/.git;protocol=${PROTO};destsuffix=mtd-utils;nobranch=1"
-SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/filesystems/mtd-utils', d)}"
+SRCREV = "${AUTOREV}"
 S = "${WORKDIR}/mtd-utils"
 
 # xattr support creates an additional compile-time dependency on acl because
