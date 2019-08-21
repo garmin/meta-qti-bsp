@@ -58,3 +58,8 @@ WARN_TO_ERROR_QA_remove += "unknown-configure-option"
 
 LLVM_VERSION = "6.0"
 GCCVERSION = "7.%"
+
+# Enable multilib
+require conf/multilib.conf
+MULTILIBS = "multilib:lib32"
+DEFAULTTUNE_virtclass-multilib-lib32 = "armv7ahf-neon"
