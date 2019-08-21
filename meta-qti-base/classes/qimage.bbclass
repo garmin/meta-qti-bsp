@@ -47,7 +47,7 @@ python rootfs_ignore_packages() {
     atmt_only_pkgs = d.getVar("PACKAGE_INSTALL_ATTEMPTONLY", True).split()
     inst_atmt_pkgs = d.getVar("IMAGE_INSTALL_ATTEMPTONLY", True).split()
 
-    empty_pkgs = "${TMPDIR}/prebuilt/${MACHINE}/empty_pkgs"
+    empty_pkgs = "${TMPDIR}/prebuilt/${BASEMACHINE}/empty_pkgs"
     if (os.path.isfile(empty_pkgs)):
         with open(empty_pkgs) as file:
             ignore_pkgs = file.read().splitlines()
