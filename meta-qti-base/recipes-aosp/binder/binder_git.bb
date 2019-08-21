@@ -1,4 +1,4 @@
-inherit autotools pkgconfig useradd
+inherit autotools pkgconfig useradd distro_features_check
 
 DESCRIPTION = "Android Binder support"
 HOMEPAGE = "http://developer.android.com/"
@@ -50,3 +50,5 @@ do_install_append() {
 }
 
 FILES_${PN} += "${systemd_unitdir}/system/"
+
+REQUIRED_DISTRO_FEATURES = "systemd"
