@@ -1,0 +1,32 @@
+From d4f1149fa870343c5e9c2aa4b1d3a6f7a19dfd75 Mon Sep 17 00:00:00 2001
+From: Lei wang <leiwan@codeaurora.org>
+Date: Sat, 24 Aug 2019 02:15:48 +0800
+Subject: [PATCH] libnaviapi-agl: add multilib support
+
+Signed-off-by: Lei wang <leiwan@codeaurora.org>
+---
+ CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9bd545b..a631a7e 100755
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -6,7 +6,7 @@ set(PROJECT_NAME "agl-service-navigation")
+ set(PROJECT_PRETTY_NAME "AFM binding for navigation service")
+ set(PROJECT_DESCRIPTION "Binding for AGL Navigation API")
+ set(PROJECT_INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/include)
+-set(PROJECT_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib)
++set(PROJECT_LIBDIR ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX})
+ set(PROJECT_API_VERSION 0.1.0)
+ set(PROJECT_URL "https://wiki.automotivelinux.org/eg-navi")
+ 
+@@ -61,4 +61,4 @@ add_custom_target(widget ALL DEPENDS ${BINARY_NAME})
+ configure_file(libnaviapi-agl.pc.in libnaviapi-agl.pc @ONLY)
+ INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/libnaviapi-agl.pc
+   DESTINATION
+-  ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
++  ${CMAKE_INSTALL_PREFIX}/lib${LIB_SUFFIX}/pkgconfig)
+-- 
+1.9.1
+

@@ -1,0 +1,26 @@
+From cdd11c0b60c12c54ef2dcb4afe75b769483c62da Mon Sep 17 00:00:00 2001
+From: Lei wang <leiwan@codeaurora.org>
+Date: Sat, 24 Aug 2019 01:17:58 +0800
+Subject: [PATCH] libqtappfw: fix multilib compatibility
+
+Signed-off-by: Lei wang <leiwan@codeaurora.org>
+---
+ CMakeLists.txt | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 3509b85..62ffe64 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -43,7 +43,7 @@ set(DEST_DIR "${CMAKE_INSTALL_PREFIX}")
+ set(PRIVATE_LIBS "${PRIVATE_LIBS} -lqtappfw")
+ CONFIGURE_FILE("qtappfw.pc.in" "qtappfw.pc" @ONLY)
+ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qtappfw.pc
+-	DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/pkgconfig)
++	DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+ 
+ set (SUBDIRS
+ 	bluetooth
+-- 
+1.9.1
+

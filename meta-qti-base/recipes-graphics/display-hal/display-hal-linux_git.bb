@@ -44,8 +44,8 @@ CPPFLAGS += "-fno-operator-names"
 
 do_install_append () {
     # libhardware expects to find /usr/lib/hw/gralloc.*.so
-    install -d ${D}/usr/lib/hw
-    ln -s /usr/lib/libgralloc.so ${D}/usr/lib/hw/gralloc.default.so
+    install -d ${D}${libdir}/hw
+    ln -s ${libdir}/libgralloc.so ${D}${libdir}/hw/gralloc.default.so
     cp -fR ${WORKDIR}/display/display-hal/include/* ${STAGING_INCDIR}
     cp -fR ${WORKDIR}/display/display-hal/gpu_tonemapper/*.h ${STAGING_INCDIR}
 
