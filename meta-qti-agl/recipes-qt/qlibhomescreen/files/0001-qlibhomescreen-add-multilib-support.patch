@@ -1,0 +1,35 @@
+From bd4e4d288aff2c0b7b18f348ba482bce4c66ba16 Mon Sep 17 00:00:00 2001
+From: Lei wang <leiwan@codeaurora.org>
+Date: Sat, 24 Aug 2019 01:50:46 +0800
+Subject: [PATCH] qlibhomescreen: add multilib support
+
+Signed-off-by: Lei wang <leiwan@codeaurora.org>
+---
+ src/src.pro | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/src.pro b/src/src.pro
+index b3c8675..598c754 100644
+--- a/src/src.pro
++++ b/src/src.pro
+@@ -23,7 +23,7 @@ SOURCES = qlibhomescreen.cpp
+ headers.path = /usr/include
+ headers.files = qlibhomescreen.h
+ 
+-target.path = /usr/lib
++target.path = /usr/lib$${LIB_SUFFIX}
+ 
+ CONFIG += link_pkgconfig create_pc create_prl no_install_prl
+ 
+@@ -33,7 +33,7 @@ QMAKE_PKGCONFIG_NAME = qlibhomescreen
+ QMAKE_PKGCONFIG_FILE = $${QMAKE_PKGCONFIG_NAME}
+ QMAKE_PKGCONFIG_VERSION = $${VERSION}
+ QMAKE_PKGCONFIG_DESCRIPTION = A wrapper interface for libhomescreen for Qt
+-QMAKE_PKGCONFIG_LIBDIR = ${prefix}/lib
++QMAKE_PKGCONFIG_LIBDIR = ${prefix}/lib$${LIB_SUFFIX}
+ QMAKE_PKGCONFIG_INCDIR = ${prefix}/include
+ QMAKE_PKGCONFIG_REQUIRES = libhomescreen
+ QMAKE_PKGCONFIG_DESTDIR = pkgconfig
+-- 
+1.9.1
+

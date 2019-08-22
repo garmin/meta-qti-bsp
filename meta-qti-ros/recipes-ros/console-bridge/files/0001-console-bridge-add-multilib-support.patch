@@ -1,0 +1,35 @@
+From f94edfa74d7c2a2e7bb051493af7f6affc9b6d7f Mon Sep 17 00:00:00 2001
+From: Lei wang <leiwan@codeaurora.org>
+Date: Sat, 24 Aug 2019 14:16:11 +0800
+Subject: [PATCH] console-bridge: add multilib support
+
+Signed-off-by: Lei wang <leiwan@codeaurora.org>
+---
+ CMakeLists.txt | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index ab0ad99..fc6b23a 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -34,7 +34,7 @@ add_library(${PROJECT_NAME} src/console.cpp)
+ target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
+ 
+ install(TARGETS ${PROJECT_NAME}
+-  DESTINATION lib/)
++  DESTINATION lib${LIB_SUFFIX}/)
+ 
+ install(DIRECTORY include/
+   DESTINATION include
+@@ -52,7 +52,7 @@ if (NOT MSVC)
+   set(pkg_conf_file "console_bridge.pc")
+   configure_file("${pkg_conf_file}.in" "${CMAKE_BINARY_DIR}/${pkg_conf_file}" @ONLY)
+   install(FILES "${CMAKE_BINARY_DIR}/${pkg_conf_file}"
+-    DESTINATION lib/pkgconfig/ COMPONENT pkgconfig)
++    DESTINATION lib${LIB_SUFFIX}/pkgconfig/ COMPONENT pkgconfig)
+ endif()
+ 
+ SET_DIRECTORY_PROPERTIES(PROPERTIES
+-- 
+1.9.1
+
