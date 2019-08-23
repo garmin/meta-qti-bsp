@@ -1,4 +1,4 @@
-inherit qimage
+inherit core-image
 
 include ${BASEMACHINE}/${BASEMACHINE}-automotive-image.inc
 
