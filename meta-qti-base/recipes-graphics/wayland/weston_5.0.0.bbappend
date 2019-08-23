@@ -1,7 +1,7 @@
 FILESEXTRAPATHS_append := ":${THISDIR}/weston/"
-SRC_URI = "${PATH_TO_REPO}/graphics/weston/.git;protocol=${PROTO};destsuffix=graphics/weston;nobranch=1"
+SRC_URI = "${PATH_TO_REPO}/graphics/weston/.git;protocol=${PROTO};destsuffix=graphics/weston;usehead=1"
 S = "${WORKDIR}/graphics/weston"
-SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/graphics/weston', d)}"
+SRCREV = "${AUTOREV}"
 
 SRC_URI_append = "  \
     file://weston.service_caf \

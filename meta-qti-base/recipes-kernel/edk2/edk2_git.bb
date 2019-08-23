@@ -12,9 +12,9 @@ BUILD_OS = "linux"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
-SRC_URI   =  "${PATH_TO_REPO}/bootable/bootloader/edk2/.git;protocol=${PROTO};destsuffix=bootable/bootloader/edk2;nobranch=1"
+SRC_URI   =  "${PATH_TO_REPO}/bootable/bootloader/edk2/.git;protocol=${PROTO};destsuffix=bootable/bootloader/edk2;usehead=1"
 S         =  "${WORKDIR}/bootable/bootloader/edk2"
-SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/bootable/bootloader/edk2', d)}"
+SRCREV = "${AUTOREV}"
 
 INSANE_SKIP_${PN} = "arch"
 

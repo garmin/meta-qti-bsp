@@ -7,12 +7,13 @@ SRC_URI_remove += " file://0001-introspection.m4-prefix-pkgconfig-paths-with-PKG
 DEPENDS += "gbm"
 
 
-SRC_URI = "${PATH_TO_REPO}/gstreamer/gst-plugins-bad/.git;protocol=${PROTO};destsuffix=gstreamer/gst-plugins-bad;nobranch=1;name=bad"
+SRC_URI = "${PATH_TO_REPO}/gstreamer/gst-plugins-bad/.git;protocol=${PROTO};destsuffix=gstreamer/gst-plugins-bad;usehead=1"
 SRC_URI_append = " ${CAF_GIT}/gstreamer/common;destsuffix=gstreamer/gst-plugins-bad/common;branch=gstreamer/common/master;name=common"
 
 GI_DATA_ENABLED="0"
-SRCREV_bad = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/gstreamer/gst-plugins-bad', d)}"
+SRCREV = "${AUTOREV}"
 SRCREV_common = "6f2d2093e84cc0eb99b634fa281822ebb9507285"
+SRCREV_FORMAT = "bad_common"
 S = "${WORKDIR}/gstreamer/gst-plugins-bad"
 
 DEPENDS += "wayland-native"

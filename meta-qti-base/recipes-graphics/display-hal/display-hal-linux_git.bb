@@ -8,9 +8,9 @@ ${LICENSE};md5=3775480a712fc46a69647678acb234cb"
 PR = "r8"
 
 SRC_DIR = "${SRC_DIR_ROOT}/display/display-hal"
-SRC_URI = "${PATH_TO_REPO}/display/display-hal/.git;protocol=${PROTO};destsuffix=display/display-hal;nobranch=1"
+SRC_URI = "${PATH_TO_REPO}/display/display-hal/.git;protocol=${PROTO};destsuffix=display/display-hal;usehead=1"
 S = "${WORKDIR}/display/display-hal"
-SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR}', d)}"
+SRCREV = "${AUTOREV}"
 
 DEPENDS += "system-core"
 DEPENDS += "libhardware"

@@ -1,9 +1,9 @@
 inherit qlicense qcommon
 DESCRIPTION = "Provide native media hardware Headers"
 
-SRC_URI = "${PATH_TO_REPO}/frameworks/.git;protocol=${PROTO};destsuffix=frameworks;nobranch=1"
+SRC_URI = "${PATH_TO_REPO}/frameworks/.git;protocol=${PROTO};destsuffix=frameworks;usehead=1"
 S = "${WORKDIR}/frameworks"
-SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/frameworks', d)}"
+SRCREV = "${AUTOREV}"
 
 do_install() {
     install -d ${D}${includedir}/media/hardware
