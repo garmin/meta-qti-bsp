@@ -1,0 +1,121 @@
+From c5df73b143275251d3283d05a736616f23a7a775 Mon Sep 17 00:00:00 2001
+From: Xubao Jiang <xubaoj@codeaurora.org>
+Date: Wed, 21 Aug 2019 17:02:15 +0800
+Subject: [PATCH 2/2] Add autotools support
+
+Change-Id: Ibc992e261fd10abe495817277808d0d3e3a8e3a0
+Signed-off-by: Xubao Jiang <xubaoj@codeaurora.org>
+---
+ Makefile.am               |  1 +
+ configure.ac              | 32 ++++++++++++++++++++++++++++++++
+ oem-recovery/Makefile.am  | 12 ++++++++++++
+ oem-recovery/configure.ac | 31 +++++++++++++++++++++++++++++++
+ 4 files changed, 76 insertions(+)
+ create mode 100644 Makefile.am
+ create mode 100644 configure.ac
+ create mode 100644 oem-recovery/Makefile.am
+ create mode 100644 oem-recovery/configure.ac
+
+diff --git a/Makefile.am b/Makefile.am
+new file mode 100644
+index 0000000..7e554d9
+--- /dev/null
++++ b/Makefile.am
+@@ -0,0 +1 @@
++SUBDIRS = oem-recovery
+diff --git a/configure.ac b/configure.ac
+new file mode 100644
+index 0000000..e1c4a2a
+--- /dev/null
++++ b/configure.ac
+@@ -0,0 +1,32 @@
++AC_PREREQ(2.61)
++AC_INIT([recovery-ext],1.0.0)
++AM_INIT_AUTOMAKE([-Wall gnu foreign])
++AC_CONFIG_SRCDIR([Makefile.am])
++AC_CONFIG_HEADERS([config.h])
++AC_CONFIG_MACRO_DIR([m4])
++
++# Check for programs
++AM_PROG_AS
++AC_PROG_CC
++AM_PROG_CC_C_O
++AC_PROG_LIBTOOL
++AC_PROG_AWK
++AC_PROG_CPP
++AC_PROG_CXX
++AC_PROG_INSTALL
++AC_PROG_LN_S
++AC_PROG_MAKE_SET
++PKG_PROG_PKG_CONFIG
++
++AC_ARG_WITH([sanitized-headers],
++         AC_HELP_STRING([--with-sanitized-headers=@<:@dir@:>@],
++         [Specify the location of the sanitized Linux kernel headers]),
++         [CPPFLAGS="$CPPFLAGS -I$withval"],
++         with_sanitized-headers=no)
++
++
++AC_CONFIG_FILES([ \
++    Makefile
++    oem-recovery/Makefile
++])
++AC_OUTPUT
+diff --git a/oem-recovery/Makefile.am b/oem-recovery/Makefile.am
+new file mode 100644
+index 0000000..bb7a4ca
+--- /dev/null
++++ b/oem-recovery/Makefile.am
+@@ -0,0 +1,12 @@
++# Export header
++librecovery_updater_msmheaders_includedir=$(includedir)
++librecovery_updater_msmheaders_include_HEADERS := gpt-utils.h
++
++# Build libgpt.so
++lib_LTLIBRARIES      := librecovery_updater_msm.la
++
++librecovery_updater_msm_la_SOURCES    := gpt-utils.cpp
++
++librecovery_updater_msm_la_CPPFLAGS   := -I$(top_srcdir)/
++librecovery_updater_msm_la_CPPFLAGS   += -std=c++11 -Wall -Wno-unused-parameter
++librecovery_updater_msm_la_CPPFLAGS   += -Wno-deprecated-declarations
+diff --git a/oem-recovery/configure.ac b/oem-recovery/configure.ac
+new file mode 100644
+index 0000000..b6cb20f
+--- /dev/null
++++ b/oem-recovery/configure.ac
+@@ -0,0 +1,31 @@
++AC_PREREQ(2.61)
++AC_INIT([oem-recovery],1.0.0)
++AM_INIT_AUTOMAKE([-Wall gnu foreign])
++AC_CONFIG_SRCDIR([Makefile.am])
++AC_CONFIG_HEADERS([config.h])
++AC_CONFIG_MACRO_DIR([m4])
++
++# Check for programs
++AM_PROG_AS
++AC_PROG_CC
++AM_PROG_CC_C_O
++AC_PROG_LIBTOOL
++AC_PROG_AWK
++AC_PROG_CPP
++AC_PROG_CXX
++AC_PROG_INSTALL
++AC_PROG_LN_S
++AC_PROG_MAKE_SET
++PKG_PROG_PKG_CONFIG
++
++AC_ARG_WITH([sanitized-headers],
++         AC_HELP_STRING([--with-sanitized-headers=@<:@dir@:>@],
++         [Specify the location of the sanitized Linux kernel headers]),
++         [CPPFLAGS="$CPPFLAGS -I$withval"],
++         with_sanitized-headers=no)
++
++
++AC_CONFIG_FILES([ \
++    Makefile
++])
++AC_OUTPUT
+-- 
+1.9.1
+
