@@ -48,6 +48,7 @@ EXTRA_OECONF_append =" --enable-build-mm-video='yes'"
 EXTRA_OECONF_append =" --enable-is-ubwc-supported='yes'"
 EXTRA_OECONF_append =" --enable-build-swcodec='yes'"
 EXTRA_OECONF_append =" --enable-target-output-deinterlaced='yes'"
+EXTRA_OECONF_append ="${@bb.utils.contains('DISTRO_FEATURES', 'q-hypervisor', ' --enable-target-hypervisor=yes', '', d)}"
 
 CPPFLAGS += "-I${STAGING_INCDIR} \
              -I${STAGING_INCDIR}/drm \
