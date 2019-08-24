@@ -53,6 +53,8 @@ PAGE_SIZE ?= '4096'
 IMAGE_ROOTFS_ALIGNMENT = "4096"
 EXTRA_IMAGECMD_ext4 += " -b 4096 "
 
+IMAGE_CLASSES += "qimage"
+
 # Temporary disable these paths for yocto2.6 upgrade.
 WARN_TO_ERROR_QA_remove += "unknown-configure-option"
 
