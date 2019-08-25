@@ -71,42 +71,6 @@ do_makesystem[prefuncs]  += " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity
 do_makesystem[postfuncs] += " ${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity', 'make_verity_enabled_system_image', '', d)}"
 do_makesystem[dirs]       = "${DEPLOY_DIR_IMAGE}"
 
-################################################
-############# Generate boot.img ################
-################################################
-python do_make_bootimg () {
-    import subprocess
-
-    xtra_parms=""
-    if bb.utils.contains('DISTRO_FEATURES', 'nand-boot', True, False, d):
-        xtra_parms = " --tags-addr" + " " + d.getVar('KERNEL_TAGS_OFFSET')
-
-    mkboot_bin_path = d.getVar('STAGING_BINDIR_NATIVE', True) + '/mkbootimg'
-    zimg_path       = d.getVar('DEPLOY_DIR_IMAGE', True) + "/" + d.getVar('KERNEL_IMAGETYPE', True)
-    cmdline         = "\"" + d.getVar('KERNEL_CMD_PARAMS', True) + "\""
-    pagesize        = d.getVar('PAGE_SIZE', True)
-    base            = d.getVar('KERNEL_BASE', True)
-
-    # When verity is enabled add '.noverity' suffix to default boot img.
-    output          = d.getVar('DEPLOY_DIR_IMAGE', True) + "/" + d.getVar('BOOTIMAGE_TARGET', True)
-    if bb.utils.contains('DISTRO_FEATURES', 'dm-verity', True, False, d):
-            output += ".noverity"
-
-    # cmd to make boot.img
-    cmd =  mkboot_bin_path + " --kernel %s --cmdline %s --pagesize %s --base %s %s --ramdisk /dev/null --ramdisk_offset 0x0 --output %s" \
-           % (zimg_path, cmdline, pagesize, base, xtra_parms, output )
-
-    bb.debug(1, "do_make_bootimg cmd: %s" % (cmd))
-
-    subprocess.call(cmd, shell=True)
-}
-do_make_bootimg[dirs]      = "${DEPLOY_DIR_IMAGE}"
-# Make sure native tools and vmlinux ready to create boot.img
-do_make_bootimg[depends]  += "${PN}:do_prepare_recipe_sysroot"
-do_make_bootimg[depends]  += "virtual/kernel:do_shared_workdir"
-
-addtask do_make_bootimg before do_image_complete
-
 # With dm-verity, kernel cmdline has to be updated with correct hash value of
 # system image. This means final boot image can be created only after system image.
 # But many a times when only kernel need to be built waiting for full image is
