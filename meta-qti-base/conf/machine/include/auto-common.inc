@@ -18,14 +18,14 @@ PREFERRED_VERSION_wayland = "1.16.0"
 PREFERRED_VERSION_wayland-native = "1.16.0"
 PREFERRED_VERSION_wayland-ivi-extension = "2.2.0"
 
-# Prefer GStreamer 1.8.x by default
-PREFERRED_VERSION_gstreamer1.0              ?= "1.8.%"
-PREFERRED_VERSION_gstreamer1.0-plugins-bad  ?= "1.8.%"
-PREFERRED_VERSION_gstreamer1.0-plugins-base ?= "1.8.%"
-PREFERRED_VERSION_gstreamer1.0-plugins-good ?= "1.8.%"
-PREFERRED_VERSION_gstreamer1.0-plugins-ugly ?= "1.8.%"
-PREFERRED_VERSION_gstreamer1.0-libav        ?= "1.8.%"
-PREFERRED_VERSION_gstreamer1.0-omx          ?= "1.2.%"
+# Prefer GStreamer 1.16.x by default
+PREFERRED_VERSION_gstreamer1.0              ?= "1.16.%"
+PREFERRED_VERSION_gstreamer1.0-plugins-bad  ?= "1.16.%"
+PREFERRED_VERSION_gstreamer1.0-plugins-base ?= "1.16.%"
+PREFERRED_VERSION_gstreamer1.0-plugins-good ?= "1.16.%"
+PREFERRED_VERSION_gstreamer1.0-plugins-ugly ?= "1.16.%"
+PREFERRED_VERSION_gstreamer1.0-libav        ?= "1.16.%"
+PREFERRED_VERSION_gstreamer1.0-omx          ?= "1.16.%"
 
 # Prefer adreno
 PREFERRED_PROVIDER_virtual/wayland-egl  = "adreno"

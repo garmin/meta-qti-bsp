@@ -10,7 +10,7 @@ GSTREAMER_1_0_OMX_CORE_NAME = "${libdir}/libOmxCore.so"
 SRC_URI =  "${PATH_TO_REPO}/gstreamer/gst-omx/.git;protocol=${PROTO};destsuffix=gstreamer/gst-omx;usehead=1"
 SRC_URI_append = " ${CAF_GIT}/gstreamer/common;destsuffix=gstreamer/gst-omx/common;branch=gstreamer/common/master;name=common"
 SRCREV = "${AUTOREV}"
-SRCREV_common = "1f5d3c3163cc3399251827235355087c2affa790"
+SRCREV_common = "59cb678164719ff59dcf6c8b93df4617a1075d11"
 SRCREV_FORMAT = "omx_common"
 S = "${WORKDIR}/gstreamer/gst-omx"
 
