@@ -21,4 +21,5 @@ source: meta-agl/meta-agl/recipes-multimedia/pulseaudio/agl-audio-plugin_0.1.bb
         https://source.codeaurora.org/quic/le/AGL/meta-agl/tree/meta-agl/recipes-multimedia/pulseaudio?h=automotivelinux/eel
 
 recipe: recipes-multimedia/gstreamer/*
-source: http://cgit.openembedded.org/openembedded-core/tree/meta/recipes-multimedia/gstreamer?h=morty
+commit: 81f9e815d36848761a9dfa94b00ad998bb39a4a6
+source: https://source.codeaurora.org/quic/ype/external/yoctoproject.org/poky/tree/meta/recipes-multimedia/gstreamer?h=yocto/master

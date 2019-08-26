@@ -5,8 +5,9 @@ SRC_URI = "${PATH_TO_REPO}/gstreamer/gst-plugins-ugly/.git;protocol=${PROTO};des
 SRC_URI_append = " ${CAF_GIT}/gstreamer/common;destsuffix=gstreamer/gst-plugins-ugly/common;branch=gstreamer/common/master;name=common"
 
 SRCREV = "${AUTOREV}"
-SRCREV_common = "6f2d2093e84cc0eb99b634fa281822ebb9507285"
+SRCREV_common = "59cb678164719ff59dcf6c8b93df4617a1075d11"
 SRCREV_FORMAT = "ugly_common"
+
 S = "${WORKDIR}/gstreamer/gst-plugins-ugly"
 DEPENDS += "opencore-amr"
 
