@@ -6,4 +6,5 @@ RDEPENDS_${PN}_remove = "\
     agl-service-geoclue \
     agl-service-geofence \
     agl-service-gps \
+    agl-service-nfc \
     "
