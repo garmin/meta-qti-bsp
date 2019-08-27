@@ -6,6 +6,9 @@ do_install_append_class-target() {
     sed -i -e 's/mkdir/mkdir -p/' ${D}${systemd_system_unitdir}/afm-system-setup.service
     sed -i -e '/^PAMName/a\ExecStartPre=/bin/systemctl  daemon-reload' ${D}${systemd_system_unitdir}/afm-user-session@.service
     sed -i -e '/^ExecStartPre/a\ExecStartPre=/etc/init.d/smack reload' ${D}${systemd_system_unitdir}/afm-user-session@.service
+    sed -i -e '/^ExecStart=/i\ExecStartPre=/bin/mkdir  -p /home/%i/app-data' ${D}${systemd_system_unitdir}/afm-user-session@.service
+    sed -i -e '/^ExecStart=/i\ExecStartPre=/usr/bin/chsmack -a  "_"  /home/%i' ${D}${systemd_system_unitdir}/afm-user-session@.service
+    sed -i -e '/^ExecStart=/i\ExecStartPre=/usr/bin/chsmack -a  "_"  /home/%i/app-data' ${D}${systemd_system_unitdir}/afm-user-session@.service
 }
 
 
