@@ -22,6 +22,16 @@ fix_sepolicies () {
 }
 do_install[prefuncs] += " ${@bb.utils.contains('DISTRO_FEATURES', 'selinux', '', 'fix_sepolicies', d)}"
 
+# Replace persist/home bind if read-only is not enabled
+fix_read_only () {
+    sed -i "/^\PARTLABEL=persist.*var/d" ${WORKDIR}/fstab
+    sed -i "/^\#.*Bind/d" ${WORKDIR}/fstab
+    sed -i "/^\/data/d" ${WORKDIR}/fstab
+    sed -i "/^\/var/d" ${WORKDIR}/fstab
+}
+
+do_install[prefuncs] += " ${@bb.utils.contains('IMAGE_FEATURES', 'read-only-rootfs', '', 'fix_read_only', d)}"
+
 do_install_append(){
     install -m 755 -o diag -g diag -d ${D}/media
     install -m 755 -o diag -g diag -d ${D}/media/card
