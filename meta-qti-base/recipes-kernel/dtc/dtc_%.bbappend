@@ -1,7 +1,6 @@
 
 # change the SRC dir
-SRC_URI = "${PATH_TO_REPO}/external/dtc/.git;protocol=${PROTO};destsuffix=external/dtc;usehead=1 \
-           file://0001-Correct-the-name-of-libfdt.patch"
+SRC_URI = "${PATH_TO_REPO}/external/dtc/.git;protocol=${PROTO};destsuffix=external/dtc;usehead=1" 
 
 S = "${WORKDIR}/external/dtc"
 EXTRA_OEMAKE_append = " NO_PYTHON=1"
