@@ -11,6 +11,11 @@ tmpfs                /media/ram      tmpfs     defaults,noauto       0  0
 /dev/vdb             /data           auto      defaults,nofail       0  2
 /dev/vdc             /dsp            auto      defaults,nofail       0  2
 /dev/vdc             /firmware       auto      defaults,nofail       0  2
+/dev/vdc             /var            auto      defaults,nofail       0  2
+
+# Bind /home to /data
+/data                /home                auto       defaults,bind         0  0
+/var                 /persist             auto       defaults,bind         0  0
 
 # uncomment this if your device has a SD/MMC/Transflash slot
 /dev/mmcblk0p1       /media/card          auto       defaults,sync,noauto  0  0
