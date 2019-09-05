@@ -22,3 +22,8 @@ PACKAGES +="${PN}-test-bin"
 
 FILES_${PN}     = "${libdir}/pkgconfig/* ${libdir}/* ${sysconfdir}/*"
 FILES_${PN}-test-bin = "${base_bindir}/*"
+
+do_install_append() {
+    install -d ${D}${includedir}/kernel-headers
+    cp -r ${S}/kernel-headers/*  ${D}${includedir}/kernel-headers
+}
