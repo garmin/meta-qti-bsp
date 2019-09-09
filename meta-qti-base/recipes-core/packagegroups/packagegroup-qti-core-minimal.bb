@@ -19,6 +19,7 @@ RDEPENDS_${PN} += "\
     system-core-leprop \
     system-core-logd \
     system-core-post-boot \
+    system-core-early-boot \
     system-core-usb \
     ${@bb.utils.contains('DISTRO_FEATURES', 'q-hypervisor', '', 'memory-hotplug', d)} \
     "
