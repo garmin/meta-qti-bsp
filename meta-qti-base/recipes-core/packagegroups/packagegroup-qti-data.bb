@@ -22,4 +22,8 @@ RDEPENDS_${PN} += "\
     tcpdump \
     vlan \
     strongswan \
+    xinetd \
+    tcp-wrappers \
+    netkit-telnet \
+    openssh \
     "
