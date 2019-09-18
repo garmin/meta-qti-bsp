@@ -1,0 +1,1 @@
+EXTRA_OECMAKE += "-DLIB_SUFFIX=''"

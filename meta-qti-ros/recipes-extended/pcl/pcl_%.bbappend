@@ -1,0 +1,1 @@
+EXTRA_OECMAKE += "-DLIB_INSTALL_DIR=${baselib}"
