@@ -17,7 +17,6 @@ RDEPENDS_${PN} += "\
     kernel-modules \
     system-core-adbd \
     system-core-leprop \
-    system-core-logd \
     system-core-post-boot \
     system-core-early-boot \
     system-core-usb \
