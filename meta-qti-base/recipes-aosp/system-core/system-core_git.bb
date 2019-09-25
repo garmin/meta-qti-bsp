@@ -68,9 +68,11 @@ do_install_append() {
       install -m 0750 ${S}/logd/start_logd -D ${D}${sysconfdir}/initscripts/logd
       install -m 0755 ${S}/usb/start_usb -D ${D}${sysconfdir}/initscripts/usb
       install -m 0750 ${S}/rootdir/etc/init.qcom.post_boot.sh -D ${D}${sysconfdir}/initscripts/init_post_boot
+      install -m 0750 ${S}/rootdir/etc/init.qti.early_boot.sh -D ${D}${sysconfdir}/initscripts/init_early_boot
       install -d ${D}${systemd_unitdir}/system/
       install -d ${D}${systemd_unitdir}/system/multi-user.target.wants/
       install -d ${D}${systemd_unitdir}/system/ffbm.target.wants/
+      install -d ${D}${systemd_unitdir}/system/sysinit.target.wants/
       install -m 0644 ${S}/adb/adbd.service -D ${D}${systemd_unitdir}/system/adbd.service
       ln -sf ${systemd_unitdir}/system/adbd.service ${D}${systemd_unitdir}/system/multi-user.target.wants/adbd.service
       ln -sf ${systemd_unitdir}/system/adbd.service ${D}${systemd_unitdir}/system/ffbm.target.wants/adbd.service
@@ -85,6 +87,9 @@ do_install_append() {
           ${D}${systemd_unitdir}/system/multi-user.target.wants/init_post_boot.service
       ln -sf ${systemd_unitdir}/system/init_post_boot.service \
           ${D}${systemd_unitdir}/system/ffbm.target.wants/init_post_boot.service
+      install -m 0644 ${S}/rootdir/etc/init_early_boot.service -D ${D}${systemd_unitdir}/system/init_early_boot.service
+      ln -sf ${systemd_unitdir}/system/init_early_boot.service \
+          ${D}${systemd_unitdir}/system/sysinit.target.wants/init_early_boot.service
       install -m 0644 ${S}/debuggerd/init_debuggerd.service -D ${D}${systemd_unitdir}/system/init_debuggerd.service
       ln -sf ${systemd_unitdir}/system/init_debuggerd.service \
           ${D}${systemd_unitdir}/system/multi-user.target.wants/init_debuggerd.service
@@ -161,6 +166,10 @@ FILES_${PN}-usb     += "${systemd_unitdir}/system/usb.service ${systemd_unitdir}
 PACKAGES =+ "${PN}-post-boot"
 FILES_${PN}-post-boot  = "${sysconfdir}/init.d/init_post_boot"
 FILES_${PN}-post-boot += "${systemd_unitdir}/system/init_post_boot.service ${systemd_unitdir}/system/multi-user.target.wants/init_post_boot.service ${systemd_unitdir}/system/ffbm.target.wants/init_post_boot.service ${sysconfdir}/initscripts/init_post_boot"
+
+PACKAGES =+ "${PN}-early-boot"
+FILES_${PN}-early-boot  = "${sysconfdir}/init.d/init_early_boot"
+FILES_${PN}-early-boot += "${systemd_unitdir}/system/init_early_boot.service ${systemd_unitdir}/system/sysinit.target.wants/init_early_boot.service ${sysconfdir}/initscripts/init_early_boot"
 
 PACKAGES =+ "${PN}-logd-dbg ${PN}-logd"
 FILES_${PN}-logd-dbg  = "${base_sbindir}/.debug/logd"
