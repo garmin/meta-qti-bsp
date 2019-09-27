@@ -1,0 +1,317 @@
+From 3ce6d3f8ebfff5c1cb07b5f0e310172496cdf426 Mon Sep 17 00:00:00 2001
+From: Xubao Jiang <xubaoj@codeaurora.org>
+Date: Tue, 27 Aug 2019 17:46:48 +0800
+Subject: [PATCH] Enabel bootctl for LV
+
+Refine api calling function
+
+Disable some features which are not ready
+
+Add Makefileam and configure.ac to build with autotool
+
+Change-Id: I558d1d52c6d81a6a63d3c5d9ab32f3d6d44ac9e5
+Signed-off-by: Xubao Jiang <xubaoj@codeaurora.org>
+---
+ Makefile.am  |   9 +++
+ bootctl.cpp  | 155 ++++++++++++++++++++-------------------------------
+ configure.ac |  24 ++++++++
+ 3 files changed, 92 insertions(+), 96 deletions(-)
+ create mode 100644 bootctl/Makefile.am
+ create mode 100644 bootctl/configure.ac
+
+diff --git a/Makefile.am b/Makefile.am
+new file mode 100644
+index 0000000..d3145ea
+--- /dev/null
++++ b/Makefile.am
+@@ -0,0 +1,9 @@
++# Build boot_control utility
++root_sbindir           := "/sbin"
++root_sbin_PROGRAMS     := bootctrl
++
++bootctrl_SOURCES  := bootctl.cpp
++
++bootctrl_CPPFLAGS := -I$(top_srcdir)
++bootctrl_CPPFLAGS += -std=c++11 -Wall -Wno-unused-parameter
++bootctrl_LDFLAGS  := -lboot_control
+diff --git a/bootctl.cpp b/bootctl.cpp
+index 799d066..b11d4e3 100644
+--- a/bootctl.cpp
++++ b/bootctl.cpp
+@@ -1,4 +1,7 @@
+ /*
++ * Copyright (c) 2019, The Linux Foundation. All rights reserved.
++ * Not a contribution
++ *
+  * Copyright (C) 2016 The Android Open Source Project
+  *
+  * Licensed under the Apache License, Version 2.0 (the "License");
+@@ -14,18 +17,20 @@
+  * limitations under the License.
+  */
+ 
+-#include <sysexits.h>
+-#include <android/hardware/boot/1.0/IBootControl.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++#include <assert.h>
++#include <sys/types.h>
++#include <unistd.h>
++#include <errno.h>
++#include <limits.h>
+ 
+-using android::sp;
++#include <hardware/boot_control.h>
+ 
+-using android::hardware::hidl_string;
+-using android::hardware::Return;
++typedef unsigned int Slot;
+ 
+-using android::hardware::boot::V1_0::BoolResult;
+-using android::hardware::boot::V1_0::IBootControl;
+-using android::hardware::boot::V1_0::CommandResult;
+-using android::hardware::boot::V1_0::Slot;
++extern boot_control_module_t HAL_MODULE_INFO_SYM;
+ 
+ static void usage(FILE* where, int /* argc */, char* argv[])
+ {
+@@ -36,7 +41,7 @@ static void usage(FILE* where, int /* argc */, char* argv[])
+             "  %s COMMAND\n"
+             "\n"
+             "Commands:\n"
+-            "  %s hal-info                       - Show info about boot_control HAL used.\n"
++            //"  %s hal-info                       - Show info about boot_control HAL used.\n"
+             "  %s get-number-slots               - Prints number of slots.\n"
+             "  %s get-current-slot               - Prints currently running SLOT.\n"
+             "  %s mark-boot-successful           - Mark current slot as GOOD.\n"
+@@ -51,121 +56,83 @@ static void usage(FILE* where, int /* argc */, char* argv[])
+             argv[0], argv[0], argv[0], argv[0], argv[0]);
+ }
+ 
+-static int do_hal_info(const sp<IBootControl> module) {
+-    module->interfaceDescriptor([&](const auto& descriptor) {
+-        fprintf(stdout,
+-                "HAL Version: %s\n",
+-                descriptor.c_str());
+-    });
+-    return EX_OK;
+-}
+-
+-static int do_get_number_slots(sp<IBootControl> module)
++static int do_get_number_slots(boot_control_module_t*  module)
+ {
+-    uint32_t numSlots = module->getNumberSlots();
++    uint32_t numSlots = module->getNumberSlots(module);
+     fprintf(stdout, "%u\n", numSlots);
+-    return EX_OK;
++    return 0;
+ }
+ 
+-static int do_get_current_slot(sp<IBootControl> module)
++static int do_get_current_slot(boot_control_module_t* module)
+ {
+-    Slot curSlot = module->getCurrentSlot();
++    unsigned int curSlot = module->getCurrentSlot(module);
+     fprintf(stdout, "%u\n", curSlot);
+-    return EX_OK;
+-}
+-
+-static std::function<void(CommandResult)> generate_callback(CommandResult *crp) {
+-    return [=](CommandResult cr){
+-        *crp = cr;
+-    };
+-}
+-
+-static int handle_return(const Return<void> &ret, CommandResult cr, const char* errStr) {
+-    if (!ret.isOk()) {
+-        fprintf(stderr, errStr, ret.description().c_str());
+-        return EX_SOFTWARE;
+-    } else if (!cr.success) {
+-        fprintf(stderr, errStr, cr.errMsg.c_str());
+-        return EX_SOFTWARE;
+-    }
+-    return EX_OK;
++    return 0;
+ }
+ 
+-static int do_mark_boot_successful(sp<IBootControl> module)
++static int do_mark_boot_successful(boot_control_module_t* module)
+ {
+-    CommandResult cr;
+-    Return<void> ret = module->markBootSuccessful(generate_callback(&cr));
+-    return handle_return(ret, cr, "Error marking as having booted successfully: %s\n");
++    printf("TBD \n");
++    return 0;
++    //return module->markBootSuccessful(module);
+ }
+ 
+-static int do_set_active_boot_slot(sp<IBootControl> module,
++static int do_set_active_boot_slot(boot_control_module_t* module,
+                                    Slot slot_number)
+ {
+-    CommandResult cr;
+-    Return<void> ret = module->setActiveBootSlot(slot_number, generate_callback(&cr));
+-    return handle_return(ret, cr, "Error setting active boot slot: %s\n");
++    printf("Start set active boot slot to %d \n", slot_number);
++    //return 0;
++    return module->setActiveBootSlot(module, slot_number);
+ }
+ 
+-static int do_set_slot_as_unbootable(sp<IBootControl> module,
++static int do_set_slot_as_unbootable(boot_control_module_t* module,
+                                      Slot slot_number)
+ {
+-    CommandResult cr;
+-    Return<void> ret = module->setSlotAsUnbootable(slot_number, generate_callback(&cr));
+-    return handle_return(ret, cr, "Error setting slot as unbootable: %s\n");
+-}
+-
+-static int handle_return(const Return<BoolResult> &ret, const char* errStr) {
+-    if (!ret.isOk()) {
+-        fprintf(stderr, errStr, ret.description().c_str());
+-        return EX_SOFTWARE;
+-    } else if (ret == BoolResult::INVALID_SLOT) {
+-        fprintf(stderr, errStr, "Invalid slot");
+-        return EX_SOFTWARE;
+-    } else if (ret == BoolResult::TRUE) {
+-        return EX_OK;
+-    }
+-    return EX_SOFTWARE;
++    printf("TBD \n");
++    return 0;
++    //return module->setSlotAsUnbootable(module, slot_number);
+ }
+ 
+-static int do_is_slot_bootable(sp<IBootControl> module, Slot slot_number)
++static int do_is_slot_bootable(boot_control_module_t* module, Slot slot_number)
+ {
+-    Return<BoolResult> ret = module->isSlotBootable(slot_number);
+-    return handle_return(ret, "Error calling isSlotBootable(): %s\n");
++    printf("TBD \n");
++    return 0;
++    //return module->isSlotBootable(module, slot_number);
+ }
+ 
+-static int do_is_slot_marked_successful(sp<IBootControl> module,
++static int do_is_slot_marked_successful(boot_control_module_t* module,
+                                         Slot slot_number)
+ {
+-    Return<BoolResult> ret = module->isSlotMarkedSuccessful(slot_number);
+-    return handle_return(ret, "Error calling isSlotMarkedSuccessful(): %s\n");
++    printf("TBD \n");
++    return 0;
++    //return module->isSlotMarkedSuccessful(module, slot_number);
+ }
+ 
+ 
+-static int do_get_suffix(sp<IBootControl> module, Slot slot_number) {
+-    std::function<void(hidl_string)> cb = [](hidl_string suffix){
+-        fprintf(stdout, "%s\n", suffix.c_str());
+-    };
+-    Return<void> ret = module->getSuffix(slot_number, cb);
+-    if (!ret.isOk()) {
+-        fprintf(stderr, "Error calling getSuffix(): %s\n",
+-                ret.description().c_str());
+-        return EX_SOFTWARE;
+-    }
+-    return EX_OK;
++static int do_get_suffix(boot_control_module_t*  module, Slot slot_number)
++{
++    printf("TBD \n");
++    return 0;
++
++    //const char *suffix = module->getSuffix(module, slot_number);
++
++    //if (suffix)
++    //    fprintf(stdout, "%s\n", suffix);            
++    //return 0;
+ }
+ 
+ static uint32_t parse_slot(int pos, int argc, char *argv[])
+ {
+     if (pos > argc - 1) {
+         usage(stderr, argc, argv);
+-        exit(EX_USAGE);
++        exit(64);
+         return -1;
+     }
+     errno = 0;
+     uint64_t ret = strtoul(argv[pos], NULL, 10);
+     if (errno != 0 || ret > UINT_MAX) {
+         usage(stderr, argc, argv);
+-        exit(EX_USAGE);
++        exit(64);
+         return -1;
+     }
+     return (uint32_t)ret;
+@@ -173,22 +140,18 @@ static uint32_t parse_slot(int pos, int argc, char *argv[])
+ 
+ int main(int argc, char *argv[])
+ {
+-    sp<IBootControl> module;
+-
+     if (argc < 2) {
+         usage(stderr, argc, argv);
+-        return EX_USAGE;
++        return -1;
+     }
+-
+-    module = IBootControl::getService();
++    
++    boot_control_module_t* module = &HAL_MODULE_INFO_SYM;
+     if (module == NULL) {
+         fprintf(stderr, "Error getting bootctrl module.\n");
+-        return EX_SOFTWARE;
++        return -1;
+     }
+ 
+-    if (strcmp(argv[1], "hal-info") == 0) {
+-        return do_hal_info(module);
+-    } else if (strcmp(argv[1], "get-number-slots") == 0) {
++    if (strcmp(argv[1], "get-number-slots") == 0) {
+         return do_get_number_slots(module);
+     } else if (strcmp(argv[1], "get-current-slot") == 0) {
+         return do_get_current_slot(module);
+@@ -206,7 +169,7 @@ int main(int argc, char *argv[])
+         return do_is_slot_marked_successful(module, parse_slot(2, argc, argv));
+     } else {
+         usage(stderr, argc, argv);
+-        return EX_USAGE;
++        return -1;
+     }
+ 
+     return 0;
+diff --git a/configure.ac b/configure.ac
+new file mode 100644
+index 0000000..0395df3
+--- /dev/null
++++ b/configure.ac
+@@ -0,0 +1,24 @@
++AC_PREREQ(2.61)
++AC_INIT([bootctrl],1.0.0)
++AM_INIT_AUTOMAKE([-Wall gnu foreign])
++AC_CONFIG_SRCDIR([Makefile.am])
++AC_CONFIG_HEADERS([config.h])
++AC_CONFIG_MACRO_DIR([m4])
++
++# Check for programs
++AM_PROG_AS
++AC_PROG_CC
++AM_PROG_CC_C_O
++AC_PROG_LIBTOOL
++AC_PROG_AWK
++AC_PROG_CPP
++AC_PROG_CXX
++AC_PROG_INSTALL
++AC_PROG_LN_S
++AC_PROG_MAKE_SET
++PKG_PROG_PKG_CONFIG
++
++AC_CONFIG_FILES([ \
++    Makefile \
++])
++AC_OUTPUT
+-- 
+1.9.1
+
