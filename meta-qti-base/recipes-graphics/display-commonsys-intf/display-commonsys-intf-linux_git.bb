@@ -12,12 +12,11 @@ SRC_URI = "${PATH_TO_REPO}/vendor/qcom/opensource/commonsys-intf/display/.git;pr
 S = "${WORKDIR}/vendor/qcom/opensource/commonsys-intf/display"
 SRCREV = "${AUTOREV}"
 
-DEPENDS += "display-hal-linux"
-DEPENDS += "libhardware"
+DEPENDS += "liblog libutils libcutils libhardware-headers"
 
 EXTRA_OECONF += " --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
 
-LDFLAGS += "-llog -lhardware -lutils -lcutils"
+LDFLAGS += "-llog -lutils -lcutils"
 
 CPPFLAGS += "-DTARGET_HEADLESS"
 CPPFLAGS += "-DVENUS_COLOR_FORMAT"
