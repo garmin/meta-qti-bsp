@@ -157,11 +157,7 @@ static inline void mkdirs(char* p, mode_t mode)
 	struct stat st = {0};
 	int i = 0, len = 0;
 
-	len = strlen(p);
-	if (len > 1024)
-		printf("input string is too long\r\n");
-
-	strlcpy(str, p, len);
+	strlcpy(str, p, sizeof(str));
 
 	if (str[0] != '/')
 		return;
