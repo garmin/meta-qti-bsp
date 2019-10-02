@@ -4,7 +4,7 @@ require recipes-kernel/linux-msm/linux-msm.inc
 inherit ${@bb.utils.contains('TARGET_KERNEL_ARCH', 'aarch64', 'qtikernel-arch', '', d)}
 
 # TEMP: Disable IPA3 config for sdmsteppe
-SRC_URI_append_sdmsteppe = " file://disableipa3.cfg"
+SRC_URI_append = "${@bb.utils.contains('DISTRO_FEATURES', 'ipa3', '', ' file://disableipa3.cfg', d)}"
 
 COMPATIBLE_MACHINE = "(${BASEMACHINE}|sa8195p)"
 KERNEL_IMAGEDEST = "boot"
