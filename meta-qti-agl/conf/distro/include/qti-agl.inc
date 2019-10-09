@@ -2,7 +2,6 @@ require conf/distro/poky-agl.conf
 require conf/include/base-agl.inc
 require conf/include/agl-appfw-smack.inc
 require conf/include/agl-pulseaudio.inc
-require ${QTI_METAPATH_BASE}/conf/distro/automotive.conf
 
 # Enable agl hmi framework
 DISTRO_FEATURES_append = " agl-hmi-framework"
