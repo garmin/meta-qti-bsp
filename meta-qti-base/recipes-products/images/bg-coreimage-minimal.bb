@@ -10,6 +10,7 @@ DEPENDS += "edk2"
 
 CORE_IMAGE_EXTRA_INSTALL += "\
     audiodlkm \
+    weston \
     "
 
 
