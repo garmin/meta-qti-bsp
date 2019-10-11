@@ -1,0 +1,35 @@
+From 480c93f59eceb7c0051af961f840696d9b218378 Mon Sep 17 00:00:00 2001
+From: Nan Zhang <nanzha@codeaurora.org>
+Date: Mon, 9 Sep 2019 17:08:22 +0800
+Subject: [PATCH] Fix the variable GST_FD_MEMORY_FLAG_DONT_CLOSE error.
+
+change the GST_FD_MEMORY_FLAG_DONT_CLOSE to GST_FD_MEMORY_FLAG_NONE.
+
+Signed-off-by: Nan Zhang <nanzha@codeaurora.org>
+---
+ src/gst/gstpipewirepool.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/gst/gstpipewirepool.c b/src/gst/gstpipewirepool.c
+index 6ac132c..d77cf63 100644
+--- a/src/gst/gstpipewirepool.c
++++ b/src/gst/gstpipewirepool.c
+@@ -90,13 +90,13 @@ void gst_pipewire_pool_wrap_buffer (GstPipeWirePool *pool, struct pw_buffer *b)
+     GST_LOG_OBJECT (pool, "wrap buffer %d %d", d->mapoffset, d->maxsize);
+     if (d->type == SPA_DATA_MemFd) {
+       gmem = gst_fd_allocator_alloc (pool->fd_allocator, d->fd,
+-                d->mapoffset + d->maxsize, GST_FD_MEMORY_FLAG_DONT_CLOSE);
++                d->mapoffset + d->maxsize, GST_FD_MEMORY_FLAG_NONE);
+       gst_memory_resize (gmem, d->mapoffset, d->maxsize);
+       data->offset = d->mapoffset;
+     }
+     else if(d->type == SPA_DATA_DmaBuf) {
+       gmem = gst_fd_allocator_alloc (pool->dmabuf_allocator, d->fd,
+-                d->mapoffset + d->maxsize, GST_FD_MEMORY_FLAG_DONT_CLOSE);
++                d->mapoffset + d->maxsize, GST_FD_MEMORY_FLAG_NONE);
+       gst_memory_resize (gmem, d->mapoffset, d->maxsize);
+       data->offset = d->mapoffset;
+     }
+-- 
+1.9.1
+
