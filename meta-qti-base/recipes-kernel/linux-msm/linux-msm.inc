@@ -40,6 +40,7 @@ SRCREV_FORMAT = "kernel_data"
 
 FILESEXTRAPATHS_append := ":${THISDIR}/files"
 SRC_URI_append =  "${@bb.utils.contains('DISTRO_FEATURES', 'wayland', ' file://weston.cfg', '', d)}"
+SRC_URI_append =  "${@bb.utils.contains('DISTRO_FEATURES', 'ktf', ' file://ktf.cfg', '', d)}"
 SRC_URI_append =  " file://cgroup.cfg"
 SRC_URI_append =  " file://ipc.cfg"
 SRC_URI_append =  " file://memhotplug.cfg"
