@@ -14,6 +14,7 @@ RDEPENDS_${PN} += "\
     connman-client \
     ${@bb.utils.contains('DISTRO_FEATURES', 'q-hypervisor', 'setup-network', '', d)} \
     net-tools \
+    emac-dwc-eqos \
     ethtool \
     iperf3 \
     iproute2 \
