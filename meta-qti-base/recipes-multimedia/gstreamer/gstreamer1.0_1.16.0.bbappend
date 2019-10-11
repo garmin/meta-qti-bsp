@@ -11,7 +11,7 @@ SRCREV_FORMAT = "gstreamer_common"
 
 DEPENDS = "gobject-introspection bison-native"
 
-SRCREV_common = "6f2d2093e84cc0eb99b634fa281822ebb9507285"
+SRCREV_common = "59cb678164719ff59dcf6c8b93df4617a1075d11"
 S = "${WORKDIR}/gstreamer/gstreamer"
 # qemu-mips64: error while loading shared libraries: .../recipe-sysroot/usr/lib/libgthread-2.0.so.0: ELF file data encoding not little-endian
 GI_DATA_ENABLED="0"
