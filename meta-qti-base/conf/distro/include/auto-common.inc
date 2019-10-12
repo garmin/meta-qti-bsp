@@ -15,9 +15,6 @@ DISTRO_FEATURES_append = " pam"
 # Display
 DISTRO_FEATURES_append = " wayland"
 
-#Disable ssd listener
-DISTRO_FEATURES_append = " no-ssd-listener-support"
-
 # Use synergy, disable bluez
 DISTRO_FEATURES_BACKFILL_CONSIDERED += "bluez5 bluetooth"
 
