@@ -25,7 +25,7 @@ FILES_${PN} += "${systemd_unitdir}/system/audio.service"
 FILES_${PN} += "${systemd_unitdir}/system/multi-user.target.wants/audio.service"
 
 EXTRA_OEMAKE += "TARGET_SUPPORT=${BASEMACHINE}"
-
+KERNEL_CC += "-Wno-error=maybe-uninitialized"
 # Disable parallel make
 PARALLEL_MAKE = ""
 
