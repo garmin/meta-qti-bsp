@@ -1,5 +1,3 @@
-inherit autotools pkgconfig
-
 DESCRIPTION = "hardware libhardware headers"
 HOMEPAGE = "http://codeaurora.org/"
 LICENSE = "Apache-2.0"
@@ -13,17 +11,15 @@ SRC_URI_append = " https://source.codeaurora.org/quic/le/platform/hardware/libha
 SRCREV = "${AUTOREV}"
 S = "${WORKDIR}/hardware/libhardware"
 
-PR = "r6"
+PR = "r1"
 
-DEPENDS += "libutils libcutils liblog system-core-headers"
+DEPENDS = "system-core-headers"
 
-EXTRA_OECONF_append_apq8053 = " --enable-sensors"
-EXTRA_OECONF_append_concam = " --enable-camera"
-EXTRA_OECONF_append_sdm845 = " --enable-sensors"
-EXTRA_OECONF_append_sdm845 = " --enable-camera"
-EXTRA_OECONF_append_robot-som = " --enable-camera"
+do_configure[noexec] = "1"
+do_compile[noexec] = "1"
 
-do_install_append () {
-    # remove headers, use libhardware-headers
-    rm -rf ${D}${includedir}/hardware/
+do_install () {
+    install -d ${D}${includedir}/hardware/
+    install -m 0644 ${WORKDIR}/gralloc1.h ${D}${includedir}/hardware/
+    install -m 0644 ${S}/include/hardware/*.h ${D}${includedir}/hardware/
 }
