@@ -28,7 +28,7 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 CMDLINE_PATH=/proc/cmdline
-AGL_IFACE_ARRAY=(eth0 eth1)
+AGL_IFACE_ARRAY=(eth0)
 
 function check_all_interfaces_up()
 {
@@ -58,7 +58,10 @@ function setup_network_agl_vm()
     ifconfig eth0 192.168.1.2 up
 
     echo "Setup route"
-    ip route add default dev eth0 via 192.168.1.2
+    ip route add default dev eth0 via 192.168.1.10 table default
+
+    echo "Enable forwarding"
+    sysctl -w net.ipv4.conf.all.forwarding=1
 }
 
 
