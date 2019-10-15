@@ -4,9 +4,10 @@ include conf/distro/msm.conf
 DISTRO_NAME = "automotive"
 DISTROOVERRIDES =. "automotive:"
 
-PRODUCT = "automotive"
-
-DEPLOY_NAME_BASE="${BASEMACHINE}-automotive"
+PRODUCT ?= "${BASEMACHINE}" 
+DEPLOY_NAME_BASE = "${PRODUCT}-automotive"
+IMAGE_NAME = "${IMAGE_BASENAME}-${PRODUCT}${IMAGE_VERSION_SUFFIX}"
+IMAGE_LINK_NAME = "${IMAGE_BASENAME}-${PRODUCT}"
 
 # Support systemd-user-session
 DISTRO_FEATURES_append = " pam"
