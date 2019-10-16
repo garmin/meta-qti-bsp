@@ -2,8 +2,8 @@
 
 IMAGE_INSTALL += " \
     packagegroup-qti-core-minimal \
-    packagegroup-qti-audio \
-    packagegroup-qti-bluetooth \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'audio', 'packagegroup-qti-audio', '', d)}
+    ${@bb.utils.contains('DISTRO_FEATURES', 'synergy', 'packagegroup-qti-bluetooth', '', d)} \
     packagegroup-qti-data \
     packagegroup-qti-display \
     packagegroup-qti-extra \

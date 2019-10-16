@@ -1,6 +1,6 @@
 IMAGE_INSTALL += " \
     packagegroup-qti-core-minimal \
-    packagegroup-qti-audio \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'audio', 'packagegroup-qti-audio', '', d)} \
     packagegroup-qti-bluetooth \
     packagegroup-qti-data \
     packagegroup-qti-display \
