@@ -214,7 +214,7 @@ static inline void prepare_dir(char* p)
 					mkdir("/run", 0700);
 				}
 
-				ret = mount("tmpfs", "/run", "tmpfs", MS_NOSUID|MS_NODEV|MS_STRICTATIME, "mode=755,smackfsroot=*");
+				ret = mount("tmpfs", "/run", "tmpfs", MS_NOSUID|MS_NODEV|MS_STRICTATIME, "mode=755");
 				if (ret < 0) {
 					perror("mount tmpfs failed");
 				}
@@ -564,7 +564,7 @@ static inline int parse_line(char* p)
 				 */
 				if (app_launcher.wait) {
 					printf("app %s waiting for %s ...\r\n", app_launcher.appname, app_launcher.wait);
-					for (i = 0; i < 30; i++) {
+					for (i = 0; i < 60; i++) {
 						if (-1 != access(app_launcher.wait, F_OK))
 							break;
 						usleep(5000);
@@ -621,7 +621,7 @@ static inline void trigger_firmware_loading(const char* path)
 	if (pid == 0) {
 		memset(marker, 0, 50);
 		snprintf(marker, 49 ,"open-%s-begin", path);
-		for (i = 0; i < 30; i++) {
+		for (i = 0; i < 60; i++) {
 			if (-1 != access(path, F_OK))
 				break;
 			usleep(5000);
@@ -671,7 +671,7 @@ int main(int argc, char* argv[])
 	write_marker("early-init-start-up");
 
 	/* Trigger firmware loading parallelly */
-	// trigger_firmware_loading(DRM_CARD_PATH);
+	trigger_firmware_loading(DRM_CARD_PATH);
 #ifdef EARLY_ETHERNET
 	trigger_firmware_loading(VIDEO_CARD_PATH);
 #endif
