@@ -64,9 +64,6 @@ FILES_${PN}     += "usr/bin/init.qti.wlan_off.sh"
 SRC_URI_append_auto = " file://init_qti_wlan_auto.service"
 SYSTEMD_SERVICE_${PN}_auto = "init_qti_wlan_auto.service"
 
-# disable wlan service on boot for sdxpoorwills-auto
-SYSTEMD_AUTO_ENABLE_${PN}_auto = "disable"
-
 SRC_URI_append_auto = " file://init.qti.wlan_on.sh"
 SRC_URI_append_auto = " file://init.qti.wlan_off.sh"
 
