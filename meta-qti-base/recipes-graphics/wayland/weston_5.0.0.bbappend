@@ -25,6 +25,8 @@ DEPENDS += "libion libsync"
 DEPENDS += "display-hal-linux display-noship-linux gbm-headers display-ship-linux display-hal-headers"
 DEPENDS += "${@bb.utils.contains('DISTRO_FEATURES', 'q-hypervisor', 'libuhab', '', d)}"
 
+RRECOMMENDS_${PN}_remove = "weston-conf"
+
 TARGET_CFLAGS += "-idirafter ${STAGING_KERNEL_BUILDDIR}/include/"
 TARGET_CFLAGS += "-I${STAGING_INCDIR}/libdrm"
 TARGET_CFLAGS += "-I${STAGING_INCDIR}/sdm"

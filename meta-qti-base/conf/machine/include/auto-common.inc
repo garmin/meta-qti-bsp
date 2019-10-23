@@ -59,4 +59,4 @@ IMAGE_CLASSES += "qimage"
 WARN_TO_ERROR_QA_remove += "unknown-configure-option"
 
 LLVM_VERSION = "6.0"
-GCCVERSION = "7.%"
+GCCVERSION = "9.%"
