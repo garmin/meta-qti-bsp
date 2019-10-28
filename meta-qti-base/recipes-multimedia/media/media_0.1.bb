@@ -9,17 +9,15 @@ SRCREV = "${AUTOREV}"
 
 
 PR = "r1"
+
 DEPENDS = "virtual/kernel"
 DEPENDS += "glib-2.0"
 DEPENDS += "virtual/libc"
-DEPENDS += "libion libcutils libutils libui system-core"
-DEPENDS += "weston"
+DEPENDS += "libion libcutils libutils system-core-headers"
 DEPENDS += "adreno-headers"
-DEPENDS += "libhardware"
 DEPENDS += "mm-video-noship"
-DEPENDS += "display-hal-linux"
-DEPENDS += "display-commonsys-intf-linux"
-DEPENDS += "libhardware"
+DEPENDS += "libdrm gbm adreno wayland gbm-headers"
+DEPENDS += "display-commonsys-intf-linux display-hal-headers"
 DEPENDS += "media-plugin-headers"
 
 # Need the kernel headers
