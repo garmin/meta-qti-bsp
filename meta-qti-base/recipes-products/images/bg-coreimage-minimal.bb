@@ -16,6 +16,7 @@ CORE_IMAGE_EXTRA_INSTALL += "\
     openssh-sftp \
     openssh-sftp-server \
     weston \
+    media \
     "
 
 IMAGE_FEATURES += " \
