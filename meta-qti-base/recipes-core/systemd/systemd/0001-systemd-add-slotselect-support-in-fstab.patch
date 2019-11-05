@@ -1,6 +1,6 @@
-From 04a8903ab4f0cec3c33e0c243bc5bbce0da399aa Mon Sep 17 00:00:00 2001
+From 7ba32a4fa2cdb9927f78822dc22cab10101b96bc Mon Sep 17 00:00:00 2001
 From: Lei wang <leiwan@codeaurora.org>
-Date: Mon, 18 Feb 2019 11:26:32 +0800
+Date: Tue, 5 Nov 2019 14:05:47 +0800
 Subject: [PATCH] systemd: add slotselect support in fstab
 
 support a/b partition option in fstab
@@ -8,14 +8,14 @@ support a/b partition option in fstab
 Signed-off-by: Lei wang <leiwan@codeaurora.org>
 ---
  src/core/mount.c                      |  2 +-
- src/fstab-generator/fstab-generator.c | 14 ++++++++++++++
- 2 files changed, 15 insertions(+), 1 deletion(-)
+ src/fstab-generator/fstab-generator.c | 13 +++++++++++++
+ 2 files changed, 14 insertions(+), 1 deletion(-)
 
 diff --git a/src/core/mount.c b/src/core/mount.c
-index 214364d..cdb707b 100644
+index 959b8fbed2..39478249ff 100644
 --- a/src/core/mount.c
 +++ b/src/core/mount.c
-@@ -934,7 +934,7 @@ static void mount_enter_mounting(Mount *m) {
+@@ -978,7 +978,7 @@ static void mount_enter_mounting(Mount *m) {
          if (p) {
                  _cleanup_free_ char *opts = NULL;
  
@@ -25,21 +25,21 @@ index 214364d..cdb707b 100644
                          goto fail;
  
 diff --git a/src/fstab-generator/fstab-generator.c b/src/fstab-generator/fstab-generator.c
-index 7f23b9f..997471e 100644
+index 76270aec17..98413e5d26 100644
 --- a/src/fstab-generator/fstab-generator.c
 +++ b/src/fstab-generator/fstab-generator.c
-@@ -57,6 +57,7 @@ static char *arg_usr_what = NULL;
+@@ -51,6 +51,7 @@ static char *arg_usr_what = NULL;
  static char *arg_usr_fstype = NULL;
  static char *arg_usr_options = NULL;
  static VolatileMode arg_volatile_mode = _VOLATILE_MODE_INVALID;
 +static char* slot_suffix = NULL;
  
- static int write_options(FILE *f, const char *options) {
-         _cleanup_free_ char *o = NULL;
-@@ -532,6 +533,19 @@ static int parse_fstab(bool initrd) {
-                 if (!what)
-                         return log_oom();
- 
+ STATIC_DESTRUCTOR_REGISTER(arg_root_what, freep);
+ STATIC_DESTRUCTOR_REGISTER(arg_root_fstype, freep);
+@@ -576,6 +577,18 @@ static int parse_fstab(bool initrd) {
+                 growfs = fstab_test_option(me->mnt_opts, "x-systemd.growfs\0");
+                 noauto = fstab_test_yes_no_option(me->mnt_opts, "noauto\0" "auto\0");
+                 nofail = fstab_test_yes_no_option(me->mnt_opts, "nofail\0" "fail\0");
 +                /*
 +                 * update what for slot support
 +                 */
@@ -52,10 +52,9 @@ index 7f23b9f..997471e 100644
 +                        else
 +                                log_warning("slotselect is not supported in cmdline, mount target changed to default '%s'.", what);
 +                }
-+
-                 if (is_device_path(what) && path_is_read_only_fs("sys") > 0) {
-                         log_info("Running in a container, ignoring fstab device entry for %s.", what);
-                         continue;
+ 
+                 log_debug("Found entry what=%s where=%s type=%s makefs=%s growfs=%s noauto=%s nofail=%s",
+                           what, where, me->mnt_type,
 -- 
-1.9.1
+2.14.0.rc1.14.gc3eb4e6
 

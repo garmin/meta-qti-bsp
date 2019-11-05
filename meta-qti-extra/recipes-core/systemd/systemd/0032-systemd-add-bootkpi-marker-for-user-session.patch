@@ -1,6 +1,6 @@
-From d00eaef9c2aa17690bf1f6b7309adcff32c08865 Mon Sep 17 00:00:00 2001
+From c3efe253e6a6fde60a812a05456d9b8bd0917900 Mon Sep 17 00:00:00 2001
 From: Lei wang <leiwan@codeaurora.org>
-Date: Wed, 17 Apr 2019 11:20:15 +0800
+Date: Tue, 5 Nov 2019 19:13:15 +0800
 Subject: [PATCH] systemd: add userspace marker support
 
 put debugfs mount earlier
@@ -8,18 +8,28 @@ support userspace entry and unit marker
 
 Signed-off-by: Lei wang <leiwan@codeaurora.org>
 ---
- src/basic/util.h       | 16 ++++++++++++++++
- src/core/job.c         | 29 +++++++++++++++++++++++++++++
+ src/basic/util.h       | 19 +++++++++++++++++++
+ src/core/job.c         | 26 ++++++++++++++++++++++++++
  src/core/main.c        |  1 +
  src/core/mount-setup.c |  6 ++++--
  units/meson.build      |  2 --
  5 files changed, 50 insertions(+), 4 deletions(-)
 
 diff --git a/src/basic/util.h b/src/basic/util.h
-index c583923..954705b 100644
+index 25e6ab8112..6688df1959 100644
 --- a/src/basic/util.h
 +++ b/src/basic/util.h
-@@ -178,6 +178,22 @@ static inline unsigned log2u_round_up(unsigned x) {
+@@ -2,6 +2,9 @@
+ #pragma once
+ 
+ #include <stdint.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <string.h>
+ 
+ #include "macro.h"
+ 
+@@ -75,6 +78,22 @@ static inline unsigned log2u_round_up(unsigned x) {
          return log2u(x - 1) + 1;
  }
  
@@ -41,27 +51,25 @@ index c583923..954705b 100644
 +
  int container_get_leader(const char *machine, pid_t *pid);
  
- int namespace_open(pid_t pid, int *pidns_fd, int *mntns_fd, int *netns_fd, int *userns_fd, int *root_fd);
+ int version(void);
 diff --git a/src/core/job.c b/src/core/job.c
-index 8552ffb..7e249d8 100644
+index 9537366eb9..16bee9ed8e 100644
 --- a/src/core/job.c
 +++ b/src/core/job.c
-@@ -25,6 +25,14 @@
+@@ -28,6 +28,12 @@
  #include "unit.h"
  #include "virt.h"
  
-+
 +#define ARRAY_SIZE(x) (sizeof(x) / sizeof((x)[0][0]))
 +
 +static const char* bootkpi_unit_list[][3]= {
 +        {"systemd-logind.service", "V - agl system session complete", "V - agl first user logged in"},
 +};
 +
-+
  Job* job_new_raw(Unit *unit) {
          Job *j;
  
-@@ -548,6 +556,16 @@ static int job_perform_on_unit(Job **j) {
+@@ -630,6 +636,16 @@ static int job_perform_on_unit(Job **j) {
                          assert_not_reached("Invalid job type");
          }
  
@@ -75,12 +83,12 @@ index 8552ffb..7e249d8 100644
 +                }
 +        }
 +
-         /* Log if the job still exists and the start/stop/reload function
-          * actually did something. */
-         *j = manager_get_job(m, id);
-@@ -888,6 +906,17 @@ int job_finish_and_invalidate(Job *j, JobResult result, bool recursive, bool alr
+         /* Log if the job still exists and the start/stop/reload function actually did something. Note that this means
+          * for units for which there's no 'activating' phase (i.e. because we transition directly from 'inactive' to
+          * 'active') we'll possibly skip the "Starting..." message. */
+@@ -975,6 +991,16 @@ int job_finish_and_invalidate(Job *j, JobResult result, bool recursive, bool alr
  
-         log_unit_debug(u, "Job %s/%s finished, result=%s", u->id, job_type_to_string(t), job_result_to_string(result));
+         log_unit_debug(u, "Job %" PRIu32 " %s/%s finished, result=%s", j->id, u->id, job_type_to_string(t), job_result_to_string(result));
  
 +        if (result == JOB_DONE && u->type == UNIT_SERVICE) {
 +                for (size_t idx = 0; idx < (ARRAY_SIZE(bootkpi_unit_list) / 3); idx++) {
@@ -92,27 +100,26 @@ index 8552ffb..7e249d8 100644
 +                }
 +        }
 +
-+
          /* If this job did nothing to respective unit we don't log the status message */
          if (!already)
-                 job_emit_status_message(u, t, result);
+                 job_emit_done_status_message(u, j->id, t, result);
 diff --git a/src/core/main.c b/src/core/main.c
-index 44dd834..7c3331b 100644
+index bcce7178a8..20109d300c 100644
 --- a/src/core/main.c
 +++ b/src/core/main.c
-@@ -2214,6 +2214,7 @@ int main(int argc, char *argv[]) {
-                                         error_message = "Failed to mount early API filesystems";
-                                         goto finish;
-                                 }
-+                                write_marker("M - User Space Start");
+@@ -2436,6 +2436,7 @@ int main(int argc, char *argv[]) {
+                                  * available, and it previously wasn't. */
+                                 log_open();
  
++                                write_marker("M - User Space Start");
                                  r = initialize_security(
                                                  &loaded_policy,
+                                                 &security_start_timestamp,
 diff --git a/src/core/mount-setup.c b/src/core/mount-setup.c
-index 8b6bef1..6a600e4 100644
+index ea7b0a80cb..49bcfcdb47 100644
 --- a/src/core/mount-setup.c
 +++ b/src/core/mount-setup.c
-@@ -51,9 +51,9 @@ typedef struct MountPoint {
+@@ -53,9 +53,9 @@ typedef struct MountPoint {
   * other ones we can delay until SELinux and IMA are loaded. When
   * SMACK is enabled we need smackfs, too, so it's a fifth one. */
  #if ENABLE_SMACK
@@ -124,7 +131,7 @@ index 8b6bef1..6a600e4 100644
  #endif
  
  static const MountPoint mount_table[] = {
-@@ -65,6 +65,8 @@ static const MountPoint mount_table[] = {
+@@ -67,6 +67,8 @@ static const MountPoint mount_table[] = {
            NULL,          MNT_FATAL|MNT_IN_CONTAINER },
          { "securityfs",  "/sys/kernel/security",      "securityfs", NULL,                      MS_NOSUID|MS_NOEXEC|MS_NODEV,
            NULL,          MNT_NONE                   },
@@ -134,10 +141,10 @@ index 8b6bef1..6a600e4 100644
          { "smackfs",     "/sys/fs/smackfs",           "smackfs",    "smackfsdef=*",            MS_NOSUID|MS_NOEXEC|MS_NODEV,
            mac_smack_use, MNT_FATAL                  },
 diff --git a/units/meson.build b/units/meson.build
-index 698734e..56d0d47 100644
+index 6bb7771b36..07e1845437 100644
 --- a/units/meson.build
 +++ b/units/meson.build
-@@ -71,8 +71,6 @@ units = [
+@@ -69,8 +69,6 @@ units = [
           'sysinit.target.wants/'],
          ['sys-kernel-config.mount',             '',
           'sysinit.target.wants/'],
@@ -147,5 +154,5 @@ index 698734e..56d0d47 100644
          ['syslog.socket',                       ''],
          ['system-update.target',                ''],
 -- 
-1.9.1
+2.14.0.rc1.14.gc3eb4e6
 
