@@ -75,6 +75,10 @@ do_install_append() {
 	WESTON_INI_CONFIG=${sysconfdir}/xdg/weston
 	install -d ${D}${WESTON_INI_CONFIG}
 	install -m 0644 ${WORKDIR}/weston.ini_caf ${D}${WESTON_INI_CONFIG}/weston.ini
+	# Install reuqire-input=false in weston.ini
+	if ${@bb.utils.contains('DISTRO_FEATURES', 'q-hypervisor', 'true', 'false', d)}; then
+	    sed -i -e '/\[core\]/a require-input=false' ${D}${WESTON_INI_CONFIG}/weston.ini
+	fi
 	# expose weston protocol to /usr/share/weston as video may use it
 	install ${WORKDIR}/graphics/weston/protocol/*.xml ${D}${datadir}/weston
 }
