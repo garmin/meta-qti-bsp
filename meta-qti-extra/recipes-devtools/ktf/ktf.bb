@@ -30,6 +30,7 @@ do_install () {
     install -D -m 0644 ${S}/kernel/${KTF_MODULE_NAME}.ko ${D}/lib/modules/${KERNEL_VERSION}/unit_test/
     install -m 0755 ${S}/user/.libs/ktfrun ${D}${bindir}
     cp ${S}/lib/.libs/libktf.so.0 ${D}${libdir}
+    install -m 0644 ${S}/kernel/*.h ${STAGING_KERNEL_DIR}/include/linux
 }
 
 PCKAGES = "${PN} ${PN}-dbg"
