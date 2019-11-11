@@ -34,6 +34,7 @@ COMMON_OPTIMIZATION = " \
 
 FULL_OPTIMIZATION         = "-O2 -fomit-frame-pointer ${COMMON_OPTIMIZATION} "
 DEBUG_OPTIMIZATION_append = " ${COMMON_OPTIMIZATION} "
+TUNE_CCARGS_append        = "-march=armv8-a -mcpu=cortex-a57 -mtune=cortex-a57"
 
 # NLS
 USE_NLS = "no"
