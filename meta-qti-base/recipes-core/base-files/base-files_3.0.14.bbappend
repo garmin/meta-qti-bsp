@@ -39,6 +39,8 @@ do_install_append(){
     rmdir ${D}/tmp
     ln -s /var/tmp ${D}/tmp
     ln -s /var/run/resolv.conf ${D}/etc/resolv.conf
+    ln -s /lib ${D}/lib64
+    ln -s /usr/lib ${D}/usr/lib64
 
     install -m 0644 ${WORKDIR}/fstab ${D}${sysconfdir}/fstab
 
