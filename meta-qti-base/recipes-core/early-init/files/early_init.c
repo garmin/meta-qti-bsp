@@ -46,7 +46,7 @@
 #define END_TAG                 "<end>"
 #define LINE_MAX                2048
 #define WHITESPACE              " \t\n\r"
-#define KPI_VALUE_PATH          "/debug/bootkpi/kpi_values"
+#define KPI_VALUE_PATH          "/sys/kernel/debug/bootkpi/kpi_values"
 #define GPIO_EXPORT             "/sys/class/gpio/export"
 #define DRM_CARD_PATH           "/dev/dri/card0"
 #define VIDEO_CARD_PATH         "/dev/video32"
@@ -192,14 +192,8 @@ static inline void prepare_dir(char* p)
 	switch (*p) {
 		case 'd':
 			if (0 == strncmp(p + 1, "ebugfs", strlen("ebugfs"))) {
-				/*
-				 * Mount debugfs
-				 */
-				if (stat("/debug", &st) == -1) {
-					mkdir("/debug", 0755);
-				}
 
-				ret = mount("debugfs", "/debug", "debugfs", 0, NULL);
+				ret = mount("debugfs", "/sys/kernel/debug", "debugfs", 0, NULL);
 				if (ret < 0) {
 					perror("mount debugfs failed");
 				}
@@ -647,10 +641,10 @@ int main(int argc, char* argv[])
 	char line[LINE_MAX];
 	int fd;
 
+	prepare_dir("sysfs");
 	prepare_dir("debugfs");
 	prepare_dir("xdg_runtime_dir");
 	prepare_dir("shm");
-	prepare_dir("sysfs");
 	prepare_dir("procfs");
 
 	fd = open("/run/early_init.log", O_RDWR | O_CREAT, 0644);

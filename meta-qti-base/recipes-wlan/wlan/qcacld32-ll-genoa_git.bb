@@ -100,6 +100,11 @@ do_install_append_automotive() {
     #For GNA04.1 boardid = 0x301
     ln -sf /firmware/image/${_MODNAME}/bdwlan03.b01 ${D}/lib/firmware/${_MODNAME}/
     mv ${D}/lib/firmware/${_MODNAME}/bdwlan03.b01 ${D}/lib/firmware/${_MODNAME}/bdwlan.b0301
+    #For GNA04.1 boardid = 0x302
+    ln -sf /firmware/image/${_MODNAME}/bdwlan02.b03 ${D}/lib/firmware/${_MODNAME}/
+    mv ${D}/lib/firmware/${_MODNAME}/bdwlan02.b03 ${D}/lib/firmware/${_MODNAME}/bdwlan03.b02
+    #For GNA04.1 boardid = 0x203
+    ln -sf /firmware/image/${_MODNAME}/bdwlan02.b03 ${D}/lib/firmware/${_MODNAME}/
 
     # Install systemd service file
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
