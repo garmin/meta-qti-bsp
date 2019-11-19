@@ -14,7 +14,7 @@ FILES_${PN}     += "${nonarch_base_libdir}/modules/${KERNEL_VERSION}/extra/*"
 do_unpack[deptask] = "do_populate_sysroot"
 PR = "r0"
 
-SRC_URI   =  "${PATH_TO_REPO}/data-kernel/.git;protocol=${PROTO};destsuffix=data-kernel/drivers/emac-dwc-eqos;subpath=drivers/emac-dwc-eqos;nobranch=1"
+SRC_URI   =  "${PATH_TO_REPO}/data-kernel/.git;protocol=${PROTO};destsuffix=data-kernel/drivers/emac-dwc-eqos;subpath=drivers/emac-dwc-eqos;usehead=1"
 SRC_URI_append = " file://emac_dwc_eqos_start_stop_le"
 SRC_URI_append = " file://setup_avtp_routing_le"
 SRC_URI_append = " file://emac_dwc_eqos.service"
@@ -53,7 +53,7 @@ pkg_postinst_${PN} () {
 }
 
 do_module_signing() {
-    if [ "${MACHINE}" == "sa8195" || [ "${MACHINE}" == "sa8155" ] || [ "${MACHINE}" == "sa8155qdrive" ]; then
+    if [ "${BASEMACHINE}" = "sa8195" ] || [ "${BASEMACHINE}" = "sa8155" ]; then
     if [ -f  ${STAGING_KERNEL_BUILDDIR}/certs/signing_key.pem ]; then
 	    bbnote "Signing ${PN} module ${i}"
         for i in $(find ${PKGDEST}/${PN}/${nonarch_base_libdir}/modules/${KERNEL_VERSION}/extra/ -name "*.ko"); do
