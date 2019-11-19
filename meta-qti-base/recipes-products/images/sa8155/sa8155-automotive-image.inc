@@ -9,6 +9,7 @@ IMAGE_INSTALL += " \
     packagegroup-qti-security \
     packagegroup-qti-vnw \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wlan', 'packagegroup-qti-wlan', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'lxc', 'packagegroup-qti-lxc', '', d)} \
     packagegroup-qti-tools \
     ${@bb.utils.contains('DISTRO_FEATURES', 'qdrive', 'packagegroup-qti-ros packagegroup-qti-qdrive packagegroup-qti-location-hal', '', d)} \
     "

@@ -32,6 +32,8 @@ SRC_URI   =  "${PATH_TO_REPO}/kernel/msm-4.14/.git;protocol=${PROTO};destsuffix=
 SRC_URI_append = "  \
               ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' file://systemd.cfg', '', d)} \
               ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', ' file://virtualization.cfg', '', d)} \
+              ${@bb.utils.contains('DISTRO_FEATURES', 'lxc', ' file://lxc.cfg', '', d)} \
+              ${@bb.utils.contains('DISTRO_FEATURES', 'lxc', ' file://drm-lease.cfg ', '', d)} \
               ${@bb.utils.contains('DISTRO_FEATURES', 'nand-squashfs', ' file://squashfs.cfg', '', d)} \
               ${@bb.utils.contains('DISTRO_FEATURES', 'early_init', ' file://earlyuserspace.cfg', '', d)} \
 	     "
