@@ -21,10 +21,10 @@ S =  "${WORKDIR}/vendor/qcom/opensource/hsi2s-kernel"
 TARGET_CC_ARCH += "${LDFLAGS}"
 
 do_compile () {
-	oe_runmake -C test/loopback
+	oe_runmake -C test/generic
 }
 
 do_install () {
 	install -d ${D}${bindir}
-	install -m 0755 ${S}/test/loopback/hsi2s_test ${D}${bindir}
+	install -m 0755 ${S}/test/generic/hsi2s_test ${D}${bindir}
 }
