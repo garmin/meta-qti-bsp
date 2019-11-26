@@ -1,22 +1,79 @@
-From fe3e1baa76b61b93362b74d29428f0508d5be9b3 Mon Sep 17 00:00:00 2001
-From: Lei wang <leiwan@codeaurora.org>
-Date: Tue, 7 May 2019 10:42:27 +0800
-Subject: [PATCH] systemd: Make root's home directory configurable
+From 815bc509a70246d8868e37d6805137940a1a9f2e Mon Sep 17 00:00:00 2001
+From: Chen Qi <Qi.Chen@windriver.com>
+Date: Tue, 26 Nov 2019 10:31:30 +0800
+Subject: [PATCH] Make root's home directory configurable
 
-oe patch does not work well with systemd 239, need
-change the source code to make that work.
+OpenEmbedded has a configurable home directory for root. Allow
+systemd to be built using its idea of what root's home directory
+should be.
+
+Upstream-Status: Denied
+Upstream wants to have a unified hierarchy where everyone is
+using the same root folder.
+https://github.com/systemd/systemd/issues/541
+
+Signed-off-by: Dan McGregor <dan.mcgregor@usask.ca>
+Signed-off-by: Khem Raj <raj.khem@gmail.com>
+Signed-off-by: Chen Qi <Qi.Chen@windriver.com>
 
 Signed-off-by: Lei wang <leiwan@codeaurora.org>
 ---
+ meson.build           | 7 +++++++
+ meson_options.txt     | 2 ++
  src/basic/user-util.c | 4 ++--
  src/nspawn/nspawn.c   | 4 ++--
- 2 files changed, 4 insertions(+), 4 deletions(-)
+ 4 files changed, 13 insertions(+), 4 deletions(-)
 
+diff --git a/meson.build b/meson.build
+index 79b762f..1084c2a 100644
+--- a/meson.build
++++ b/meson.build
+@@ -111,6 +111,11 @@ if rootlibdir == ''
+         rootlibdir = join_paths(rootprefixdir, libdir.split('/')[-1])
+ endif
+ 
++roothomedir = get_option('roothomedir')
++if roothomedir == ''
++        roothomedir = '/root'
++endif
++
+ # Dirs of external packages
+ pkgconfigdatadir = get_option('pkgconfigdatadir') == '' ? join_paths(datadir, 'pkgconfig') : get_option('pkgconfigdatadir')
+ pkgconfiglibdir = get_option('pkgconfiglibdir') == '' ? join_paths(libdir, 'pkgconfig') : get_option('pkgconfiglibdir')
+@@ -233,6 +238,7 @@ conf.set_quoted('UDEVLIBEXECDIR',                             udevlibexecdir)
+ conf.set_quoted('POLKIT_AGENT_BINARY_PATH',                   join_paths(bindir, 'pkttyagent'))
+ conf.set_quoted('LIBDIR',                                     libdir)
+ conf.set_quoted('ROOTLIBDIR',                                 rootlibdir)
++conf.set_quoted('ROOTHOMEDIR',                                roothomedir)
+ conf.set_quoted('ROOTLIBEXECDIR',                             rootlibexecdir)
+ conf.set_quoted('BOOTLIBDIR',                                 bootlibdir)
+ conf.set_quoted('SYSTEMD_PULL_PATH',                          join_paths(rootlibexecdir, 'systemd-pull'))
+@@ -252,6 +258,7 @@ substs.set('rootprefix_noslash',                              rootprefixdir_nosl
+ substs.set('exec_prefix',                                     prefixdir)
+ substs.set('libdir',                                          libdir)
+ substs.set('rootlibdir',                                      rootlibdir)
++substs.set('roothomedir',                                     roothomedir)
+ substs.set('includedir',                                      includedir)
+ substs.set('sysconfdir',                                      sysconfdir)
+ substs.set('bindir',                                          bindir)
+diff --git a/meson_options.txt b/meson_options.txt
+index 5dc898e..ce3c88e 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -12,6 +12,8 @@ option('rootlibdir', type : 'string',
+        description : '''[/usr]/lib/x86_64-linux-gnu or such''')
+ option('rootprefix', type : 'string',
+        description : '''override the root prefix [default '/' if split-usr and '/usr' otherwise]''')
++option('roothomedir', type : 'string',
++       description : '''override the root home directory''')
+ option('link-udev-shared', type : 'boolean',
+        description : 'link systemd-udev and its helpers to libsystemd-shared.so')
+ option('link-systemctl-shared', type: 'boolean',
 diff --git a/src/basic/user-util.c b/src/basic/user-util.c
-index a562a39..0fcaaf4 100644
+index 3b253bc..b70c382 100644
 --- a/src/basic/user-util.c
 +++ b/src/basic/user-util.c
-@@ -111,7 +111,7 @@ int get_user_creds(
+@@ -127,7 +127,7 @@ static int synthesize_user_creds(
                          *gid = 0;
  
                  if (home)
@@ -25,7 +82,7 @@ index a562a39..0fcaaf4 100644
  
                  if (shell)
                          *shell = "/bin/sh";
-@@ -420,7 +420,7 @@ int get_home_dir(char **_h) {
+@@ -472,7 +472,7 @@ int get_home_dir(char **_h) {
          /* Hardcode home directory for root and nobody to avoid NSS */
          u = getuid();
          if (u == 0) {
@@ -35,19 +92,19 @@ index a562a39..0fcaaf4 100644
                          return -ENOMEM;
  
 diff --git a/src/nspawn/nspawn.c b/src/nspawn/nspawn.c
-index 56877bd..1dfb6f0 100644
+index 2aec804..6fd41e2 100644
 --- a/src/nspawn/nspawn.c
 +++ b/src/nspawn/nspawn.c
-@@ -2672,7 +2672,7 @@ static int inner_child(
-         if (envp[n_env])
+@@ -3035,7 +3035,7 @@ static int inner_child(
                  n_env++;
  
--        if ((asprintf((char**)(envp + n_env++), "HOME=%s", home ? home: "/root") < 0) ||
-+        if ((asprintf((char**)(envp + n_env++), "HOME=%s", home ? home: ROOTHOMEDIR) < 0) ||
-             (asprintf((char**)(envp + n_env++), "USER=%s", arg_user ? arg_user : "root") < 0) ||
-             (asprintf((char**)(envp + n_env++), "LOGNAME=%s", arg_user ? arg_user : "root") < 0))
-                 return log_oom();
-@@ -2751,7 +2751,7 @@ static int inner_child(
+         if (home || !uid_is_valid(arg_uid) || arg_uid == 0)
+-                if (asprintf((char**)(envp + n_env++), "HOME=%s", home ?: "/root") < 0)
++                if (asprintf((char**)(envp + n_env++), "HOME=%s", home ?: ROOTHOMEDIR) < 0)
+                         return log_oom();
+ 
+         if (arg_user || !uid_is_valid(arg_uid) || arg_uid == 0)
+@@ -3129,7 +3129,7 @@ static int inner_child(
          } else {
                  if (!arg_chdir)
                          /* If we cannot change the directory, we'll end up in /, that is expected. */
@@ -57,5 +114,5 @@ index 56877bd..1dfb6f0 100644
                  execle("/bin/bash", "-bash", NULL, env_use);
                  execle("/bin/sh", "-sh", NULL, env_use);
 -- 
-1.9.1
+2.7.4
 
