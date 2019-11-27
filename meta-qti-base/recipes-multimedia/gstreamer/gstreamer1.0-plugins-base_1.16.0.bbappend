@@ -17,6 +17,12 @@ SRC_URI_append = " ${CAF_GIT}/gstreamer/common;destsuffix=gstreamer/gst-plugins-
 SRCREV = "${AUTOREV}"
 SRCREV_common = "59cb678164719ff59dcf6c8b93df4617a1075d11"
 SRCREV_FORMAT = "base_common"
+DEPENDS += "media"
+DEPENDS += "libion"
+CPPFLAGS += "-I${STAGING_KERNEL_BUILDDIR}/usr/include"
+CPPFLAGS += "-I${STAGING_INCDIR}/ion_headers"
+CPPFLAGS += "-I${STAGING_INCDIR}/mm-core/"
+
 
 S = "${WORKDIR}/gstreamer/gst-plugins-base"
 

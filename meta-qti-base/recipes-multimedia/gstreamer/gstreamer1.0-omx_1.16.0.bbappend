@@ -2,6 +2,7 @@ DEFAULT_PREFERENCE = "-1"
 
 
 DEPENDS += "media"
+DEPENDS += "libion"
 RDEPENDS_${PN} = "media"
 GSTREAMER_1_0_OMX_TARGET = "generic"
 GSTREAMER_1_0_OMX_CORE_NAME = "${libdir}/libOmxCore.so"
@@ -23,6 +24,7 @@ EXTRA_OECONF_append =" --enable-target-vpu554='yes'"
 EXTRA_OECONF_append =" --enable-encoder-heic='yes'"
 
 CPPFLAGS += "-I${STAGING_KERNEL_BUILDDIR}/usr/include"
+CPPFLAGS += "-I${STAGING_INCDIR}/ion_headers"
 
 delete_pkg_m4_file() {
     # Delete m4 files which we provide patched versions of but will be ignored
