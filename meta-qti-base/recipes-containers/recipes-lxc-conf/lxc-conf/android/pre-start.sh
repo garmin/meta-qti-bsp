@@ -1,3 +1,5 @@
+#! /bin/sh
+
 # Copyright (c) 2019, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -25,26 +27,10 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-lxc.rootfs.path = /var/lib/lxc/android/rootfs
-lxc.uts.name = armhf
-lxc.arch = armhf
-lxc.cap.drop = mac_admin mac_override
-lxc.start.auto = 1
-lxc.pty.max = 64
-lxc.selinux.context = unconfined_u:unconfined_r:lxc_t:s0-s0:c0.c1023
+echo "prepare setup bridge in host side"
+brctl addbr lxcbrandroid
+ifconfig lxcbrandroid 192.168.0.1 up
+echo "setup the routing"
+sysctl -w net.ipv4.conf.all.forwarding=1
+iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o eth0 -j MASQUERADE
 
-lxc.net.0.type = veth
-lxc.net.0.hwaddr = 48:29:43:49:19:bf
-lxc.net.0.flags = up
-lxc.net.0.link = lxcbrandroid
-lxc.net.0.ipv4.address = 192.168.0.2/24
-
-# permission
-# deny android creating drm card 0/2
-lxc.cgroup.devices.deny                = c 226:0 m
-lxc.cgroup.devices.deny                = c 226:2 m
-lxc.cgroup.devices.deny                = c 226:3 m
-
-lxc.init.cmd=/init
-lxc.hook.pre-start = /var/lib/lxc/android/pre-start.sh
-lxc.hook.pre-mount = /var/lib/lxc/android/pre-mount.sh

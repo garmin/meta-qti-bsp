@@ -29,21 +29,43 @@
 
 echo "prepare rootfs for ivi2 using overlay..."
 
+IVI2_ROOTFS=/var/lib/lxc/ivi2/rootfs
+
 mkdir -p /data/ivi2/rootfs_upper
 mkdir -p /data/ivi2/rootfs_workdir
-mkdir -p /var/lib/lxc/ivi2/rootfs
-mount -t overlay -o lowerdir=/,upperdir=/data/ivi2/rootfs_upper,workdir=/data/ivi2/rootfs_workdir overlay /var/lib/lxc/ivi2/rootfs
+mkdir -p ${IVI2_ROOTFS}
+mount -t overlay -o lowerdir=/,upperdir=/data/ivi2/rootfs_upper,workdir=/data/ivi2/rootfs_workdir overlay ${IVI2_ROOTFS}
 
 # remove fstab
-sed -i '/^PARTLABEL/d' /var/lib/lxc/ivi2/rootfs/etc/fstab
-sed -i '/^\/data/d' /var/lib/lxc/ivi2/rootfs/etc/fstab
-sed -i '/^\/var/d' /var/lib/lxc/ivi2/rootfs/etc/fstab
+sed -i '/^PARTLABEL/d' ${IVI2_ROOTFS}/etc/fstab
+sed -i '/^\/data/d' ${IVI2_ROOTFS}/etc/fstab
+sed -i '/^\/var/d' ${IVI2_ROOTFS}/etc/fstab
+
+# set hostname ivi2
+echo "LV-infotainment" > ${IVI2_ROOTFS}/etc/hostname
 
 #enable weston in ivi2
-rm /var/lib/lxc/ivi2/rootfs/etc/systemd/system/weston.service
-rm /var/lib/lxc/ivi2/rootfs/lib/systemd/system/multi-user.target.wants/usb.service
-rm /var/lib/lxc/ivi2/rootfs/lib/systemd/system/multi-user.target.wants/adbd.service
+rm ${IVI2_ROOTFS}/etc/systemd/system/weston.service
+rm ${IVI2_ROOTFS}/lib/systemd/system/multi-user.target.wants/usb.service
+rm ${IVI2_ROOTFS}/lib/systemd/system/multi-user.target.wants/adbd.service
 
-mkdir -p /var/lib/lxc/ivi2/rootfs/home/root
+#disable adsprpcd
+rm ${IVI2_ROOTFS}/lib/systemd/system/adsprpcd*.service
+
+#disable connman
+FILE=${IVI2_ROOTFS}/lib/systemd/system/connman.service
+FILE_BAK=${IVI2_ROOTFS}/lib/systemd/system/connman.service.bak
+if [ -f "$FILE" ]; then
+    mv $FILE $FILE_BAK
+fi
+if [ -L ${IVI2_ROOTFS}/etc/resolv.conf ]; then
+    rm ${IVI2_ROOTFS}/etc/resolv.conf
+fi
+echo "nameserver 8.8.8.8" > ${IVI2_ROOTFS}/etc/resolv.conf
+
+# use systemd-networkd for route config
+cp /var/lib/lxc/ivi2/lxc-wired.network ${IVI2_ROOTFS}/etc/systemd/network/
+
+mkdir -p ${IVI2_ROOTFS}/home/root
 
 echo "prepare rootfs for ivi2 done"

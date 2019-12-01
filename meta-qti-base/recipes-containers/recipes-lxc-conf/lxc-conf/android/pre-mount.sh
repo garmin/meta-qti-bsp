@@ -28,35 +28,60 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 echo "prepare rootfs for android"
-mkdir -p /var/lib/lxc/android/rootfs
-mkdir -p /var/lib/lxc/android/rootfs/vendor
-mount /dev/disk/by-partlabel/system_b /var/lib/lxc/android/rootfs
-mount /dev/disk/by-partlabel/vendor_a /var/lib/lxc/android/rootfs/vendor
+
+ANDROID_ROOTFS=/var/lib/lxc/android/rootfs
+mkdir -p ${ANDROID_ROOTFS}
+
+echo "prepare mounting"
+if [ -h "/dev/disk/by-partlabel/la_userdata" ]; then
+    mount /dev/disk/by-partlabel/la_system /var/lib/lxc/android/rootfs
+    mount /dev/disk/by-partlabel/la_vendor /var/lib/lxc/android/rootfs/vendor
+    mount /dev/disk/by-partlabel/la_userdata /var/lib/lxc/android/rootfs/data
+    mount /dev/disk/by-partlabel/la_persist /var/lib/lxc/android/rootfs/mnt/vendor/persist
+else
+    # For backward compatibility, will be removed later
+    mount /dev/disk/by-partlabel/system_b ${ANDROID_ROOTFS}
+    mount /dev/disk/by-partlabel/vendor_a ${ANDROID_ROOTFS}/vendor
+    mkdir -p /var/lib/lxc/android/persist
+    mount --bind /var/lib/lxc/android/persist ${ANDROID_ROOTFS}/mnt/vendor/persist
+    mkdir -p /data/android/data/
+    mount --bind /data/android/data/ ${ANDROID_ROOTFS}/data
+fi
 
 echo "sharing the firmware/bluetooth/dsp partiton with host"
-mount --bind /firmware /var/lib/lxc/android/rootfs/vendor/firmware_mnt
-mount --bind /bluetooth /var/lib/lxc/android/rootfs/vendor/bt_firmware
-mount --bind /dsp /var/lib/lxc/android/rootfs/vendor/dsp
-mkdir -p /var/lib/lxc/android/rootfs/mnt/vendor/persist
-mkdir -p /var/lib/lxc/android/persist
-mount --bind /var/lib/lxc/android/persist /var/lib/lxc/android/rootfs/mnt/vendor/persist
-mkdir -p /data/android/data/
-mount --bind /data/android/data/ /var/lib/lxc/android/rootfs/data
-
-echo "mounting prepare persist/dsp/firmware/bt_firmware"
+mount --bind /firmware ${ANDROID_ROOTFS}/vendor/firmware_mnt
+mount --bind /bluetooth ${ANDROID_ROOTFS}/vendor/bt_firmware
+mount --bind /dsp ${ANDROID_ROOTFS}/vendor/dsp
 
 # disable usb
-FILE=/var/lib/lxc/android/rootfs/vendor/etc/init/hw/init.qcom.usb.rc
-FILE_BAK=/var/lib/lxc/android/rootfs/vendor/etc/init/hw/init.qcom.usb.rc.bak
+FILE=${ANDROID_ROOTFS}/vendor/etc/init/hw/init.qcom.usb.rc
+FILE_BAK=${ANDROID_ROOTFS}/vendor/etc/init/hw/init.qcom.usb.rc.bak
 if [ -f "$FILE" ]; then
   mv $FILE $FILE_BAK
 fi
 
+# disable adsprpcd/cdsp
+FILE=${ANDROID_ROOTFS}/vendor/etc/init/vendor.qti.adsprpc-service.rc
+if [ -f "$FILE" ]; then
+   rm $FILE
+fi
+
+# change android console
+echo "ro.boot.console=tty7" >> ${ANDROID_ROOTFS}/default.prop
+
+sed -i '/vendor.adsprpcd/,+3d'  ${ANDROID_ROOTFS}/vendor/etc/init/hw/init.target.rc
+sed -i '/vendor.cdsprpcd/,+3d'  ${ANDROID_ROOTFS}/vendor/etc/init/hw/init.target.rc
+sed -i '/boot_adsp/d'  ${ANDROID_ROOTFS}/vendor/etc/init/hw/init.qcom.rc
+sed -i '/boot_cdsp/d'  ${ANDROID_ROOTFS}/vendor/etc/init/hw/init.qcom.rc
+
+#FIXME
+sed -i 's/chmod\ 0660\ \/dev\/ttyHS0/chmod\ 0666\ \/dev\/ttyHS0/g' ${ANDROID_ROOTFS}/vendor/etc/init/hw/init.qcom.rc
+
 # remove mounting
-sed -i '/system/d' /var/lib/lxc/android/rootfs/vendor/etc/fstab.qcom
-sed -i '/userdata/d' /var/lib/lxc/android/rootfs/vendor/etc/fstab.qcom
-sed -i '/persist/d' /var/lib/lxc/android/rootfs/vendor/etc/fstab.qcom
-sed -i '/dsp/d' /var/lib/lxc/android/rootfs/vendor/etc/fstab.qcom
-sed -i '/vfat/d' /var/lib/lxc/android/rootfs/vendor/etc/fstab.qcom
+sed -i '/system/d' ${ANDROID_ROOTFS}/vendor/etc/fstab.qcom
+sed -i '/userdata/d' ${ANDROID_ROOTFS}/vendor/etc/fstab.qcom
+sed -i '/persist/d' ${ANDROID_ROOTFS}/vendor/etc/fstab.qcom
+sed -i '/dsp/d' ${ANDROID_ROOTFS}/vendor/etc/fstab.qcom
+sed -i '/vfat/d' ${ANDROID_ROOTFS}/vendor/etc/fstab.qcom
 
 echo "prepare rootfs for android done"

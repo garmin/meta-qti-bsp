@@ -26,12 +26,20 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 lxc.rootfs.path = /var/lib/lxc/ivi2/rootfs
-lxc.uts.name = armhf
+lxc.uts.name = ivi2
 lxc.arch = armhf
 lxc.cap.drop = mac_admin mac_override
 lxc.start.auto = 1
+lxc.pty.max = 64
 lxc.selinux.context = unconfined_u:unconfined_r:lxc_t:s0-s0:c0.c1023
 
+lxc.net.0.type = veth
+lxc.net.0.hwaddr = 4a:a9:45:49:79:bf
+lxc.net.0.flags = up
+lxc.net.0.link = lxcbrivi2
+lxc.net.0.ipv4.address = 192.168.2.2/24
+
+lxc.hook.pre-start = /var/lib/lxc/ivi2/pre-start.sh
 lxc.hook.pre-mount = /var/lib/lxc/ivi2/pre-mount.sh
 
 lxc.mount.entry = /dev/ion dev/ion none bind,optional,create=file
@@ -44,3 +52,7 @@ lxc.mount.entry = /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,crea
 lxc.mount.entry = /dev/input dev/input none bind,optional,create=dir
 lxc.mount.entry = /dev/video32 dev/video32 none bind,optional,create=file
 lxc.mount.entry = /dev/video33 dev/video33 none bind,optional,create=file
+lxc.mount.entry = /dev/snd/timer dev/snd/timer none bind,optional,create=file
+lxc.mount.entry = /dev/snd/controlC0 dev/snd/controlC0 none bind,optional,create=file
+lxc.mount.entry = /dev/snd/pcmC0D4c dev/snd/pcmC0D4c none bind,optional,create=file
+lxc.mount.entry = /dev/snd/pcmC0D4p dev/snd/pcmC0D4p none bind,optional,create=file
