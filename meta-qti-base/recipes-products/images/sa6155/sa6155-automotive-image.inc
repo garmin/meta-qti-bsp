@@ -10,4 +10,6 @@ IMAGE_INSTALL += " \
     packagegroup-qti-multimedia\
     packagegroup-qti-security \
     packagegroup-qti-vnw \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'wlan', 'packagegroup-qti-wlan', '', d)} \
+    packagegroup-qti-tools \
     "
