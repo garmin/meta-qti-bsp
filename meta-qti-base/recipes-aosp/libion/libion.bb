@@ -14,6 +14,8 @@ SRCREV = "${AUTOREV}"
 S = "${WORKDIR}/system/core/libion"
 DEPENDS += "virtual/kernel liblog"
 
+do_configure[depends] += "virtual/kernel:do_shared_workdir"
+
 EXTRA_OECONF += " --disable-static"
 EXTRA_OECONF += "${@bb.utils.contains_any('PREFERRED_VERSION_linux-msm', '3.18 4.4 4.9', '--with-legacyion', '', d)}"
 EXTRA_OECONF += "--with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
