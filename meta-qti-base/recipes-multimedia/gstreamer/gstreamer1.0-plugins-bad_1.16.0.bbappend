@@ -23,6 +23,7 @@ PACKAGECONFIG = " \
     ${@bb.utils.contains('DISTRO_FEATURES', 'wayland', 'wayland', '', d)} \
     orc \
     hls \
+    dash \
     "
 PACKAGECONFIG_GL = "${@bb.utils.contains('DISTRO_FEATURES', 'opengl', 'gles2 egl', '', d)}"
 
@@ -62,7 +63,7 @@ EXTRA_OECONF = " \
                 --disable-compositor \
                 --disable-curl \
                 --disable-daala \
-                --disable-dash \
+                --enable-dash \
                 --disable-dataurisrc \
                 --disable-dc1394 \
                 --disable-dccp \
