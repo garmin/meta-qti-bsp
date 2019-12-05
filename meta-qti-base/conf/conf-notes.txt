@@ -4,16 +4,21 @@
 Ensure MACHINE, DISTRO & VARIANT are appropriately set before proceeding.
 Supported combinations are listed below.
 
-      +---------------+----------------+------------------+
-      | MACHINE       | DISTRO         |  VARIANT         |
-      +---------------+----------------+------------------+
-      |sa8155         | automotive     | debug perf       |
-      |sa8155qdrive   |                |                  |
-      |sa8155ivi      |                |                  |
-      |sa8195         |                |                  |
-      +---------------+----------------+------------------+
-      |qtiquingvm     | automotive     | debug perf       |
-      +---------------+----------------+------------------+
+      +---------------+-----------------+------------------+
+      | MACHINE       | DISTRO          |  VARIANT         |
+      +---------------+-----------------+------------------+
+      |sa8155         | auto            | debug perf       |
+      |sa6155         |                 |                  |
+      |sa8195         |                 |                  |
+      +---------------+-----------------+------------------+
+      |sa8155agl      | auto-agl        | debug perf       |
+      |sa6155agl      |                 |                  |
+      |sa8195agl      |                 |                  |
+      +---------------+-----------------+------------------+
+      |qtiquingvm     | auto-gvm-agl    | debug perf       |
+      +---------------+-----------------+------------------+
+      |sa8155qdrive   | auto-qdrive-agl | debug perf       |
+      +---------------+-----------------+------------------+
 
 Once ready run 'bitbake <pkg-name>' to build required package or
 run 'bitbake machine-image' to build complete image.
