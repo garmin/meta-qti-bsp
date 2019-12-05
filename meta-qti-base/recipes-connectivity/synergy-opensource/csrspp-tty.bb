@@ -15,8 +15,8 @@ FILES_${PN}     += "lib/modules/${KERNEL_VERSION}/extra/${_MODNAME}.ko"
 PROVIDES_NAME   = "kernel-module-${_MODNAME}"
 RPROVIDES_${PN} += "${PROVIDES_NAME}-${KERNEL_VERSION}"
 
-SRC_URI = "${PATH_TO_REPO}/synergy/synergy-opensource/.git;protocol=${PROTO};destsuffix=synergy/synergy-opensource;nobranch=1"
+SRC_URI = "${PATH_TO_REPO}/synergy/synergy-opensource/.git;protocol=${PROTO};destsuffix=synergy/synergy-opensource;usehead=1"
 
-SRCREV = "${@base_get_metadata_git_revision('${SRC_DIR_ROOT}/synergy/synergy-opensource', d)}"
+SRCREV = "${AUTOREV}"
 
 S = "${WORKDIR}/synergy/synergy-opensource/platform/msm/spp"
