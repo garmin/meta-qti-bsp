@@ -1,6 +1,6 @@
 inherit core-image
 
-include ${BASEMACHINE}/${BASEMACHINE}-automotive-image.inc
+include automotive-image.inc
 
 IMAGE_LINGUAS = ""
 
