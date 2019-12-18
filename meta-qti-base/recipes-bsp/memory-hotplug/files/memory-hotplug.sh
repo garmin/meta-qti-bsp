@@ -27,29 +27,14 @@
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 cd /sys/devices/system/memory/
-echo 0xc0000000 > probe
-echo online > memory6/state
-echo 0xe0000000 > probe
-echo online > memory7/state
-echo 0x100000000 > probe
-echo online > memory8/state
-echo 0x120000000 > probe
-echo online > memory9/state
-echo 0x140000000 > probe
-echo online > memory10/state
-echo 0x160000000 > probe
-echo online > memory11/state
-echo 0x180000000 > probe
-echo online > memory12/state
-echo 0x1a0000000 > probe
-echo online > memory13/state
-echo 0x1c0000000 > probe
-echo online > memory14/state
-echo 0x1e0000000 > probe
-echo online > memory15/state
-echo 0x200000000 > probe
-echo online > memory16/state
-echo 0x220000000 > probe
-echo online > memory17/state
-echo 0x240000000 > probe
-echo online > memory18/state
+n=1
+addr=`cat aligned_blocks_addr | cut -d ',' -f $n`
+num=`cat aligned_blocks_num | cut -d ',' -f $n`
+while [ -n "$addr" ]
+do
+echo $addr > probe
+echo online > memory$num/state
+let n++
+addr=`cat aligned_blocks_addr | cut -d ',' -f $n`
+num=`cat aligned_blocks_num | cut -d ',' -f $n`
+done
