@@ -28,32 +28,31 @@
 
 python __anonymous(){
     import re
-#    bb.warn("SRC_URI=%s******" % d.getVar('SRC_URI'))
+
     d.prependVar("FILESPATH", "${SRC_DIR_ROOT}/:")
-    if (d.getVar('SRC_URI')) != "" :
-        src_uri = ((d.getVar('SRC_URI')).strip() or '').split(' ')
-        new_uri = ""
-        num = 0
 
-        pattern = re.compile(r'protocol=file')
-        first_url = src_uri[0]
-        for url in src_uri:
-            if pattern.search(url):
-                num = num + 1
+    pre_pathname = d.getVar('PATH_TO_REPO')
+    src_uri_list = d.getVar('SRC_URI').split(" ")
+    new_src_uri_list = []
+    need_change = False
+    for srcuri in src_uri_list:
+        if (srcuri.find(pre_pathname) < 0) and (srcuri.find("protocol=file") < 0):
+            new_src_uri_list.append(srcuri)
+            continue
+        new_srcuri = srcuri
+        try:
+            new_srcuri = "file://%s" % re.findall(r"^(.+?);", srcuri.strip())[0].replace(pre_pathname+"/","").replace(".git","")
+            need_change = True
+        except:
+            bb.warn("[qfile debug] Change SRC_URI failed")
+        new_src_uri_list.append(new_srcuri)
 
-        if pattern.search(first_url):
-            file_path = re.findall(r"destsuffix=(.+?);", first_url)
-#            bb.note("file_path=%s******" % file_path)
-            if file_path != []:   
-                src_uri[0] = "file://" + file_path[0]
-
-        for p in src_uri:
-            new_uri = new_uri + ' ' + p
-
-        if num == 1:
-            d.setVar("SRCREV", '')
- 
-        d.setVar("SRC_URI", new_uri)   
+    if need_change:
+        new_src_uri = " ".join(new_src_uri_list)
+        d.setVar("SRC_URI", new_src_uri)
+        d.setVar("SRCREV", '')
 }
+
+
 
 
