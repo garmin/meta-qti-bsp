@@ -32,12 +32,13 @@ python __anonymous(){
     d.prependVar("FILESPATH", "${SRC_DIR_ROOT}/:")
 
     pre_pathname = d.getVar('PATH_TO_REPO')
-    src_uri_list = d.getVar('SRC_URI').split(" ")
+    src_uri_list = d.getVar('SRC_URI').replace("\t"," ").split(" ")
     new_src_uri_list = []
     need_change = False
     for srcuri in src_uri_list:
         if (srcuri.find(pre_pathname) < 0) and (srcuri.find("protocol=file") < 0):
-            new_src_uri_list.append(srcuri)
+            if srcuri.strip() != "":
+                new_src_uri_list.append(srcuri)
             continue
         new_srcuri = srcuri
         try:
