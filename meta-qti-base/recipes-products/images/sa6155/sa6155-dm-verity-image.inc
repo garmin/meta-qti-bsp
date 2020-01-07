@@ -59,7 +59,7 @@ python do_generate_verity_conf(){
     fp_verity = open('%s/dm-verity/verity.conf'%(DEPLOY_DIR_IMAGE), 'w+')
     lines=fp.read()
     hashBlock  = str(int(dataBlocks) +1)
-    verity_parameters = "dmname=system" + " version=1" + " data_device=/dev/sda6" + " hash_device=/dev/sda6" + " data_block_size=" + dataBlockSize + " hash_block_size=" + hashBlockSize + " number_of_data_blocks=" +dataBlocks + " hash_start_block=" + hashBlock + " algorithm=" + algorithm + " digest=" + hash + " salt=" + salt +" opt=restart_on_corruption"
+    verity_parameters = "dmname=system" + " version=1" + " data_device=/dev/mmcblk0p13" + " hash_device=/dev/mmcblk0p13" + " data_block_size=" + dataBlockSize + " hash_block_size=" + hashBlockSize + " number_of_data_blocks=" +dataBlocks + " hash_start_block=" + hashBlock + " algorithm=" + algorithm + " digest=" + hash + " salt=" + salt +" opt=restart_on_corruption"
     cmdline_parameters=re.search("dmname.+restart_on_corruption", lines).group(0)
     if(cmdline_parameters):
         relines=lines.replace(cmdline_parameters,verity_parameters)
