@@ -1,6 +1,7 @@
 FILESEXTRAPATHS_prepend := "${THISDIR}/${PN}:"
 SRC_URI += " file://0001-systemd-add-slotselect-support-in-fstab.patch "
-# SRC_URI += " file://0033-systemd-Make-root-s-home-directory-configurable-2.patch "
+#SRC_URI += " file://0033-systemd-Make-root-s-home-directory-configurable-2.patch "
+SRC_URI += " ${@bb.utils.contains('DISTRO_FEATURES', 'lxc', ' file://0001-systemd-skip-smack-copy-issue-in-systemd.patch ', '', d)}"
 
 
 # Remove backlight ldconfig
@@ -31,4 +32,15 @@ do_install_append () {
 
     # Remove orignal 60-persistent-v4l.rules which is not applicable for QTI video
     rm ${D}/lib/udev/rules.d/60-persistent-v4l.rules
+}
+
+# disable weston in host for multi-drm support
+pkg_postinst_${PN} () {
+  if ${@bb.utils.contains('DISTRO_FEATURES','lxc','true','false',d)}; then
+    if [ -n "$D" ]; then
+      OPTS="--root=$D"
+    fi
+    systemctl $OPTS mask weston.service
+    systemctl $OPTS mask servicemanager.service
+  fi
 }

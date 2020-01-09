@@ -1,3 +1,5 @@
+#! /bin/sh
+
 # Copyright (c) 2019, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,36 +26,11 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
 
-python __anonymous(){
-    import re
-
-    d.prependVar("FILESPATH", "${SRC_DIR_ROOT}/:")
-
-    pre_pathname = d.getVar('PATH_TO_REPO')
-    src_uri_list = d.getVar('SRC_URI').replace("\t"," ").split(" ")
-    new_src_uri_list = []
-    need_change = False
-    for srcuri in src_uri_list:
-        if (srcuri.find(pre_pathname) < 0) and (srcuri.find("protocol=file") < 0):
-            if srcuri.strip() != "":
-                new_src_uri_list.append(srcuri)
-            continue
-        new_srcuri = srcuri
-        try:
-            new_srcuri = "file://%s" % re.findall(r"^(.+?);", srcuri.strip())[0].replace(pre_pathname+"/","").replace(".git","")
-            need_change = True
-        except:
-            bb.warn("[qfile debug] Change SRC_URI failed")
-        new_src_uri_list.append(new_srcuri)
-
-    if need_change:
-        new_src_uri = " ".join(new_src_uri_list)
-        d.setVar("SRC_URI", new_src_uri)
-        d.setVar("SRCREV", '')
-}
-
-
-
+echo "prepare setup bridge in host side"
+brctl addbr lxcbrandroid
+ifconfig lxcbrandroid 192.168.0.1 up
+echo "setup the routing"
+sysctl -w net.ipv4.conf.all.forwarding=1
+iptables -t nat -A POSTROUTING -s 192.168.0.0/24 -o eth0 -j MASQUERADE
 

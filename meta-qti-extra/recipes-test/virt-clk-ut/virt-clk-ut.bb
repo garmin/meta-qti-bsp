@@ -1,6 +1,6 @@
 SUMMARY = "Unit test for virtio clock driver"
-LICENSE = "GPLv2"
-LIC_FILES_CHKSUM = "file://GPL-2.0;md5=12f884d2ae1ff87c09e5b7ccc2c4ca7e"
+LICENSE = "GPL-2.0"
+LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/GPL-2.0;md5=801f80980d171dd6425610833a22dbe6"
 
 inherit module module-sign
 

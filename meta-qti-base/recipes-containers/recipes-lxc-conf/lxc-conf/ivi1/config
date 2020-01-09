@@ -24,36 +24,35 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
 
-python __anonymous(){
-    import re
+lxc.rootfs.path = /var/lib/lxc/ivi1/rootfs
+lxc.uts.name = ivi1
+lxc.arch = armhf
+lxc.cap.drop = mac_admin mac_override
+lxc.start.auto = 1
+lxc.pty.max = 64
+lxc.selinux.context = unconfined_u:unconfined_r:lxc_t:s0-s0:c0.c1023
 
-    d.prependVar("FILESPATH", "${SRC_DIR_ROOT}/:")
+lxc.net.0.type = veth
+lxc.net.0.hwaddr = 4a:49:43:49:79:bf
+lxc.net.0.flags = up
+lxc.net.0.link = lxcbrivi1
+lxc.net.0.ipv4.address = 192.168.1.2/24
 
-    pre_pathname = d.getVar('PATH_TO_REPO')
-    src_uri_list = d.getVar('SRC_URI').replace("\t"," ").split(" ")
-    new_src_uri_list = []
-    need_change = False
-    for srcuri in src_uri_list:
-        if (srcuri.find(pre_pathname) < 0) and (srcuri.find("protocol=file") < 0):
-            if srcuri.strip() != "":
-                new_src_uri_list.append(srcuri)
-            continue
-        new_srcuri = srcuri
-        try:
-            new_srcuri = "file://%s" % re.findall(r"^(.+?);", srcuri.strip())[0].replace(pre_pathname+"/","").replace(".git","")
-            need_change = True
-        except:
-            bb.warn("[qfile debug] Change SRC_URI failed")
-        new_src_uri_list.append(new_srcuri)
+lxc.hook.pre-start = /var/lib/lxc/ivi1/pre-start.sh
+lxc.hook.pre-mount = /var/lib/lxc/ivi1/pre-mount.sh
 
-    if need_change:
-        new_src_uri = " ".join(new_src_uri_list)
-        d.setVar("SRC_URI", new_src_uri)
-        d.setVar("SRCREV", '')
-}
-
-
-
-
+lxc.mount.entry = /dev/ion dev/ion none bind,optional,create=file
+lxc.mount.entry = /dev/tty10 dev/tty0 none bind,optional,create=file
+lxc.mount.entry = /dev/tty11 dev/tty1 none bind,optional,create=file
+lxc.mount.entry = /dev/tty12 dev/tty2 none bind,optional,create=file
+lxc.mount.entry = /dev/kgsl-3d0 dev/kgsl-3d0 none bind,optional,create=file
+lxc.mount.entry = /dev/dri/card2 dev/dri/card0 none bind,optional,create=file
+lxc.mount.entry = /dev/dri/renderD128 dev/dri/renderD128 none bind,optional,create=file
+lxc.mount.entry = /dev/input dev/input none bind,optional,create=dir
+lxc.mount.entry = /dev/video32 dev/video32 none bind,optional,create=file
+lxc.mount.entry = /dev/video33 dev/video33 none bind,optional,create=file
+lxc.mount.entry = /dev/snd/timer dev/snd/timer none bind,optional,create=file
+lxc.mount.entry = /dev/snd/controlC0 dev/snd/controlC0 none bind,optional,create=file
+lxc.mount.entry = /dev/snd/pcmC0D1c dev/snd/pcmC0D1c none bind,optional,create=file
+lxc.mount.entry = /dev/snd/pcmC0D1p dev/snd/pcmC0D1p none bind,optional,create=file
