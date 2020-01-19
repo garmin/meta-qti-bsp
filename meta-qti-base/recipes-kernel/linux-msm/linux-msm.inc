@@ -20,7 +20,6 @@ LDFLAGS_aarch64 = "-O1 --hash-style=gnu --as-needed"
 DEPENDS_append_aarch64 = " libgcc"
 KERNEL_CC_append_aarch64 = " ${TOOLCHAIN_OPTIONS}"
 KERNEL_LD_append_aarch64 = " ${TOOLCHAIN_OPTIONS}"
-KERNEL_CC_append_aarch64 = " -DCONFIG_PLATFORM_AUTO=1"
 
 KERNEL_PRIORITY           = "9001"
 # Add V=1 to KERNEL_EXTRA_ARGS for verbose
