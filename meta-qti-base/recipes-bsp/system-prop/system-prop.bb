@@ -4,9 +4,9 @@ PR = "r0"
 
 FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
 
-SRC_URI   = "file://${BASEMACHINE}/system.prop"
-SRC_URI  += "file://persist-prop.sh"
-SRC_URI  += "file://persist-prop.service"
+SRC_URI = "file://persist-prop.sh"
+SRC_URI_append = " file://persist-prop.service"
+SRC_URI_append_qtiquingvm = " file://system.prop"
 
 DESCRIPTION = "Script to populate system properties"
 
@@ -19,7 +19,11 @@ SYSTEMD_SERVICE_${PN} = "${@bb.utils.contains('DISTRO_FEATURES','systemd','persi
 
 do_compile() {
     # Remove empty lines and lines starting with '#'
-    sed -e 's/#.*$//' -e '/^$/d' ${WORKDIR}/${BASEMACHINE}/system.prop >> ${S}/build.prop
+    if [ -e ${WORKDIR}/system.prop ]; then
+        sed -e 's/#.*$//' -e '/^$/d' ${WORKDIR}/system.prop >> ${S}/build.prop
+    else
+        touch ${S}/build.prop
+    fi
 }
 
 do_install() {
