@@ -1,0 +1,28 @@
+From 267fb37c0114523cd6dbbd198149b7bf5c592dc4 Mon Sep 17 00:00:00 2001
+From: Lei wang <leiwan@codeaurora.org>
+Date: Tue, 12 Mar 2019 15:44:41 +0800
+Subject: [PATCH] systemd: skip smack copy failed
+
+skip smack copy failed
+
+Signed-off-by: Lei wang <leiwan@codeaurora.org>
+---
+ src/core/mount-setup.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/core/mount-setup.c b/src/core/mount-setup.c
+index 7295efb..1e32528 100644
+--- a/src/core/mount-setup.c
++++ b/src/core/mount-setup.c
+@@ -317,7 +317,7 @@ int mount_cgroup_controllers(char ***join_controllers) {
+                                                 return log_oom();
+                                         r = mac_smack_copy(t, src);
+                                         if (r < 0 && r != -EOPNOTSUPP)
+-                                                return log_error_errno(r, "Failed to copy smack label from %s to %s: %m", src, t);
++                                                log_error_errno(r, "Failed to copy smack label from %s to %s: %m", src, t);
+ #endif
+                                 } else if (errno != EEXIST)
+                                         return log_error_errno(errno, "Failed to create symlink %s: %m", t);
+-- 
+1.9.1
+

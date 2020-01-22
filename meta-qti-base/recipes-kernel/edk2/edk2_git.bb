@@ -16,6 +16,10 @@ SRC_URI   =  "${PATH_TO_REPO}/bootable/bootloader/edk2/.git;protocol=${PROTO};de
 S         =  "${WORKDIR}/bootable/bootloader/edk2"
 SRCREV = "${AUTOREV}"
 
+# FIXME for keymaster functionality
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'lxc', ' file://0001-avb-bring-up-keymaster-for-LV.patch', '', d)}"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'lxc', ' file://0002-avb-send-dummy-ROT-and-boot-state-to-keymaster-from-.patch ', '', d)}"
+
 INSANE_SKIP_${PN} = "arch"
 
 VBLE = "${@bb.utils.contains('DISTRO_FEATURES', 'vble','1', '0', d)}"

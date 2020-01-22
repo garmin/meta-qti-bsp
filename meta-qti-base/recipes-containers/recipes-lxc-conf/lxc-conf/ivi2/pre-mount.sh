@@ -1,3 +1,5 @@
+#! /bin/sh
+
 # Copyright (c) 2019, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -24,36 +26,46 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
 
-python __anonymous(){
-    import re
+echo "prepare rootfs for ivi2 using overlay..."
 
-    d.prependVar("FILESPATH", "${SRC_DIR_ROOT}/:")
+IVI2_ROOTFS=/var/lib/lxc/ivi2/rootfs
 
-    pre_pathname = d.getVar('PATH_TO_REPO')
-    src_uri_list = d.getVar('SRC_URI').replace("\t"," ").split(" ")
-    new_src_uri_list = []
-    need_change = False
-    for srcuri in src_uri_list:
-        if (srcuri.find(pre_pathname) < 0) and (srcuri.find("protocol=file") < 0):
-            if srcuri.strip() != "":
-                new_src_uri_list.append(srcuri)
-            continue
-        new_srcuri = srcuri
-        try:
-            new_srcuri = "file://%s" % re.findall(r"^(.+?);", srcuri.strip())[0].replace(pre_pathname+"/","").replace(".git","")
-            need_change = True
-        except:
-            bb.warn("[qfile debug] Change SRC_URI failed")
-        new_src_uri_list.append(new_srcuri)
+mkdir -p /data/ivi2/rootfs_upper
+mkdir -p /data/ivi2/rootfs_workdir
+mkdir -p ${IVI2_ROOTFS}
+mount -t overlay -o lowerdir=/,upperdir=/data/ivi2/rootfs_upper,workdir=/data/ivi2/rootfs_workdir overlay ${IVI2_ROOTFS}
 
-    if need_change:
-        new_src_uri = " ".join(new_src_uri_list)
-        d.setVar("SRC_URI", new_src_uri)
-        d.setVar("SRCREV", '')
-}
+# remove fstab
+sed -i '/^PARTLABEL/d' ${IVI2_ROOTFS}/etc/fstab
+sed -i '/^\/data/d' ${IVI2_ROOTFS}/etc/fstab
+sed -i '/^\/var/d' ${IVI2_ROOTFS}/etc/fstab
 
+# set hostname ivi2
+echo "LV-infotainment" > ${IVI2_ROOTFS}/etc/hostname
 
+#enable weston in ivi2
+rm ${IVI2_ROOTFS}/etc/systemd/system/weston.service
+rm ${IVI2_ROOTFS}/lib/systemd/system/multi-user.target.wants/usb.service
+rm ${IVI2_ROOTFS}/lib/systemd/system/multi-user.target.wants/adbd.service
 
+#disable adsprpcd
+rm ${IVI2_ROOTFS}/lib/systemd/system/adsprpcd*.service
 
+#disable connman
+FILE=${IVI2_ROOTFS}/lib/systemd/system/connman.service
+FILE_BAK=${IVI2_ROOTFS}/lib/systemd/system/connman.service.bak
+if [ -f "$FILE" ]; then
+    mv $FILE $FILE_BAK
+fi
+if [ -L ${IVI2_ROOTFS}/etc/resolv.conf ]; then
+    rm ${IVI2_ROOTFS}/etc/resolv.conf
+fi
+echo "nameserver 8.8.8.8" > ${IVI2_ROOTFS}/etc/resolv.conf
+
+# use systemd-networkd for route config
+cp /var/lib/lxc/ivi2/lxc-wired.network ${IVI2_ROOTFS}/etc/systemd/network/
+
+mkdir -p ${IVI2_ROOTFS}/home/root
+
+echo "prepare rootfs for ivi2 done"

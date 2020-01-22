@@ -24,36 +24,27 @@
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-#
 
-python __anonymous(){
-    import re
+lxc.rootfs.path = /var/lib/lxc/android/rootfs
+lxc.uts.name = armhf
+lxc.arch = armhf
+lxc.cap.drop = mac_admin mac_override
+lxc.start.auto = 1
+lxc.pty.max = 64
+lxc.selinux.context = unconfined_u:unconfined_r:lxc_t:s0-s0:c0.c1023
 
-    d.prependVar("FILESPATH", "${SRC_DIR_ROOT}/:")
+lxc.net.0.type = veth
+lxc.net.0.hwaddr = 48:29:43:49:19:bf
+lxc.net.0.flags = up
+lxc.net.0.link = lxcbrandroid
+lxc.net.0.ipv4.address = 192.168.0.2/24
 
-    pre_pathname = d.getVar('PATH_TO_REPO')
-    src_uri_list = d.getVar('SRC_URI').replace("\t"," ").split(" ")
-    new_src_uri_list = []
-    need_change = False
-    for srcuri in src_uri_list:
-        if (srcuri.find(pre_pathname) < 0) and (srcuri.find("protocol=file") < 0):
-            if srcuri.strip() != "":
-                new_src_uri_list.append(srcuri)
-            continue
-        new_srcuri = srcuri
-        try:
-            new_srcuri = "file://%s" % re.findall(r"^(.+?);", srcuri.strip())[0].replace(pre_pathname+"/","").replace(".git","")
-            need_change = True
-        except:
-            bb.warn("[qfile debug] Change SRC_URI failed")
-        new_src_uri_list.append(new_srcuri)
+# permission
+# deny android creating drm card 0/2
+lxc.cgroup.devices.deny                = c 226:0 m
+lxc.cgroup.devices.deny                = c 226:2 m
+lxc.cgroup.devices.deny                = c 226:3 m
 
-    if need_change:
-        new_src_uri = " ".join(new_src_uri_list)
-        d.setVar("SRC_URI", new_src_uri)
-        d.setVar("SRCREV", '')
-}
-
-
-
-
+lxc.init.cmd=/init
+lxc.hook.pre-start = /var/lib/lxc/android/pre-start.sh
+lxc.hook.pre-mount = /var/lib/lxc/android/pre-mount.sh

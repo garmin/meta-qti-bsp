@@ -4,7 +4,8 @@ DESCRIPTION = "Qualcomm Atheros WLAN CLD3.0 low latency driver"
 LICENSE = "ISC"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/${LICENSE};md5=f3b90e78ea0cffb20bf5cca7947a896d"
 
-_MODNAME = "qcn7605"
+_MODNAME = "qca6595"
+FW_PATH_NAME = "qcn7605"
 FILES_${PN}     += "lib/firmware/wlan/*"
 FILES_${PN}     += "lib/firmware/*"
 FILES_${PN}     += "lib/modules/${KERNEL_VERSION}/extra/${_MODNAME}.ko"
@@ -40,6 +41,7 @@ EXTRA_OEMAKE += "CONFIG_CLD_HL_SDIO_CORE=n CONFIG_CNSS_SDIO=n"
 EXTRA_OEMAKE += "CONFIG_QCA_CLD_WLAN_PROFILE=genoa.pci.debug"
 EXTRA_OEMAKE += "DYNAMIC_SINGLE_CHIP=${_MODNAME}"
 EXTRA_OEMAKE += "MODNAME=${_MODNAME}"
+EXTRA_OEMAKE_append_sa6155 = " WLAN_CFG_OVERRIDE="CONFIG_IPA_OFFLOAD=y""
 
 LDFLAGS_aarch64_automotive = "-O1 --hash-style=gnu --as-needed"
 
@@ -91,20 +93,20 @@ do_install_append_automotive() {
     install -D -m 0755 ${WORKDIR}/init.qti.wlan_on.sh ${D}${bindir}/init.qti.wlan_on.sh
     install -D -m 0755 ${WORKDIR}/init.qti.wlan_off.sh ${D}${bindir}/init.qti.wlan_off.sh
 
-    install -d ${D}/lib/firmware/${_MODNAME}/
-    ln -sf /firmware/image/${_MODNAME}/amss.bin ${D}/lib/firmware/${_MODNAME}/
+    install -d ${D}/lib/firmware/${FW_PATH_NAME}/
+    ln -sf /firmware/image/${FW_PATH_NAME}/amss.bin ${D}/lib/firmware/${FW_PATH_NAME}/
 
     #For GNA04.1 boardid = 0xff
-    ln -sf /firmware/image/${_MODNAME}/bdwlan03.b01 ${D}/lib/firmware/${_MODNAME}/
-    mv ${D}/lib/firmware/${_MODNAME}/bdwlan03.b01 ${D}/lib/firmware/${_MODNAME}/bdwlan.bin
+    ln -sf /firmware/image/${FW_PATH_NAME}/bdwlan03.b01 ${D}/lib/firmware/${FW_PATH_NAME}/
+    mv ${D}/lib/firmware/${FW_PATH_NAME}/bdwlan03.b01 ${D}/lib/firmware/${FW_PATH_NAME}/bdwlan.bin
     #For GNA04.1 boardid = 0x301
-    ln -sf /firmware/image/${_MODNAME}/bdwlan03.b01 ${D}/lib/firmware/${_MODNAME}/
-    mv ${D}/lib/firmware/${_MODNAME}/bdwlan03.b01 ${D}/lib/firmware/${_MODNAME}/bdwlan.b0301
+    ln -sf /firmware/image/${FW_PATH_NAME}/bdwlan03.b01 ${D}/lib/firmware/${FW_PATH_NAME}/
+    mv ${D}/lib/firmware/${FW_PATH_NAME}/bdwlan03.b01 ${D}/lib/firmware/${FW_PATH_NAME}/bdwlan.b0301
     #For GNA04.1 boardid = 0x302
-    ln -sf /firmware/image/${_MODNAME}/bdwlan02.b03 ${D}/lib/firmware/${_MODNAME}/
-    mv ${D}/lib/firmware/${_MODNAME}/bdwlan02.b03 ${D}/lib/firmware/${_MODNAME}/bdwlan03.b02
+    ln -sf /firmware/image/${FW_PATH_NAME}/bdwlan02.b03 ${D}/lib/firmware/${FW_PATH_NAME}/
+    mv ${D}/lib/firmware/${FW_PATH_NAME}/bdwlan02.b03 ${D}/lib/firmware/${FW_PATH_NAME}/bdwlan03.b02
     #For GNA04.1 boardid = 0x203
-    ln -sf /firmware/image/${_MODNAME}/bdwlan02.b03 ${D}/lib/firmware/${_MODNAME}/
+    ln -sf /firmware/image/${FW_PATH_NAME}/bdwlan02.b03 ${D}/lib/firmware/${FW_PATH_NAME}/
 
     # Install systemd service file
     if ${@bb.utils.contains('DISTRO_FEATURES','systemd','true','false',d)}; then
