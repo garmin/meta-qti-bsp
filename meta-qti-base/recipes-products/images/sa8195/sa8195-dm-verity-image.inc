@@ -27,7 +27,7 @@
 
 # specific steps to dm-verity image
 
-python do_generate_verity_dts(){
+python do_generate_verity_conf(){
     import re,os
     reDataBlocks = re.compile(r'^Data blocks:\s+(\w+)$')
     reDataBlockSize = re.compile(r'^Data block size:\s+(\w+)$')
@@ -51,30 +51,23 @@ python do_generate_verity_dts(){
             salt = reSalt.search(text).groups()[0]
         if(reHash.search(text)):
             hash = reHash.search(text).groups()[0]
-
     fp.close()
-    fp = open('%s/dm-verity/dm-verity-boot.dtsi'%(DEPLOY_DIR_IMAGE),'w')
-    fp.write('dm_verity {\n')
-    fp.write('\tdmname="system";\n')
-    fp.write('\tversion="1";\n')
-    fp.write('\tdata_device="%s";\n'%(ROOT_DEVICE))
-    fp.write('\thash_device="%s";\n'%(ROOT_DEVICE))
-    fp.write('\tdata_block_size="%s";\n'%(dataBlockSize))
-    fp.write('\thash_block_size="%s";\n'%(hashBlockSize))
-    fp.write('\tnumber_of_data_blocks="%s";\n'%(dataBlocks))
-    fp.write('\thash_start_block="%s";\n'%(int(dataBlocks)+1))
-    fp.write('\talgorithm="%s";\n'%(algorithm))
-    fp.write('\t// root hash: 64 bytes long\n')
-    fp.write('\tdigest="%s";\n'%(hash))
-    fp.write('\tsalt="%s";\n'%(salt))
-    fp.write('\t// restart_on_corruption ignore_corruption ignore_zero_blocks\n')
-    fp.write('\topt="restart_on_corruption";\n')
-    fp.write('};\n')
+
+    SRC_DIR_ROOT = d.getVar('SRC_DIR_ROOT', True)
+    BASEMACHINE = d.getVar('BASEMACHINE', True)
+    fp = open('%s/meta-qti-bsp/meta-qti-base/conf/machine/sa8195.conf'%(SRC_DIR_ROOT))
+    fp_verity = open('%s/dm-verity/verity.conf'%(DEPLOY_DIR_IMAGE), 'w+')
+    lines=fp.read()
+    hashBlock  = str(int(dataBlocks) +1)
+    verity_parameters = "dmname=system" + " version=1" + " data_device=/dev/sda6" + " hash_device=/dev/sda6" + " data_block_size=" + dataBlockSize + " hash_block_size=" + hashBlockSize + " number_of_data_blocks=" +dataBlocks + " hash_start_block=" + hashBlock + " algorithm=" + algorithm + " digest=" + hash + " salt=" + salt +" opt=restart_on_corruption"
+    cmdline_parameters=re.search("dmname.+restart_on_corruption", lines).group(0)
+    if(cmdline_parameters):
+        relines=lines.replace(cmdline_parameters,verity_parameters)
+    fp_verity.write(relines)
+    fp_verity.close()
     fp.close()
 }
 
-do_rebuild_dtb(){
-    KERNEL_BUILD=${TMPDIR}/work-shared/${BASEMACHINE}/kernel-build-artifacts
-    KERNEL_SOURCE=${TMPDIR}/work-shared/${BASEMACHINE}/kernel-source
-    cp ${DEPLOY_DIR_IMAGE}/dm-verity/dm-verity-boot.dtsi ${KERNEL_SOURCE}/arch/arm64/boot/dts/qcom
+do_rebuild_verity_cmdline(){
+    cp ${DEPLOY_DIR_IMAGE}/dm-verity/verity.conf ${SRC_DIR_ROOT}/meta-qti-bsp/meta-qti-base/conf/machine/${BASEMACHINE}.conf
 }

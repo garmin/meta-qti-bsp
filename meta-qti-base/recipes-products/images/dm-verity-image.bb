@@ -42,8 +42,8 @@ do_make_system_image () {
 python do_make_dm_verity_image(){
     if(d.getVar('KERNEL_ROOTDEVICE', True) == "/dev/dm-0"):
         bb.build.exec_func('do_make_system_image',d)
-        bb.build.exec_func('do_generate_verity_dts',d)
-        bb.build.exec_func('do_rebuild_dtb',d)
+        bb.build.exec_func('do_generate_verity_conf',d)
+        bb.build.exec_func('do_rebuild_verity_cmdline',d)
 }
 
 addtask do_make_dm_verity_image after do_populate_sysroot before do_build 

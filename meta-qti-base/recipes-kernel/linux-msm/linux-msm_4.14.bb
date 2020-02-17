@@ -120,15 +120,13 @@ do_configure_prepend () {
 }
 
 
-do_rebuild_dtb(){
-    KERNEL_BUILD=${TMPDIR}/work-shared/${BASEMACHINE}/kernel-build-artifacts
-    KERNEL_SOURCE=${TMPDIR}/work-shared/${BASEMACHINE}/kernel-source
-    if [ -f ${DEPLOY_DIR_IMAGE}/dm-verity/dm-verity-boot.dtsi ] && [ ${KERNEL_ROOTDEVICE} == "/dev/dm-0" ]; then
-        cp ${DEPLOY_DIR_IMAGE}/dm-verity/dm-verity-boot.dtsi ${KERNEL_SOURCE}/arch/arm64/boot/dts/qcom
+do_rebuild_verity_cmdline(){
+    if [ -f ${DEPLOY_DIR_IMAGE}/dm-verity/verity.conf ] && [ ${KERNEL_ROOTDEVICE} == "/dev/dm-0" ]; then
+        cp ${DEPLOY_DIR_IMAGE}/dm-verity/verity.conf ${SRC_DIR_ROOT}/meta-qti-bsp/meta-qti-base/conf/machine/${BASEMACHINE}.conf
     fi
 }
 
-addtask do_rebuild_dtb after do_patch before do_compile
+addtask do_rebuild_verity_cmdline after do_patch before do_compile
 
 do_shared_workdir[dirs] = "${DEPLOYDIR}"
 
