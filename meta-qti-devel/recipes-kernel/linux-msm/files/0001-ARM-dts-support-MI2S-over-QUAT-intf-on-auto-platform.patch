@@ -1,0 +1,66 @@
+From 87df7aa8f0119995bf72714fa4398ddb9b122254 Mon Sep 17 00:00:00 2001
+From: Derek Chen <chenche@codeaurora.org>
+Date: Wed, 5 Feb 2020 17:39:07 -0500
+Subject: [PATCH] ARM: dts: support MI2S over QUAT intf on auto platforms
+
+* Enable 1 bit clock delay for Long Frame Sync
+* Enable Frame Sync inversion
+* Add clock property to enable non-inverted clock on
+  QUAT interface
+* Modify lane config masks to enable playback on QUAT
+  SD0 and SD1 and capture on QUAT SD2 and SD3
+
+Change-Id: Iaf689e7043c0623ed8996671eaaa0b089dae3a05
+Suggested-by: Tahir Dawson <dawson@qti.qualcomm.com>
+Signed-off-by: Derek Chen <chenche@codeaurora.org>
+---
+ arch/arm64/boot/dts/qcom/sa8155-audio.dtsi | 18 ++++++++++--------
+ 1 file changed, 10 insertions(+), 8 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/sa8155-audio.dtsi b/arch/arm64/boot/dts/qcom/sa8155-audio.dtsi
+index b254823..4db828b 100644
+--- a/arch/arm64/boot/dts/qcom/sa8155-audio.dtsi
++++ b/arch/arm64/boot/dts/qcom/sa8155-audio.dtsi
+@@ -273,14 +273,15 @@
+ 		qcom,msm-cpudai-tdm-group-num-ports = <5>;
+ 		qcom,msm-cpudai-tdm-group-port-id = <36912 36914 36916
+ 							36918 36926>;
+-		qcom,msm-cpudai-tdm-lane-mask = /bits/ 16 <10>;
+-		qcom,msm-cpudai-tdm-clk-rate = <24576000>;
++		qcom,msm-cpudai-tdm-lane-mask = /bits/ 16 <3>;
++		qcom,msm-cpudai-tdm-clk-rate = <1536000>;
+ 		qcom,msm-cpudai-tdm-clk-internal = <1>;
+ 		qcom,msm-cpudai-tdm-sync-mode = <1>;
+ 		qcom,msm-cpudai-tdm-sync-src = <1>;
+ 		qcom,msm-cpudai-tdm-data-out = <0>;
+-		qcom,msm-cpudai-tdm-invert-sync = <0>;
+-		qcom,msm-cpudai-tdm-data-delay = <0>;
++		qcom,msm-cpudai-tdm-invert-sync = <1>;
++		qcom,msm-cpudai-tdm-data-delay = <1>;
++		qcom,msm-cpudai-tdm-clk-attribute = /bits/ 16 <4>;
+ 		pinctrl-names = "default", "sleep";
+ 		pinctrl-0 = <&quat_tdm_active &quat_tdm_din_active
+ 			     &quat_tdm_dout_active>;
+@@ -322,14 +323,15 @@
+ 		qcom,msm-cpudai-tdm-group-num-ports = <5>;
+ 		qcom,msm-cpudai-tdm-group-port-id = <36913 36915 36917
+ 							36919 36927>;
+-		qcom,msm-cpudai-tdm-lane-mask = /bits/ 16 <5>;
+-		qcom,msm-cpudai-tdm-clk-rate = <24576000>;
++		qcom,msm-cpudai-tdm-lane-mask = /bits/ 16 <12>;
++		qcom,msm-cpudai-tdm-clk-rate = <1536000>;
+ 		qcom,msm-cpudai-tdm-clk-internal = <1>;
+ 		qcom,msm-cpudai-tdm-sync-mode = <1>;
+ 		qcom,msm-cpudai-tdm-sync-src = <1>;
+ 		qcom,msm-cpudai-tdm-data-out = <0>;
+-		qcom,msm-cpudai-tdm-invert-sync = <0>;
+-		qcom,msm-cpudai-tdm-data-delay = <0>;
++		qcom,msm-cpudai-tdm-invert-sync = <1>;
++		qcom,msm-cpudai-tdm-data-delay = <1>;
++		qcom,msm-cpudai-tdm-clk-attribute = /bits/ 16 <4>;
+ 		dai_quat_tdm_tx_0: qcom,msm-dai-q6-tdm-quat-tx-0 {
+ 			compatible = "qcom,msm-dai-q6-tdm";
+ 			qcom,msm-cpudai-tdm-dev-id = <36913>;
+-- 
+2.7.4
+
