@@ -23,6 +23,15 @@ CFLAGS_append = " -fPIC"
 # So temporarily revert to default optimizations for systemd.
 FULL_OPTIMIZATION = "-O2 -fexpensive-optimizations -frename-registers -fomit-frame-pointer -ftree-vectorize"
 
+do_patch_append () {
+    bb.build.exec_func('do_fix_root_home', d)
+}
+
+do_fix_root_home () {
+    sed -i 's/\*home = "\/root"/\*home = "\/home\/root"/' ${S}/src/basic/user-util.c
+    sed -i 's/h = strdup("\/root")/h = strdup("\/home\/root")/' ${S}/src/basic/user-util.c
+}
+
 do_install_append () {
     # Use kernel rules for network iface name
     sed -i  's/^NamePolicy.*/NamePolicy=kernel/g' ${D}/lib/systemd/network/99-default.link
