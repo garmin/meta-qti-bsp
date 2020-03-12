@@ -1,4 +1,4 @@
-inherit qcommon qprebuilt
+inherit qcommon
 
 SUMMARY = "QTI Screen shot SRC Plugin for GStreamer"
 SECTION = "multimedia"
