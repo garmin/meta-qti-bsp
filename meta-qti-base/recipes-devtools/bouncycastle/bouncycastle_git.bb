@@ -75,21 +75,19 @@ check_java_version() {
     version=`echo $ver | grep -oP "^1\.[1-8]{1,}"`
 
     if [ "$valid_version" = "$version" ]; then
-        echo "Found Java $version"
-    else
-        echo "Checking if Java 1.7 is installed"
+        echo "Found Java $version. Checking if Java 1.7 is installed"
         if [ -d /usr/lib/jvm/java-1.7.0-openjdk-amd64/bin ]; then
             echo "Java 1.7 is present using it temporarily"
             export PATH=/usr/lib/jvm/java-1.7.0-openjdk-amd64/bin:$PATH
         fi
-
-        ver=`java -version 2>&1 | grep -oP "([1-1]{1,}\.)+([2-8]{1,})"`
-        version=`echo $ver | grep -oP "^1\.[1-8]{1,}"`
-        if [ "$valid_version" = "$version" ]; then
-             echo "Found valid Java $version"
+    else
+        echo "Checking if valid vesrion Java is installed"
+        if [ -d /usr/lib/jvm/java-"$version".0-openjdk-amd64/bin ]; then
+            echo "Java $version is present using it temporarily"
+            export PATH=/usr/lib/jvm/java-"$version".0-openjdk-amd64/bin:$PATH
         else
-             echo "Invalid version $version, Please install Java 1.7"
-             exit 1
+            echo "Invalid version $version, Please install Java 1.7"
+            exit 1
         fi
     fi
 }

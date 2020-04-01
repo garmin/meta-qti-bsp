@@ -42,6 +42,9 @@ EXTRA_OEMAKE = "'CLANG_BIN=${CLANG_BIN_PATH}' \
 
 EXTRA_OEMAKE_append_qcs40x = " 'DISABLE_PARALLEL_DOWNLOAD_FLASH=1'"
 
+EXTRA_OEMAKE_append = " 'TARGET_BOARD_TYPE_AUTO=1'"
+EXTRA_OEMAKE_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'dm_verity', 'VERIFIED_BOOT=1', '', d)}"
+
 do_compile () {
     export CC=${BUILD_CC}
     export CXX=${BUILD_CXX}
