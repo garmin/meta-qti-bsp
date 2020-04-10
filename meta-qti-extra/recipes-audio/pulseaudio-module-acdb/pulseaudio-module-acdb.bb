@@ -17,6 +17,7 @@ S = "${WORKDIR}/vendor/qcom/opensource/mm-audio/pulseaudio-module-acdb"
 
 AUDIO_BUILD_TARGET ?= "sa8155"
 EXTRA_OECONF += "--enable-target=${AUDIO_BUILD_TARGET}"
+EXTRA_OECONF += "--enable-acdbservice=yes"
 EXTRA_OECONF += "--with-glib \"
 
 FILES_${PN} += "${libdir}/pulse-12.2/modules/"

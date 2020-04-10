@@ -1,7 +1,7 @@
 
 include conf/machine/include/basemachine.inc
 
-SOC_FAMILY ?= "sa8155"
+SOC_FAMILY ?= ""
 include conf/machine/include/soc-family.inc
 
 include conf/machine/include/arm/arch-arm64.inc
