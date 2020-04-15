@@ -26,6 +26,7 @@ KERNEL_PRIORITY           = "9001"
 KERNEL_EXTRA_ARGS        += "O=${B}"
 KERNEL_EXTRA_ARGS_append_sa8155  += "TARGET_BOARD_TYPE=auto"
 KERNEL_EXTRA_ARGS_append_sa6155  += "TARGET_BOARD_TYPE=auto"
+KERNEL_EXTRA_ARGS_append_sa8195  += "TARGET_BOARD_TYPE=auto"
 
 SRC_URI   =  "${PATH_TO_REPO}/kernel/msm-4.14/.git;protocol=${PROTO};destsuffix=kernel/msm-4.14;usehead=1 \
               ${PATH_TO_REPO}/data-kernel/.git;protocol=${PROTO};destsuffix=data-kernel;usehead=1"
