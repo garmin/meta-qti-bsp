@@ -1,0 +1,85 @@
+From 4167e86e77989a988c50eef5d077a62bbe299f01 Mon Sep 17 00:00:00 2001
+From: Vivek Kumar <vivekuma@codeaurora.org>
+Date: Thu, 9 Apr 2020 12:08:26 +0530
+Subject: [PATCH] kernel: time: Update default jiffy clock with ARMv8 timer
+
+Update default jiffy clock with arm-timer in the SoC,
+hard-code mask, mult and shift parameters to correctly
+convert cycles to nanoseconds. These parameters are
+calulated using clocks_calc_mult_shift() and assuming
+the ARMv8 timer frequency is 19.2MHz
+
+ARM timer is started from power on reset, this change
+is for sched_clock() to return time-spent from power
+on reset as the default jiffy clock returns NULL.
+
+Change-Id: I59224871c3985398d3f5f42c82913c1c2b0550f4
+Signed-off-by: Vivek Kumar <vivekuma@codeaurora.org>
+---
+ kernel/time/sched_clock.c | 35 ++++++++++++++++++++++++++++++++---
+ 1 file changed, 32 insertions(+), 3 deletions(-)
+
+diff --git a/kernel/time/sched_clock.c b/kernel/time/sched_clock.c
+index a0d882c..c90293e 100644
+--- a/kernel/time/sched_clock.c
++++ b/kernel/time/sched_clock.c
+@@ -19,6 +19,7 @@
+ #include <linux/sched_clock.h>
+ #include <linux/seqlock.h>
+ #include <linux/bitops.h>
++#include <asm/arch_timer.h>
+ 
+ /**
+  * struct clock_read_data - data required to read from sched_clock()
+@@ -86,10 +87,28 @@ static u64 notrace jiffy_sched_clock_read(void)
+ 	return (u64)(jiffies - INITIAL_JIFFIES);
+ }
+ 
++/* Default clock is set as arch_counter_get_cntvct, this clock is started
++ * from SoC reset. The parameters mult & shift are caluclated assuming the
++ * clock frequency of ARMv8 timer is 19.2 MHz.
++ *
++ * API used for mult & shift parameter calculation
++ *
++ * clocks_calc_mult_shift (u32 *mult, u32 *shift, u32 from, u32 to, u32 maxsec)
++ * Usage:
++ * clocks_calc_mult_shift (&new_mult, &new_shift, rate, NSEC_PER_SEC, 3600);
++ *
++ * Parameter details:
++ * new_mult / new_shift will be calculated by the above API and has to be
++ * hardcoded in struct clock_data cd with
++ * rate = 19200000 , NSEC_PER_SEC = 1000000000
++ */
++
+ static struct clock_data cd ____cacheline_aligned = {
+-	.read_data[0] = { .mult = NSEC_PER_SEC / HZ,
+-			  .read_sched_clock = jiffy_sched_clock_read, },
+-	.actual_read_sched_clock = jiffy_sched_clock_read,
++	.read_data[0] = { .mult = 109226667,
++			  .shift = 21,
++			  .sched_clock_mask = CLOCKSOURCE_MASK(56),
++			  .read_sched_clock = arch_counter_get_cntvct, },
++	.actual_read_sched_clock = arch_counter_get_cntvct,
+ };
+ 
+ static inline u64 notrace cyc_to_ns(u64 cyc, u32 mult, u32 shift)
+@@ -185,6 +204,16 @@ sched_clock_register(u64 (*read)(void), int bits, unsigned long rate)
+ 	/* Calculate the mult/shift to convert counter ticks to ns. */
+ 	clocks_calc_mult_shift(&new_mult, &new_shift, rate, NSEC_PER_SEC, 3600);
+ 
++	/* Hardcode the calculated values of new_shift, new_mult, rate & read
++	 * callback in cd structure, if this clock is supposed to be used as
++	 * default sched_clock. The assumption made here is this clock is
++	 * already running and its initialization is complete.
++	 */
++
++	pr_info("new_mult = %lu, new_shift = %lu rate = %lu\n", new_mult,
++							new_shift, rate);
++
++
+ 	new_mask = CLOCKSOURCE_MASK(bits);
+ 	cd.rate = rate;
+ 
+-- 
+2.9.0.137.gcf4c2cf
+
