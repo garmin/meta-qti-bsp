@@ -1,0 +1,47 @@
+From b7cd50675eca1fc25d25b3de2c7e21d1f8b041fd Mon Sep 17 00:00:00 2001
+From: Lei wang <leiwan@codeaurora.org>
+Date: Sat, 21 Mar 2020 20:51:44 +0800
+Subject: [PATCH] lttng-module: fix lttng-module compile issue
+
+Signed-off-by: Lei wang <leiwan@codeaurora.org>
+---
+ instrumentation/events/lttng-module/mm_vmscan.h | 2 +-
+ instrumentation/events/lttng-module/net.h       | 2 ++
+ 2 files changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/instrumentation/events/lttng-module/mm_vmscan.h b/instrumentation/events/lttng-module/mm_vmscan.h
+index ef768b1..58bb1df 100644
+--- a/instrumentation/events/lttng-module/mm_vmscan.h
++++ b/instrumentation/events/lttng-module/mm_vmscan.h
+@@ -264,7 +264,7 @@ LTTNG_TRACEPOINT_EVENT_INSTANCE(mm_vmscan_direct_reclaim_end_template, mm_vmscan
+ 	TP_ARGS(nr_reclaimed)
+ )
+ 
+-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,16,0))
++#if (LINUX_VERSION_CODE >= KERNEL_VERSION(4,14,0))
+ LTTNG_TRACEPOINT_EVENT_MAP(mm_shrink_slab_start,
+ 
+ 	mm_vmscan_shrink_slab_start,
+diff --git a/instrumentation/events/lttng-module/net.h b/instrumentation/events/lttng-module/net.h
+index 2085def..7d39b86 100644
+--- a/instrumentation/events/lttng-module/net.h
++++ b/instrumentation/events/lttng-module/net.h
+@@ -543,6 +543,7 @@ LTTNG_TRACEPOINT_EVENT_INSTANCE(net_dev_template, net_dev_queue,
+ 	TP_ARGS(skb)
+ )
+ 
++/*
+ LTTNG_TRACEPOINT_EVENT_INSTANCE_MAP(net_dev_template,
+ 
+ 	netif_receive_skb,
+@@ -553,6 +554,7 @@ LTTNG_TRACEPOINT_EVENT_INSTANCE_MAP(net_dev_template,
+ 
+ 	TP_ARGS(skb)
+ )
++*/
+ 
+ LTTNG_TRACEPOINT_EVENT_INSTANCE_MAP(net_dev_template,
+ 
+-- 
+2.7.4
+
