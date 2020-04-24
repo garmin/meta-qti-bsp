@@ -1,0 +1,447 @@
+From 378c79fe9a62f509060be72ac0cb0ed9958f5470 Mon Sep 17 00:00:00 2001
+From: Jim Wang <jimwan@codeaurora.org>
+Date: Thu, 5 Mar 2020 12:52:38 -0500
+Subject: [PATCH] ARM: dts: msm: DSI->CSI passthrough test for SA8155P ADP-Air
+ board
+
+Configuration for the DSI->CSI direct passthrough on the SA8155P
+ADP-Air board, the DSI transmission side. The video output daughter
+board need to be removed from the system, and connect the video
+output connector (J1) to the receiver system (i.e. SA8195P ADP-Air)
+directly with a breakout cable.
+
+Change-Id: I9ecd95abfaf4395c8dce632c5e81f5c52f4acff1
+Signed-off-by: Jim Wang <jimwan@codeaurora.org>
+---
+ .../boot/dts/qcom/sa8155-adp-star-display.dtsi     | 355 +++------------------
+ 1 file changed, 41 insertions(+), 314 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/qcom/sa8155-adp-star-display.dtsi b/arch/arm64/boot/dts/qcom/sa8155-adp-star-display.dtsi
+index abf9d0a..485aea6 100644
+--- a/arch/arm64/boot/dts/qcom/sa8155-adp-star-display.dtsi
++++ b/arch/arm64/boot/dts/qcom/sa8155-adp-star-display.dtsi
+@@ -1,4 +1,4 @@
+-/* Copyright (c) 2019, The Linux Foundation. All rights reserved.
++/* Copyright (c) 2019-2020, The Linux Foundation. All rights reserved.
+  *
+  * This program is free software; you can redistribute it and/or modify
+  * it under the terms of the GNU General Public License version 2 and
+@@ -13,43 +13,16 @@
+ #include <dt-bindings/clock/mdss-10nm-pll-clk.h>
+ #include <dt-bindings/clock/qcom,rpmh.h>
+ 
+-&tlmm {
+-	ioexp_intr_active: ioexp_intr_active {
+-		mux {
+-			pins = "gpio48";
+-			function = "gpio";
+-		};
+-		config {
+-			pins = "gpio48";
+-			drive-strength = <2>;
+-			bias-pull-up;
+-		};
+-	};
++#include "dsi-panel-csi-proxy-video.dtsi"
+ 
+-	ioexp_reset_active: ioexp_reset_active {
+-		mux {
+-			pins = "gpio30";
+-			function = "gpio";
+-		};
+-		config {
+-			pins = "gpio30";
+-			drive-strength = <2>;
+-			bias-disable;
+-			output-high;
+-		};
+-	};
+-};
+-
+-&sde_dp {
+-	qcom,ext-disp = <&ext_disp>;
+-	qcom,dp-hpd-gpio = <&ioexp 8 0>;
+-	qcom,mst-fixed-topology-ports = <1 2>;
+-
+-	pinctrl-names = "mdss_dp_active", "mdss_dp_sleep";
+-	pinctrl-0 = <&dp_hpd_cfg_pins>;
+-	pinctrl-1 = <&dp_hpd_cfg_pins>;
++&dsi_csi_vid_2k {
++	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_external";
++	qcom,panel-mode-gpio = <&tlmm 7 0>;
++	qcom,platform-te-gpio = <&tlmm 8 0>;
++	qcom,platform-reset-gpio = <&tlmm 6 0>;
++	qcom,mdss-dsi-reset-sequence;
+ 
+-	qcom,core-supply-entries {
++	qcom,panel-supply-entries {
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 		qcom,core-supply-entry@0 {
+@@ -63,137 +36,23 @@
+ 	};
+ };
+ 
+-&qupv3_se15_i2c {
+-	#address-cells = <1>;
+-	#size-cells = <0>;
+-
+-	status = "ok";
+-
+-	pinctrl-0 = <&qupv3_se15_i2c_active
+-		&ioexp_intr_active
+-		&ioexp_reset_active>;
+-
+-	ioexp: gpio@3e {
+-		#gpio-cells = <2>;
+-		#interrupt-cells = <2>;
+-		compatible = "semtech,sx1509q";
+-		reg = <0x3e>;
+-		interrupt-parent = <&tlmm>;
+-		interrupts = <48 0>;
+-		gpio-controller;
+-		interrupt-controller;
+-		semtech,probe-reset;
+-
+-		pinctrl-names = "default";
+-		pinctrl-0 = <&dsi1_hpd_cfg_pins
+-			&dsi1_cdet_cfg_pins
+-			&dsi2_hpd_cfg_pins
+-			&dsi2_cdet_cfg_pins
+-			&dp_hpd_cfg_pins>;
+-
+-		dsi1_hpd_cfg_pins: gpio0-cfg {
+-			pins = "gpio0";
+-			bias-pull-up;
+-		};
+-
+-		dsi1_cdet_cfg_pins: gpio1-cfg {
+-			pins = "gpio1";
+-			bias-pull-down;
+-		};
+-
+-		dsi2_hpd_cfg_pins: gpio2-cfg {
+-			pins = "gpio2";
+-			bias-pull-up;
+-		};
+-
+-		dsi2_cdet_cfg_pins: gpio3-cfg {
+-			pins = "gpio3";
+-			bias-pull-down;
+-		};
+-
+-		dp_hpd_cfg_pins: gpio8-cfg {
+-			pins = "gpio8";
+-			bias-pull-down;
+-		};
+-	};
+-
+-	i2c-mux@77 {
+-		compatible = "nxp,pca9542";
+-		reg = <0x77>;
+-		#address-cells = <1>;
+-		#size-cells = <0>;
+-
+-		i2c@0 {
+-			reg = <0>;
+-			#address-cells = <1>;
+-			#size-cells = <0>;
+-
+-			anx_7625_1: anx7625@2c {
+-				compatible = "analogix,anx7625";
+-				reg = <0x2c>;
+-				interrupt-parent = <&ioexp>;
+-				interrupts = <0 0>;
+-				cbl_det-gpio = <&ioexp 1 0>;
+-				power_en-gpio = <&tlmm 47 0>;
+-				reset_n-gpio = <&tlmm 49 0>;
+-			};
+-		};
+-
+-		i2c@1 {
+-			reg = <1>;
+-			#address-cells = <1>;
+-			#size-cells = <0>;
++&dsi_csi_vid_4k {
++	qcom,mdss-dsi-bl-pmic-control-type = "bl_ctrl_external";
++	qcom,panel-mode-gpio = <&tlmm 7 0>;
++	qcom,platform-te-gpio = <&tlmm 8 0>;
++	qcom,platform-reset-gpio = <&tlmm 6 0>;
++	qcom,mdss-dsi-reset-sequence;
+ 
+-			anx_7625_2: anx7625@2c {
+-				compatible = "analogix,anx7625";
+-				reg = <0x2c>;
+-				interrupt-parent = <&ioexp>;
+-				interrupts = <2 0>;
+-				cbl_det-gpio = <&ioexp 3 0>;
+-				power_en-gpio = <&tlmm 87 0>;
+-				reset_n-gpio = <&tlmm 29 0>;
+-			};
+-		};
+-	};
+-};
+-
+-&anx_7625_1 {
+-	ports {
++	qcom,panel-supply-entries {
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+-
+-		port@0 {
+-			reg = <0>;
+-			anx_7625_1_in: endpoint {
+-				remote-endpoint = <&dsi_anx_7625_1_out>;
+-			};
+-		};
+-	};
+-};
+-
+-&anx_7625_2 {
+-	ports {
+-		#address-cells = <1>;
+-		#size-cells = <0>;
+-
+-		port@0 {
++		qcom,core-supply-entry@0 {
+ 			reg = <0>;
+-			anx_7625_2_in: endpoint {
+-				remote-endpoint = <&dsi_anx_7625_2_out>;
+-			};
+-		};
+-	};
+-};
+-
+-#include "dsi-panel-ext-bridge-1080p.dtsi"
+-
+-&dsi_ext_bridge_1080p {
+-	qcom,mdss-dsi-ext-bridge = <0>;
+-
+-	qcom,mdss-dsi-display-timings {
+-		timing@0{
+-			qcom,mdss-dsi-panel-phy-timings = [00 1E 08 07 24 22
+-				08 08 05 02 04 00 19 17];
++			qcom,supply-name = "refgen";
++			qcom,supply-min-voltage = <0>;
++			qcom,supply-max-voltage = <0>;
++			qcom,supply-enable-load = <0>;
++			qcom,supply-disable-load = <0>;
+ 		};
+ 	};
+ };
+@@ -202,31 +61,31 @@
+ 	#address-cells = <1>;
+ 	#size-cells = <1>;
+ 
+-	dsi_anx_7625_1: qcom,dsi-display@17 {
+-		label = "dsi_anx_7625_1";
++	dsi_csi_proxy_2k: qcom,dsi-display@17 {
++		label = "dsi_csi_proxy_2k";
+ 		qcom,dsi-display-active;
+-		qcom,display-label = "primary";
++		qcom,display-type = "primary";
+ 
+ 		qcom,dsi-ctrl-num = <0>;
+ 		qcom,dsi-phy-num = <0>;
+ 		qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
+ 
+-		qcom,dsi-panel = <&dsi_ext_bridge_1080p>;
++		qcom,dsi-panel = <&dsi_csi_vid_2k>;
+ 	};
+ 
+-	dsi_anx_7625_2: qcom,dsi-display@18 {
+-		label = "dsi_anx_7625_2";
++	dsi_csi_proxy_4k: qcom,dsi-display@18 {
++		label = "dsi_csi_proxy_4k";
+ 		qcom,dsi-display-active;
+-		qcom,display-type = "secondary";
++		qcom,display-type = "primary";
+ 
+-		qcom,dsi-ctrl-num = <1>;
+-		qcom,dsi-phy-num = <1>;
+-		qcom,dsi-select-clocks = "mux_byte_clk1", "mux_pixel_clk1";
++		qcom,dsi-ctrl-num = <0 1>;
++		qcom,dsi-phy-num = <0 1>;
++		qcom,dsi-select-clocks = "mux_byte_clk0", "mux_pixel_clk0";
+ 
+-		qcom,dsi-panel = <&dsi_ext_bridge_1080p>;
++		qcom,dsi-panel = <&dsi_csi_vid_4k>;
+ 	};
+ 
+-	dsi_dp1: qcom,dsi-display@1 {
++	dsi_csi1: qcom,dsi-display@1 {
+ 		compatible = "qcom,dsi-display";
+ 		label = "primary";
+ 
+@@ -236,56 +95,16 @@
+ 		clocks = <&mdss_dsi0_pll BYTECLK_MUX_0_CLK>,
+ 			 <&mdss_dsi0_pll PCLK_MUX_0_CLK>,
+ 			 <&mdss_dsi1_pll BYTECLK_MUX_1_CLK>,
+-			 <&mdss_dsi1_pll PCLK_MUX_1_CLK>,
+-			 <&clock_rpmh RPMH_CXO_CLK>;
++			 <&mdss_dsi1_pll PCLK_MUX_1_CLK>;
+ 		clock-names = "mux_byte_clk0", "mux_pixel_clk0",
+-			      "mux_byte_clk1", "mux_pixel_clk1", "xo_clk";
+-
+-		qcom,dsi-display-list =
+-			<&dsi_anx_7625_1>;
++			      "mux_byte_clk1", "mux_pixel_clk1";
+ 
+-		ports {
+-			#address-cells = <1>;
+-			#size-cells = <0>;
+-
+-			port@0 {
+-				reg = <0>;
+-				dsi_anx_7625_1_out: endpoint {
+-					remote-endpoint = <&anx_7625_1_in>;
+-				};
+-			};
+-		};
+-	};
+-
+-	dsi_dp2: qcom,dsi-display@2 {
+-		compatible = "qcom,dsi-display";
+-		label = "secondary";
+-
+-		qcom,dsi-ctrl = <&mdss_dsi0 &mdss_dsi1>;
+-		qcom,dsi-phy = <&mdss_dsi_phy0 &mdss_dsi_phy1>;
+-
+-		clocks = <&mdss_dsi0_pll BYTECLK_MUX_0_CLK>,
+-			 <&mdss_dsi0_pll PCLK_MUX_0_CLK>,
+-			 <&mdss_dsi1_pll BYTECLK_MUX_1_CLK>,
+-			 <&mdss_dsi1_pll PCLK_MUX_1_CLK>,
+-			 <&clock_rpmh RPMH_CXO_CLK>;
+-		clock-names = "mux_byte_clk0", "mux_pixel_clk0",
+-			      "mux_byte_clk1", "mux_pixel_clk1", "xo_clk";
++		pinctrl-names = "panel_active", "panel_suspend";
++		pinctrl-0 = <&sde_dsi_active &sde_te_active>;
++		pinctrl-1 = <&sde_dsi_suspend &sde_te_suspend>;
+ 
+ 		qcom,dsi-display-list =
+-			<&dsi_anx_7625_2>;
+-
+-		ports {
+-			#address-cells = <1>;
+-			#size-cells = <0>;
+-
+-			port@0 {
+-				reg = <0>;
+-				dsi_anx_7625_2_out: endpoint {
+-					remote-endpoint = <&anx_7625_2_in>;
+-				};
+-			};
+-		};
++			<&dsi_csi_proxy_4k>;
+ 	};
+ 
+ 	refgen: refgen-regulator@88e7000 {
+@@ -300,97 +119,6 @@
+ 		cell-index = <0>;
+ 		label = "wb_display";
+ 	};
+-
+-	ext_disp: qcom,msm-ext-disp {
+-		compatible = "qcom,msm-ext-disp";
+-
+-		ext_disp_audio_codec: qcom,msm-ext-disp-audio-codec-rx {
+-			compatible = "qcom,msm-ext-disp-audio-codec-rx";
+-		};
+-	};
+-	sde_sh_base0: qcom,shared-display-base@0 {
+-		      qcom,shared-display-base-intf = <1>;
+-		      qcom,shared-display-base-mode {
+-			      qcom,mode-h-active = <1920>;
+-			      qcom,mode-h-front-porch = <88>;
+-			      qcom,mode-h-pulse-width = <44>;
+-			      qcom,mode-h-back-porch = <148>;
+-			      qcom,mode-h-active-high;
+-			      qcom,mode-v-active = <1080>;
+-			      qcom,mode-v-front-porch = <4>;
+-			      qcom,mode-v-pulse-width = <5>;
+-			      qcom,mode-v-back-porch = <36>;
+-			      qcom,mode-v-active-high;
+-			      qcom,mode-refresh-rate = <60>;
+-			      qcom,mode-clock-in-khz = <148500>;
+-		      };
+-	      };
+-
+-
+-	sde_sh0: qcom,shared-display@0 {
+-		 compatible = "qcom,shared-display";
+-		 qcom,shared-display-base = <&sde_sh_base0>;
+-		 qcom,blend-stage-range = <0 9>;
+-		 qcom,display-type = "primary";
+-		 qcom,shared-display-src-mode {
+-			 qcom,mode-h-active = <1920>;
+-			 qcom,mode-v-active = <1080>;
+-		 };
+-		 qcom,shared-display-dst-mode {
+-			 qcom,mode-x-offset = <0>;
+-			 qcom,mode-y-offset = <0>;
+-			 qcom,mode-width = <1920>;
+-			 qcom,mode-height = <1080>;
+-		 };
+-	 };
+-
+-	sde_sh1: qcom,shared-display@1 {
+-		 compatible = "qcom,shared-display";
+-		 qcom,shared-display-base = <&sde_sh_base0>;
+-		 qcom,blend-stage-range = <9 1>;
+-		 qcom,shared-display-src-mode {
+-			 qcom,mode-h-active = <1920>;
+-			 qcom,mode-v-active = <1080>;
+-		 };
+-		 qcom,shared-display-dst-mode {
+-			 qcom,mode-x-offset = <0>;
+-			 qcom,mode-y-offset = <0>;
+-			 qcom,mode-width = <1920>;
+-			 qcom,mode-height = <1080>;
+-		 };
+-	 };
+-
+-	 qcom,sde-shared-plane {
+-		 compatible = "qcom,sde-shared-plane";
+-		 qcom,add-planes {
+-			 plane@0 {
+-				 qcom,plane-name = "plane-4-splash";
+-				 qcom,plane-parent = "plane-4";
+-				 qcom,plane-init-active;
+-				 qcom,plane-seamless-mode = "shared";
+-			 };
+-		 };
+-	 };
+-
+-	sde_card1: qcom,sde-kms-lease@0 {
+-		   compatible = "qcom,sde-kms-lease";
+-		   qcom,dev-name = "msm_drm";
+-		   qcom,lease-connectors = "DSI-2", "DSI-3", "DP-1", "DP-2",
+-						"DP-3";
+-		   qcom,lease-planes = "plane-0", "plane-1", "plane-2",
+-					"plane-3","plane-4", "plane-5",
+-					"plane-6","plane-7", "plane-8",
+-					"plane-9","plane-10","plane-11",
+-					"plane-12","plane-13","plane-14",
+-					"plane-15";
+-	   };
+-	sde_card2: qcom,sde-kms-lease@1 {
+-		   compatible = "qcom,sde-kms-lease";
+-		   qcom,dev-name = "msm_drm2";
+-		   qcom,lease-connectors = "DSI-4";
+-		   qcom,lease-planes = "plane-4-splash";
+-	   };
+-
+ };
+ 
+ &mdss_dsi_phy0 {
+@@ -402,6 +130,5 @@
+ };
+ 
+ &mdss_mdp {
+-	qcom,sde-reg-dma-version = <0>;
+-	connectors = <&sde_rscc &dsi_dp1 &dsi_dp2 &sde_dp &sde_wb>;
++	connectors = <&sde_rscc &dsi_csi1 &sde_wb>;
+ };
+-- 
+2.9.0.137.gcf4c2cf
+

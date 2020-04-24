@@ -1,0 +1,140 @@
+From 9f9c37758acc4890c461564f644f93fc59663a46 Mon Sep 17 00:00:00 2001
+From: Jim Wang <jimwan@codeaurora.org>
+Date: Wed, 19 Feb 2020 19:01:46 -0500
+Subject: [PATCH] ARM: dts: msm: add DSI->CSI passthrough mode
+
+Configuration for using the DSI TX to transmit the CSI-2 spec
+compatible signal. Single DSI->CSI for 1080p60 and dual DSI->CSI
+for 4K60.
+
+Change-Id: Ic514c63e60c197225e8c0b6abad04a0e12cc986c
+Signed-off-by: Jim Wang <jimwan@codeaurora.org>
+---
+ .../boot/dts/qcom/dsi-panel-csi-proxy-video.dtsi   | 115 +++++++++++++++++++++
+ 1 file changed, 115 insertions(+)
+ create mode 100644 arch/arm64/boot/dts/qcom/dsi-panel-csi-proxy-video.dtsi
+
+diff --git a/arch/arm64/boot/dts/qcom/dsi-panel-csi-proxy-video.dtsi b/arch/arm64/boot/dts/qcom/dsi-panel-csi-proxy-video.dtsi
+new file mode 100644
+index 00000000..5ee99fe
+--- /dev/null
++++ b/arch/arm64/boot/dts/qcom/dsi-panel-csi-proxy-video.dtsi
+@@ -0,0 +1,115 @@
++/* Copyright (c) 2020, The Linux Foundation. All rights reserved.
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License version 2 and
++ * only version 2 as published by the Free Software Foundation.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ */
++
++&mdss_mdp {
++	dsi_csi_vid_2k: qcom,mdss_dsi_csi_video@1 {
++		qcom,mdss-dsi-panel-name = "CSI-2 proxy 2K 60fps";
++		qcom,mdss-dsi-panel-type = "dsi_video_mode";
++		qcom,mdss-dsi-virtual-channel-id = <0>;
++		qcom,mdss-dsi-stream = <0>;
++		qcom,mdss-csi-proxy;
++		qcom,mdss-dsi-bpp = <24>;
++		qcom,mdss-dsi-border-color = <0>;
++		qcom,mdss-dsi-traffic-mode = "non_burst_sync_pulse";
++		qcom,mdss-dsi-bllp-power-mode;
++		qcom,mdss-dsi-bllp-eof-power-mode;
++		#qcom,mdss-dsi-hsa-power-mode;
++		qcom,mdss-dsi-hbp-power-mode;
++		#qcom,mdss-dsi-hfp-power-mode;
++		/*
++		 * For CSI-2 compaitble RGB888 format, use "rgb_swap_bgr".
++		 * For passing through as raw data, use "rgb_swap_rgb".
++		 */
++		qcom,mdss-dsi-color-order = "rgb_swap_rgb";
++
++		qcom,mdss-dsi-lane-0-state;
++		qcom,mdss-dsi-lane-1-state;
++		qcom,mdss-dsi-lane-2-state;
++		qcom,mdss-dsi-lane-3-state;
++		qcom,mdss-dsi-dma-trigger = "trigger_sw";
++		qcom,mdss-dsi-mdp-trigger = "none";
++		qcom,mdss-dsi-t-clk-post = <0x0C>;
++		qcom,mdss-dsi-t-clk-pre = <0x17>;
++		qcom,mdss-dsi-force-clock-lane-hs;
++
++		qcom,mdss-dsi-display-timings {
++			timing@0{
++				qcom,mdss-dsi-panel-width = <1920>;
++				qcom,mdss-dsi-panel-height = <1080>;
++				qcom,mdss-dsi-h-front-porch = <88>;
++				qcom,mdss-dsi-h-back-porch = <148>;
++				qcom,mdss-dsi-h-pulse-width = <44>;
++				qcom,mdss-dsi-h-sync-skew = <0>;
++				qcom,mdss-dsi-v-back-porch = <36>;
++				qcom,mdss-dsi-v-front-porch = <4>;
++				qcom,mdss-dsi-v-pulse-width = <5>;
++				qcom,mdss-dsi-h-sync-pulse = <0>;
++				qcom,mdss-dsi-panel-framerate = <60>;
++				qcom,display-topology = <1 0 1>;
++				qcom,default-topology-index = <0>;
++				qcom,mdss-dsi-panel-phy-timings = [00 1B
++					08 07 0D 0B 08 08 05 02 04 00 17 0C];
++			};
++		};
++	};
++
++	dsi_csi_vid_4k: qcom,mdss_dsi_csi_video@2 {
++		qcom,mdss-dsi-panel-name = "CSI-2 proxy 4k 60fps";
++		qcom,mdss-dsi-panel-type = "dsi_video_mode";
++		qcom,mdss-dsi-virtual-channel-id = <0>;
++		qcom,mdss-dsi-stream = <0>;
++		qcom,mdss-csi-proxy;
++		qcom,mdss-dsi-bpp = <24>;
++		qcom,mdss-dsi-border-color = <0>;
++		qcom,mdss-dsi-traffic-mode = "non_burst_sync_pulse";
++		qcom,mdss-dsi-bllp-power-mode;
++		qcom,mdss-dsi-bllp-eof-power-mode;
++		#qcom,mdss-dsi-hsa-power-mode;
++		qcom,mdss-dsi-hbp-power-mode;
++		#qcom,mdss-dsi-hfp-power-mode;
++		/*
++		 * For CSI-2 compaitble RGB888 format, use "rgb_swap_bgr".
++		 * For passing through as raw data, use "rgb_swap_rgb".
++		 */
++		qcom,mdss-dsi-color-order = "rgb_swap_rgb";
++
++		qcom,mdss-dsi-lane-0-state;
++		qcom,mdss-dsi-lane-1-state;
++		qcom,mdss-dsi-lane-2-state;
++		qcom,mdss-dsi-lane-3-state;
++		qcom,mdss-dsi-dma-trigger = "trigger_sw";
++		qcom,mdss-dsi-mdp-trigger = "none";
++		qcom,mdss-dsi-t-clk-post = <0x13>;
++		qcom,mdss-dsi-t-clk-pre = <0x29>;
++		qcom,mdss-dsi-force-clock-lane-hs;
++
++		qcom,mdss-dsi-display-timings {
++			timing@0{
++				qcom,mdss-dsi-panel-width = <1920>;
++				qcom,mdss-dsi-panel-height = <2160>;
++				qcom,mdss-dsi-h-front-porch = <88>;
++				qcom,mdss-dsi-h-back-porch = <180>;
++				qcom,mdss-dsi-h-pulse-width = <44>;
++				qcom,mdss-dsi-h-sync-skew = <0>;
++				qcom,mdss-dsi-v-back-porch = <72>;
++				qcom,mdss-dsi-v-front-porch = <8>;
++				qcom,mdss-dsi-v-pulse-width = <10>;
++				qcom,mdss-dsi-h-sync-pulse = <0>;
++				qcom,mdss-dsi-panel-framerate = <60>;
++				qcom,display-topology = <2 0 2>;
++				qcom,default-topology-index = <0>;
++				qcom,mdss-dsi-panel-phy-timings = [00 36
++					0F 0E 18 15 0F 0F 0B 02 04 00 2B 13];
++			};
++		};
++	};
++};
+-- 
+2.9.0.137.gcf4c2cf
+
