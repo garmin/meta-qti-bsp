@@ -1,4 +1,4 @@
-From 378c79fe9a62f509060be72ac0cb0ed9958f5470 Mon Sep 17 00:00:00 2001
+From 600059bf105ec3a3ab21188137ec86b7f6a245ef Mon Sep 17 00:00:00 2001
 From: Jim Wang <jimwan@codeaurora.org>
 Date: Thu, 5 Mar 2020 12:52:38 -0500
 Subject: [PATCH] ARM: dts: msm: DSI->CSI passthrough test for SA8155P ADP-Air
@@ -13,11 +13,11 @@ directly with a breakout cable.
 Change-Id: I9ecd95abfaf4395c8dce632c5e81f5c52f4acff1
 Signed-off-by: Jim Wang <jimwan@codeaurora.org>
 ---
- .../boot/dts/qcom/sa8155-adp-star-display.dtsi     | 355 +++------------------
- 1 file changed, 41 insertions(+), 314 deletions(-)
+ .../boot/dts/qcom/sa8155-adp-star-display.dtsi     | 357 +++------------------
+ 1 file changed, 43 insertions(+), 314 deletions(-)
 
 diff --git a/arch/arm64/boot/dts/qcom/sa8155-adp-star-display.dtsi b/arch/arm64/boot/dts/qcom/sa8155-adp-star-display.dtsi
-index abf9d0a..485aea6 100644
+index abf9d0a..dc9ea35 100644
 --- a/arch/arm64/boot/dts/qcom/sa8155-adp-star-display.dtsi
 +++ b/arch/arm64/boot/dts/qcom/sa8155-adp-star-display.dtsi
 @@ -1,4 +1,4 @@
@@ -434,12 +434,14 @@ index abf9d0a..485aea6 100644
  };
  
  &mdss_dsi_phy0 {
-@@ -402,6 +130,5 @@
+@@ -402,6 +130,7 @@
  };
  
  &mdss_mdp {
 -	qcom,sde-reg-dma-version = <0>;
 -	connectors = <&sde_rscc &dsi_dp1 &dsi_dp2 &sde_dp &sde_wb>;
++	qcom,sde-mixer-display-pref = "primary", "primary", "none",
++				"none", "none", "none";
 +	connectors = <&sde_rscc &dsi_csi1 &sde_wb>;
  };
 -- 
