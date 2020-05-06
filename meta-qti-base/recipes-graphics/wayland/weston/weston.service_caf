@@ -7,7 +7,7 @@ After=dbus.service rc.pvr.service
 ExecStart=/usr/bin/weston-launch -u root -- --idle-time=4294967 --log=/tmp/weston.log
 ExecStop=/usr/bin/killall -s KILL weston
 Type=simple
-PIDFile=/early/weston.pid
+PIDFile=/run/early/weston.pid
 Restart=always
 
 [Install]
