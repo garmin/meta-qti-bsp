@@ -21,6 +21,7 @@ DEPENDS += "drm"
 DEPENDS += "libdrm"
 #DEPENDS += "adreno"
 DEPENDS += "gbm-headers"
+DEPENDS += "display-commonsys-intf-linux"
 
 EXTRA_OECONF += " --with-sanitized-headers=${STAGING_KERNEL_BUILDDIR}/usr/include"
 
