@@ -5,6 +5,7 @@ SRCREV = "${AUTOREV}"
 
 SRC_URI_append = "  \
     file://weston.service_caf \
+    file://weston_early.service_caf \
     file://weston.ini_caf \
     file://drm_firmware_load_trigger.service \
 "
@@ -73,8 +74,12 @@ PACKAGECONFIG[clients] = " "
 
 do_install_append() {
 	# Install systemd unit files
-		if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
-		install -m 644 -p -D ${WORKDIR}/weston.service_caf ${D}${systemd_system_unitdir}/weston.service
+	if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
+		if ${@bb.utils.contains('DISTRO_FEATURES', 'early_init', 'true', 'false', d)}; then
+			install -m 644 -p -D ${WORKDIR}/weston_early.service_caf ${D}${systemd_system_unitdir}/weston.service
+		else
+			install -m 644 -p -D ${WORKDIR}/weston.service_caf ${D}${systemd_system_unitdir}/weston.service
+		fi
 	fi
 
 	WESTON_INI_CONFIG=${sysconfdir}/xdg/weston
