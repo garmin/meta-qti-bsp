@@ -6,6 +6,7 @@ LIC_FILES_CHKSUM = "file://${COREBASE}/meta/files/common-licenses/${LICENSE};md5
 SRC_URI  = "file://early_init.c"
 SRC_URI += "file://early_init.conf"
 SRC_URI += "file://early_init_eth.conf"
+SRC_URI += "file://early_init_noapp.conf"
 
 SECURITY_CFLAGS_pn-${PN} = "${SECURITY_NOPIE_CFLAGS}"
 
@@ -32,7 +33,11 @@ do_install() {
         if ${@bb.utils.contains('DISTRO_FEATURES', 'early-ethernet', 'true', 'false', d)}; then
             install -m 0644 ${S}/early_init_eth.conf  ${D}${sysconfdir}/early_init.conf
         else
-            install -m 0644 ${S}/early_init.conf  ${D}${sysconfdir}/early_init.conf
+            if ${@bb.utils.contains('DISTRO_FEATURES', 'early_userspace', 'true', 'false', d)}; then
+                install -m 0644 ${S}/early_init.conf  ${D}${sysconfdir}/early_init.conf
+            else
+                install -m 0644 ${S}/early_init_noapp.conf  ${D}${sysconfdir}/early_init.conf
+            fi
         fi
     fi
 
