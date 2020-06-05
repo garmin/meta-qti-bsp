@@ -16,6 +16,7 @@ RDEPENDS_${PN} += "\
     net-tools \
     emac-dwc-eqos \
     ethtool \
+    iperf2 \
     iperf3 \
     iproute2 \
     iproute2-ss \
