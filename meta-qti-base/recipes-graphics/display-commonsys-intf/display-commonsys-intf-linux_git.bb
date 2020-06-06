@@ -31,6 +31,7 @@ FILES_${PN}-dev = "${includedir}"
 do_install_append() {
     install -d ${D}${includedir}
     install ${S}/gralloc/*.h ${D}${includedir}
+    install ${S}/include/*.h ${D}${includedir}
 }
 
 INHIBIT_PACKAGE_STRIP="1"
