@@ -37,6 +37,7 @@ ExecStop=/usr/bin/killall -s KILL weston
 Type=simple
 PIDFile=/run/early/weston.pid
 Restart=always
+Nice=-20
 
 [Install]
 WantedBy=sysinit.target
