@@ -18,6 +18,8 @@ RDEPENDS_${PN} = " \
         gstreamer1.0-libav \
         gstreamer1.0-omx \
         gstreamer1.0-plugins-qscreencapsrc \
+        mm-vdec-omx-test-lite \
+        mm-venc-omx-test-lite \
         gdk-pixbuf-loader-bmp \
         gdk-pixbuf-loader-gif \
         alsa-lib \
