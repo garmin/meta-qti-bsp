@@ -29,6 +29,9 @@ do_compile_prepend() {
 }
 
 do_compile() {
+	if ${@bb.utils.contains('DISTRO_FEATURES', 'q-hypervisor', 'true', 'false', d)}; then
+		export AVB_FEATURE_GVM_MODE=1
+	fi
 	export AVB_FEATURE_NEUTRINO=1
 	export AVB_FEATURE_INTF_ALSA2=0
 	export AVB_FEATURE_GSTREAMER=1
