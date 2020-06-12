@@ -26,19 +26,33 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-
-MODE1=`cat /sys/devices/platform/soc/a600000.ssusb/mode`
-MODE2=`cat /sys/devices/platform/soc/a800000.ssusb/mode`
-
 case $1/$2 in
   pre/*)
-    echo "USB Going to $2..."
+    echo "Entering into $2..."
+
+    systemctl stop audiod.service
+    if [ $2 == "hibernate" ]; then
+        echo 0 > /sys/kernel/boot_adsp/boot
+    fi
+
+    # disable BT as hsuart could block suspend
+    systemctl stop synergy.service
+
+    # set all usb mode to none
     echo none > /sys/devices/platform/soc/a600000.ssusb/mode
     echo none > /sys/devices/platform/soc/a800000.ssusb/mode
     ;;
   post/*)
-    echo "USB Waking up from $2..."
-    echo $MODE1 > /sys/devices/platform/soc/a600000.ssusb/mode
-    echo $MODE2 > /sys/devices/platform/soc/a800000.ssusb/mode
+    echo "Exiting from $2..."
+
+    echo peripheral > /sys/devices/platform/soc/a600000.ssusb/mode
+    echo host > /sys/devices/platform/soc/a800000.ssusb/mode
+
+    systemctl restart synergy.service
+
+    if [ $2 == "hibernate" ]; then
+        echo 1 > /sys/kernel/boot_adsp/boot
+    fi
+    systemctl restart audiod.service
     ;;
 esac
