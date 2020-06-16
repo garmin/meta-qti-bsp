@@ -35,7 +35,7 @@ DefaultDependencies=no
 [Service]
 Type=oneshot
 Restart=no
-ExecStart=/usr/sbin/audio.sh
+ExecStart=/bin/sh /usr/sbin/audio.sh
 
 [Install]
 WantedBy=sysinit.target
