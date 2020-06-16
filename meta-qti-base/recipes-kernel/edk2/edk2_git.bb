@@ -28,13 +28,15 @@ VERITY_ENABLED = "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity','1', '0', 
 
 EARLY_ETH = "${@bb.utils.contains('DISTRO_FEATURES', 'early-eth', '1', '0', d)}"
 
+HIBERNATION = "${@bb.utils.contains('COMBINED_FEATURES', 'hibernation', '1', '0', d)}"
+
 EXTRA_OEMAKE = "'CLANG_BIN=${CLANG_BIN_PATH}' \
                 'CLANG_PREFIX=${STAGING_BINDIR_NATIVE}/${TARGET_SYS}/${TARGET_PREFIX}' \
                 'TARGET_ARCHITECTURE=${TARGET_ARCH}'\
                 'BUILDDIR=${S}'\
                 'BOOTLOADER_OUT=${S}/out'\
                 'ENABLE_LE_VARIANT=true'\
-                'HIBERNATION_SUPPORT=true'\
+                'HIBERNATION_SUPPORT=${HIBERNATION}'\
                 'VERIFIED_BOOT_LE=${VBLE}'\
                 'VERITY_LE=${VERITY_ENABLED}'\
                 'INIT_BIN_LE=\"/sbin/init\"'\

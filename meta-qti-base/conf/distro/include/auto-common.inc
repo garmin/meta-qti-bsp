@@ -31,6 +31,8 @@ DISTRO_FEATURES_append = " early-eth"
 
 DISTRO_FEATURES_append = " ab-boot-support"
 
+DISTRO_FEATURES_append = " hibernation"
+
 # Use systemd init manager.
 DISTRO_FEATURES_append = " systemd"
 DISTRO_FEATURES_BACKFILL_CONSIDERED += "sysvinit"
