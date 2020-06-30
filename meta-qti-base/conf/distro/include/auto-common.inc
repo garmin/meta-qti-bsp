@@ -3,6 +3,8 @@ include conf/distro/msm.conf
 
 DISTRO_NAME = "automotive"
 DISTROOVERRIDES =. "automotive:"
+# Support SDP
+ID_LIKE = "automotive"
 
 PRODUCT ?= "${BASEMACHINE}" 
 DEPLOY_NAME_BASE = "${PRODUCT}-automotive"
