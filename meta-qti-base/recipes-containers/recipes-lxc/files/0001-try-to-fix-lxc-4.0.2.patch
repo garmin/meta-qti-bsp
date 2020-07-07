@@ -1,0 +1,31 @@
+From 5206cb7aba2bb69be242c4162d34449d038089eb Mon Sep 17 00:00:00 2001
+From: Yuyao Zhang <yuyazhan@codeaurora.org>
+Date: Tue, 7 Jul 2020 10:51:28 +0800
+Subject: [PATCH] try to fix lxc 4.0.2
+
+Signed-off-by: Yuyao Zhang <yuyazhan@codeaurora.org>
+---
+ src/lxc/start.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/src/lxc/start.c b/src/lxc/start.c
+index 5138fde..895d78a 100644
+--- a/src/lxc/start.c
++++ b/src/lxc/start.c
+@@ -1640,6 +1640,13 @@ static int lxc_spawn(struct lxc_handler *handler)
+ 		handler->pid = lxc_raw_clone_cb(do_start, handler,
+ 						CLONE_PIDFD | handler->ns_on_clone_flags,
+ 						&handler->pidfd);
++		if (handler->pid < 0) {
++			if (errno == EINVAL) {
++				handler->pid = lxc_raw_clone_cb(do_start, handler,
++								handler->ns_on_clone_flags,
++								&handler->pidfd);
++			}
++		}
+ 	}
+ 	if (handler->pid < 0) {
+ 		SYSERROR(LXC_CLONE_ERROR);
+-- 
+2.7.4
+

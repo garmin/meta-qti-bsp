@@ -1,9 +1,12 @@
 # Fetch code from github
-SRCREV = "4dcd858b92d4135024290d70534c245e9cdd8d6d"
-
+SRCREV = "eaf3c66b93102dd7c093b942443407fbb1a6445f"
 SRC_URI_remove= "http://linuxcontainers.org/downloads/${BPN}-${PV}.tar.gz"
-SRC_URI_append = "git://github.com/lxc/${BPN}.git;protocol=http;branch=master \
+SRC_URI_append = "git://github.com/lxc/${BPN}.git;protocol=http;branch=stable-4.0 \
     "
+FILESEXTRAPATHS_prepend := "${THISDIR}/files:"
+SRC_URI_append += "\
+        file://0001-try-to-fix-lxc-4.0.2.patch \
+        "
 S = "${WORKDIR}/git"
 
 # Enable container launching automatically
