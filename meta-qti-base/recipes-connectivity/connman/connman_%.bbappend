@@ -6,4 +6,6 @@ do_install_append() {
             sed -i -e '/^L+/d'  ${D}${sysconfdir}/tmpfiles.d/connman_resolvconf.conf
         fi 
     fi
+    # Disable connman for lxc container
+    sed -i -e '/^RequiresMountsFor.*$/a ConditionVirtualization=!container' ${D}${systemd_system_unitdir}/connman.service
 }
