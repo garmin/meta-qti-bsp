@@ -32,3 +32,18 @@
 # Start using persist properties
 while [ ! -e /dev/socket/leprop-service ] ; do sleep 0.01; done
 setprop le.persistprop.enable true
+
+if systemd-detect-virt -cq ; then
+	setprop service.adb.tcp.port 5555
+	RETRY=0
+	while [ $RETRY -le 100 ]
+	do
+		PORT=`getprop service.adb.tcp.port`
+		if [ $PORT -eq "5555" ]; then
+			break
+		fi
+		let RETRY+=1
+		sleep 0.01
+		setprop service.adb.tcp.port 5555
+	done
+fi
