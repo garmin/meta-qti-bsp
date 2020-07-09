@@ -15,10 +15,11 @@ DEPENDS += "alsa-lib libpcap pciutils cmake-native glib-2.0 gstreamer1.0 gstream
 
 S = "${WORKDIR}/external/open-avb"
 
-GPTP_AUTO_START_ENABLE= "NO"
+GPTP_AUTO_START_ENABLE= "YES"
 EXTRA_OEMAKE += "${@bb.utils.contains("DISTRO_FEATURES", "systemd", " SYSTEMD_SUPPORT_INCLUDED=1", "SYSTEMD_SUPPORT_INCLUDED=0", d)}"
 EXTRA_OEMAKE += "${@oe.utils.conditional('GPTP_AUTO_START_ENABLE', 'YES', 'GPTP_AUTO_START=1', 'GPTP_AUTO_START=0', d)}"
 SYSTEMD_SERVICE_${PN} = "${@oe.utils.conditional('GPTP_AUTO_START_ENABLE', 'YES', 'gptp-daemon.service', '', d)}"
+SYSTEMD_AUTO_ENABLE_${PN} = "disable"
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 
 TARGET_CC_ARCH += "${LDFLAGS}"
