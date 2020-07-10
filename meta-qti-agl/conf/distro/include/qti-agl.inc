@@ -16,11 +16,3 @@ USER_CLASSES = "buildstats buildname image-mklibs"
 # Reset the value as meta/conf/distro/defaultsetup.conf
 TCLIBCAPPEND = "-${TCLIBC}"
 
-# Mask unnecessary recipes to fix build error
-BBMASK .= "|meta-agl/meta-agl-profile-graphical/recipes-graphics/wayland/weston_6.0.0.bbappend"
-BBMASK .= "|meta-agl/meta-agl-profile-core/recipes-test/freetype/freetype_2.9.1.bbappend"
-BBMASK .= "|meta-qti-bsp/meta-qti-extra/recipes-audio/pulseaudio/pulseaudio_%.bbappend"
-BBMASK .= "|meta-agl/meta-agl-profile-graphical/recipes-graphics/wayland/weston-init.bbappend"
-BBMASK .= "|meta-agl/meta-agl-profile-graphical/recipes-graphics/wayland/weston_5.0.0.bbappend"
-BBMASK .= "|meta-agl/meta-agl-profile-core/recipes-connectivity/connman/"
-BBMASK .= "|meta-agl-devel/meta-pipewire/recipes-security/security-manager/security-manager_%.bbappend"
