@@ -34,8 +34,6 @@ SRC_URI   =  "${PATH_TO_REPO}/kernel/msm-4.14/.git;protocol=${PROTO};destsuffix=
 SRC_URI_append = "  \
               ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', ' file://systemd.cfg', '', d)} \
               ${@bb.utils.contains('DISTRO_FEATURES', 'virtualization', ' file://virtualization.cfg', '', d)} \
-              ${@bb.utils.contains('DISTRO_FEATURES', 'lxc', ' file://lxc.cfg', '', d)} \
-              ${@bb.utils.contains('DISTRO_FEATURES', 'lxc', ' file://drm-lease.cfg ', '', d)} \
               ${@bb.utils.contains('DISTRO_FEATURES', 'nand-squashfs', ' file://squashfs.cfg', '', d)} \
               ${@bb.utils.contains('DISTRO_FEATURES', 'early_init', ' file://earlyuserspace.cfg', '', d)} \
 	     "
@@ -49,6 +47,7 @@ SRC_URI_append =  "${@bb.utils.contains('DISTRO_FEATURES', 'ktf', ' file://ktf.c
 SRC_URI_append =  " file://cgroup.cfg"
 SRC_URI_append =  " file://ipc.cfg"
 SRC_URI_append =  " file://memhotplug.cfg"
+SRC_URI_append =  " file://lxc.cfg"
 
 PACKAGE_ARCH = "${MACHINE_ARCH}"
 PACKAGES = "kernel kernel-base kernel-vmlinux kernel-dev kernel-modules"
