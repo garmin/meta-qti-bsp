@@ -58,5 +58,4 @@ IMAGE_CLASSES += "qimage"
 # Temporary disable these paths for yocto2.6 upgrade.
 WARN_TO_ERROR_QA_remove += "unknown-configure-option"
 
-LLVM_VERSION = "6.0"
 GCCVERSION = "9.%"
