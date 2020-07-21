@@ -17,8 +17,8 @@ S         =  "${WORKDIR}/bootable/bootloader/edk2"
 SRCREV = "${AUTOREV}"
 
 # FIXME for keymaster functionality
-SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'lxc', ' file://0001-avb-bring-up-keymaster-for-LV.patch', '', d)}"
-SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'lxc', ' file://0002-avb-send-dummy-ROT-and-boot-state-to-keymaster-from-.patch ', '', d)}"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'qti-lxc', ' file://0001-avb-bring-up-keymaster-for-LV.patch', '', d)}"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'qti-lxc', ' file://0002-avb-send-dummy-ROT-and-boot-state-to-keymaster-from-.patch ', '', d)}"
 
 INSANE_SKIP_${PN} = "arch"
 
@@ -34,7 +34,6 @@ EXTRA_OEMAKE = "'CLANG_BIN=${CLANG_BIN_PATH}' \
                 'BUILDDIR=${S}'\
                 'BOOTLOADER_OUT=${S}/out'\
                 'ENABLE_LE_VARIANT=true'\
-                'HIBERNATION_SUPPORT=true'\
                 'VERIFIED_BOOT_LE=${VBLE}'\
                 'VERITY_LE=${VERITY_ENABLED}'\
                 'INIT_BIN_LE=\"/sbin/init\"'\
