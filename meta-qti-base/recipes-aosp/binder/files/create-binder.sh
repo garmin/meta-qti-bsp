@@ -1,4 +1,5 @@
-# Copyright (c) 2017, The Linux Foundation. All rights reserved.
+#!/bin/sh
+# Copyright (c) 2020, The Linux Foundation. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are
@@ -23,18 +24,18 @@
 # BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
 # WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
-# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE
+# IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-[Unit]
-Description= Service manager Service
-SourcePath=/usr/bin/servicemanager
+if [ ! -c /dev/binder ] && [ ! -L /dev/binder ]; then
+	mkdir -p /dev/binderfs
+	mount -o stats=global -t binder binder /dev/binderfs
+	ln -s /dev/binderfs/binder     /dev/binder
+	ln -s /dev/binderfs/hwbinder   /dev/hwbinder
+	ln -s /dev/binderfs/vndbinder  /dev/vndbinder
+	chmod 0666 /dev/binderfs/hwbinder
+	chmod 0666 /dev/binderfs/binder
+	chmod 0666 /dev/binderfs/vndbinder
+fi
 
-[Service]
-User=system
-Group=system
-Restart=always
-ExecStartPre=/etc/initscripts/create-binder
-ExecStart=/usr/bin/servicemanager
+exit 0
 
-[Install]
-WantedBy=multi-user.target
