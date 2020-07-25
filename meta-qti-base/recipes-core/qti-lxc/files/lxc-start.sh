@@ -26,7 +26,7 @@
 # OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
 # IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-LXC_SERVICES="lxc-net.service lxc.service"
+LXC_SERVICES="var-lib-shared.mount lxc-net.service lxc.service"
 
 for SRV in $LXC_SERVICES
 do
