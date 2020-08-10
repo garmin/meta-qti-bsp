@@ -1,0 +1,128 @@
+From 99799407d9608a7eb346428f03336988c84324e5 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Wed, 12 Aug 2020 17:15:32 +0800
+Subject: [PATCH 27/28] change meson for build
+
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ ext/wayland/meson.build         |  7 ++++++-
+ gst-libs/gst/ionbuf/meson.build | 22 ++++++++++++++++++++++
+ gst-libs/gst/meson.build        |  0
+ meson.build                     |  7 +++++++
+ meson_options.txt               |  3 +++
+ 5 files changed, 38 insertions(+), 1 deletion(-)
+ mode change 100644 => 100755 ext/wayland/meson.build
+ create mode 100755 gst-libs/gst/ionbuf/meson.build
+ mode change 100644 => 100755 gst-libs/gst/meson.build
+ mode change 100644 => 100755 meson.build
+ mode change 100644 => 100755 meson_options.txt
+
+diff --git a/ext/wayland/meson.build b/ext/wayland/meson.build
+old mode 100644
+new mode 100755
+index 3c377ee..fbcc3ea
+--- a/ext/wayland/meson.build
++++ b/ext/wayland/meson.build
+@@ -10,6 +10,9 @@ wl_sources = [
+ 
+ libdrm_dep = dependency('libdrm', version: '>= 2.4.55', required:get_option('wayland'))
+ 
++libwaylandegl_dep = dependency('wayland-egl')
++libegl_dep = dependency('egl')
++libgbm_dep = dependency('gbm')
+ if use_wayland
+     protocols_datadir = wl_protocol_dep.get_pkgconfig_variable('pkgdatadir')
+ 
+@@ -20,6 +23,8 @@ if use_wayland
+         ['/unstable/fullscreen-shell/fullscreen-shell-unstable-v1.xml',
+          'fullscreen-shell-unstable-v1-protocol.c', 'fullscreen-shell-unstable-v1-client-protocol.h'],
+         ['/stable/xdg-shell/xdg-shell.xml', 'xdg-shell-protocol.c', 'xdg-shell-client-protocol.h'],
++		['/../weston/ivi-application.xml', 'ivi-application-protocol.c', 'ivi-application-client-protocol.h'],
++		['/../weston/gbm-buffer-backend.xml', 'gbm-buffer-backend-protocol.c', 'gbm-buffer-backend-client-protocol.h'],
+     ]
+     protocols_files = []
+ 
+@@ -42,7 +47,7 @@ if use_wayland
+         c_args : gst_plugins_bad_args + ['-DGST_USE_UNSTABLE_API'],
+         include_directories : [configinc],
+         dependencies : [gst_dep, gstvideo_dep, gstwayland_dep, gstallocators_dep,
+-                        wl_client_dep, wl_protocol_dep, libdrm_dep],
++                        wl_client_dep, wl_protocol_dep, libdrm_dep, gstionbuf_dep, libwaylandegl_dep, libegl_dep, libgbm_dep],
+         install : true,
+         install_dir : plugins_install_dir,
+     )
+diff --git a/gst-libs/gst/ionbuf/meson.build b/gst-libs/gst/ionbuf/meson.build
+new file mode 100755
+index 0000000..b98e1bd
+--- /dev/null
++++ b/gst-libs/gst/ionbuf/meson.build
+@@ -0,0 +1,22 @@
++ionbuf_sources = [
++  'gstionbuf_meta.c',
++]
++ionbuf_headers = [
++  'gstionbuf_meta.h',
++]
++install_headers(ionbuf_headers, subdir : 'gstreamer-1.0/gst/ionbuf')
++
++gstionbuf = library('gstionbuf-' + api_version,
++  ionbuf_sources,
++  c_args : gst_plugins_bad_args + ['-DGST_USE_UNSTABLE_API', '-DBUILDING_GST_IONBUF_BAD'],
++  include_directories : [configinc, libsinc],
++  version : libversion,
++  soversion : soversion,
++  darwin_versions : osxversion,
++  install : true,
++  dependencies : [gstbase_dep],
++)
++
++gstionbuf_dep = declare_dependency(link_with : gstionbuf,
++  include_directories : [libsinc],
++  dependencies : [gstbase_dep])
+diff --git a/gst-libs/gst/meson.build b/gst-libs/gst/meson.build
+old mode 100644
+new mode 100755
+diff --git a/meson.build b/meson.build
+old mode 100644
+new mode 100755
+index 8421811..1d52f45
+--- a/meson.build
++++ b/meson.build
+@@ -132,6 +132,7 @@ check_headers = [
+   ['HAVE_WINDOWS_H', 'windows.h'],
+   ['HAVE_WINSOCK2_H', 'winsock2.h'],
+   ['HAVE_WS2TCPIP_H', 'ws2tcpip.h'],
++  ['USE_GBM', 'gbm.h'],
+ ]
+ 
+ foreach h : check_headers
+@@ -421,6 +422,12 @@ if get_option('default_library') == 'shared'
+   plugins_pkgconfig_install_dir = disabler()
+ endif
+ 
++bad_kernel_path = get_option('kernel_path')
++if bad_kernel_path != ''
++  gst_plugins_bad_args += ['-I' + bad_kernel_path]
++endif
++
++
+ subdir('gst-libs')
+ subdir('gst')
+ subdir('sys')
+diff --git a/meson_options.txt b/meson_options.txt
+old mode 100644
+new mode 100755
+index 3a9aa93..0f4fcf0
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -180,3 +180,6 @@ option('package-name', type : 'string', yield : true,
+        description : 'package name to use in plugins')
+ option('package-origin', type : 'string', value : 'Unknown package origin', yield : true,
+        description : 'package origin URL to use in plugins')
++
++option('kernel_path', type : 'string', value : '',
++    description : 'An extra include directory to find the kernel headers')
+\ No newline at end of file
+-- 
+2.7.4
+

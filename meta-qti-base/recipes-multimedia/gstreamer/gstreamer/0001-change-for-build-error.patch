@@ -1,0 +1,30 @@
+From 4a7880f6a0e5a44eef79decefe554a49505058f7 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Fri, 14 Aug 2020 14:26:32 +0800
+Subject: [PATCH] change for build-error
+
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ configure.ac | 3 +++
+ 1 file changed, 3 insertions(+)
+ mode change 100644 => 100755 configure.ac
+
+diff --git a/configure.ac b/configure.ac
+old mode 100644
+new mode 100755
+index d9ab882..160fecb
+--- a/configure.ac
++++ b/configure.ac
+@@ -28,6 +28,9 @@ AM_MAINTAINER_MODE([enable])
+ dnl sets host_* variables
+ AC_CANONICAL_HOST
+ 
++dnl PKG_CONFIG_SYSROOT_DIR is a valid environment variable
++m4_pattern_allow(PKG_CONFIG_SYSROOT_DIR)
++
+ dnl use pretty build output by default
+ AM_SILENT_RULES([yes])
+ 
+-- 
+2.7.4
+
