@@ -89,6 +89,10 @@ do_install_append() {
    install -d ${D}${includedir}/libarbitrarybytes
    install -m 0644 ${S}/libarbitrarybytes/inc/*.h -D ${D}${includedir}/libarbitrarybytes/
 
+   if ${@bb.utils.contains('DISTRO_FEATURES', 'early_userspace', 'true', 'false', d)}; then
+       install -d ${D}/usr/bin
+       install -m 0777 ${THISDIR}/test_1080p.h264 ${D}/usr/bin/test_1080p.h264
+   fi
 }
 
 FILES_${PN}-dev = "\
