@@ -14,8 +14,9 @@ PREFERRED_VERSION_tcpdump              ?= "4.9.%"
 
 # Prefer Wayland/Weston version
 PREFERRED_VERSION_weston = "5.0.0"
-PREFERRED_VERSION_wayland = "1.16.0"
-PREFERRED_VERSION_wayland-native = "1.16.0"
+PREFERRED_VERSION_wayland = "1.18.0"
+PREFERRED_VERSION_wayland-native = "1.18.0"
+PREFERRED_VERSION_wayland-protocols = "1.20"
 PREFERRED_VERSION_wayland-ivi-extension = "2.2.0"
 
 # Prefer GStreamer 1.16.x by default
