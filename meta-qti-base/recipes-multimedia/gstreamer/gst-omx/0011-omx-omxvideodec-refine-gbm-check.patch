@@ -1,0 +1,62 @@
+From 42614e9d3627203d4b32ba0b412ad0d044cc59c4 Mon Sep 17 00:00:00 2001
+From: Yiming Cao <cyiming@codeaurora.org>
+Date: Thu, 30 May 2019 16:48:11 +0800
+Subject: [PATCH 11/42] omx:omxvideodec: refine gbm check
+
+Make the check consistent with other modules by
+properly checking gbm header file in the configure.
+
+Change-Id: I773ed2450684a5efd4bb7acd9a0e6ca566adbf8d
+Signed-off-by: Yiming Cao <cyiming@codeaurora.org>
+---
+ configure.ac    | 16 +++++++---------
+ omx/Makefile.am |  2 +-
+ 2 files changed, 8 insertions(+), 10 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index bba8060..351b8cb 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -313,19 +313,17 @@ if test "x$HAVE_VIDEO_EXT" = "xyes"; then
+ "
+ fi
+ 
++if [ test ${STAGING_INCDIR} ]; then
+ saved_compiling=$cross_compiling
+ cross_compiling=no
+-AC_ARG_WITH([protocal-xml-path],
+-      AS_HELP_STRING([--with-protocal-xml-path],[path of weston xml files]),
+-  [protocol_xml_path="$withval"], [protocol_xml_path="none"])
+-dnl Check for weston xml files
+-if [ test x$protocol_xml_path != xno ]; then
+-  AC_CHECK_FILE(${protocol_xml_path}/gbm-buffer-backend.xml,
+-     [AC_DEFINE(USE_GBM, [], [define USE_GBM macro])],[])
++  AC_CHECK_FILE(${STAGING_INCDIR}/gbm.h,
++    [AC_DEFINE(USE_GBM, [], [define USE_GBM macro])
++     AC_SUBST(GBM_LDFLAG, -lgbm)
++    ],[])
++cross_compiling=$saved_compiling
+ else
+-  AC_MSG_RESULT([no gbm-buffer-backend.xml found])
++  AC_MSG_RESULT([without STAGING_INCDIR, may cause check result not credible])
+ fi
+-cross_compiling=$saved_compiling
+ 
+ if test "x$HAVE_INDEX_EXT" = "xyes"; then
+     AC_DEFINE(HAVE_INDEX_EXT, 1, [OpenMAX IL has OMX_IndexExt.h header])
+diff --git a/omx/Makefile.am b/omx/Makefile.am
+index 59e3f94..5cf6c68 100644
+--- a/omx/Makefile.am
++++ b/omx/Makefile.am
+@@ -106,7 +106,7 @@ libgstomx_la_LIBADD = \
+ 	$(GST_LIBS) \
+ 	$(GST_ALLOCATORS_LIBS) \
+ 	$(GMODULE_NO_EXPORT_LIBS)
+-libgstomx_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS)
++libgstomx_la_LDFLAGS = $(GST_PLUGIN_LDFLAGS) $(GBM_LDFLAG)
+ 
+ EXTRA_DIST = \
+ 	openmax \
+-- 
+2.7.4
+

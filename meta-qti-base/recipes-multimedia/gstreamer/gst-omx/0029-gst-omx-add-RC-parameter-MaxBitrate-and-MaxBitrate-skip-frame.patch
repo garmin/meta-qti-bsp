@@ -1,0 +1,31 @@
+From d673f04082a2c0e8353c70d4a2d79ce6bc9228e7 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Wed, 23 Oct 2019 16:16:17 +0800
+Subject: [PATCH 29/42] gst-omx: add RC parameter MaxBitrate and MaxBitrate
+ skip frame
+
+cherry-pick from 2137631
+
+Change-Id: Iad61abbff00ebe458c6f53ddb9086af680e376c0
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ omx/gstomxvideoenc.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/omx/gstomxvideoenc.c b/omx/gstomxvideoenc.c
+index 39b86fe..96cfb3f 100644
+--- a/omx/gstomxvideoenc.c
++++ b/omx/gstomxvideoenc.c
+@@ -59,6 +59,9 @@ gst_omx_video_enc_control_rate_get_type (void)
+           "variable-skip-frames"},
+       {OMX_Video_ControlRateConstantSkipFrames, "Constant Skip Frames",
+           "constant-skip-frames"},
++      {QOMX_Video_ControlRateMaxBitrate, "MaxBitrate", "max-bitrate"},
++      {QOMX_Video_ControlRateMaxBitrateSkipFrames, "MaxBitrate Skip Frames",
++        "max-bitrate-skip-frames"},
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+       {OMX_ALG_Video_ControlRateLowLatency, "Low Latency", "low-latency"},
+ #endif
+-- 
+2.7.4
+

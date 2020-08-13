@@ -1,0 +1,99 @@
+From 810a2b6b5b9774a91e600e0b38fa0c93f5a94c61 Mon Sep 17 00:00:00 2001
+From: Miaomiao Chen <miaochen@codeaurora.org>
+Date: Tue, 28 Apr 2020 11:18:43 +0800
+Subject: [PATCH 25/28] waylandsink: modify the key rule of hash table
+
+Previously, the key of hash table is calculated by value of buffer
+fd. The buffer fd will be different per frames if we change buffer
+share mechanism between dec and sink, so the key will be calculated
+by mapped data address to avoid the wayland buffer reallocation.
+
+Change-Id: I5f0675da263606ca27728c2fe51c5c6742421d79
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 50 ++++++++++++++++++--------------------------
+ 1 file changed, 20 insertions(+), 30 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index e1ead67..13f3870 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -1470,42 +1470,35 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+ #endif
+   }else{
+     wlbuf_ops wlbufops;
+-    GstMemory *mem_bak = NULL;
++    guint8* data_bak = NULL;
+ 
+     if (G_UNLIKELY (!sink->buffer_table)) {
+       sink->buffer_table = g_hash_table_new_full (g_int64_hash, g_int64_equal,
+-					  g_free, destroy_gstwl_buffer);
++                             g_free, destroy_gstwl_buffer);
+     }
+-#ifdef USE_GBM
+-     /* put fd and offset into a int64 key*/
+-    key = ((gint64)(ionBufFdMeta->fd & 0xFFFFFFFF) << 32) | (ionBufFdMeta->meta_fd & 0xFFFFFFFF);
+-    GST_LOG_OBJECT (sink, "gbm buffer %p fd %d meta_fd %d ", buffer,ionBufFdMeta->fd,ionBufFdMeta->meta_fd);
+-#else
+-    key = ((gint64)(ionBufFdMeta->fd & 0xFFFFFFFF) << 32) | (ionBufFdMeta->offset & 0xFFFFFFFF);
+-    GST_LOG_OBJECT (sink, "egl buffer %p fd %d offset %d ", buffer,ionBufFdMeta->fd,ionBufFdMeta->offset);
+-#endif
+-    gstwlbuf = (GstWlBuffer *) g_hash_table_lookup(sink->buffer_table, &key);
+-    if (gstwlbuf && gstwlbuf->old_config) {
+-      g_hash_table_remove (sink->buffer_table, &key);
+-      GST_LOG_OBJECT (sink, "remove the old wl buffer:%p", gstwlbuf);
+-      gstwlbuf = NULL;
+-    }
+-    /* the underlying memory may be changed when the new gstbuffer
+-     * has same fd and offset of an old gstbuffer to which a gstwlbuf
+-     * was related */
++
+     if (gst_buffer_n_memory (buffer)) {
+       GstMapInfo map;
+ 
+-      mem_bak = memory = gst_buffer_get_memory (buffer, 0);
+-      if(gstwlbuf && gstwlbuf->data){
+-        gst_memory_map (memory, &map, GST_MAP_READ);
+-        if (gstwlbuf && gstwlbuf->data != map.data) {
++      memory = gst_buffer_get_memory (buffer, 0);
++      gst_memory_map (memory, &map, GST_MAP_READ);
++      key = (gint64)map.data;
++      data_bak = map.data;
++      gstwlbuf = (GstWlBuffer *) g_hash_table_lookup(sink->buffer_table, &key);
++
++      if (gstwlbuf && gstwlbuf->data) {
++        if (gstwlbuf->data != map.data || gstwlbuf->old_config) {
+           g_hash_table_remove (sink->buffer_table, &key);
++          if (gstwlbuf->old_config) {
++            GST_LOG_OBJECT (sink, "remove the old wl buffer:%p", gstwlbuf);
++          }
+           GST_WARNING("gstwlbuf 0x%x, gstwlbuf->data 0x%x, map.data 0x%x\n", gstwlbuf, gstwlbuf->data, map.data);
+           gstwlbuf = NULL;
+         }
+-        gst_memory_unmap (memory, &map);
+       }
++      gst_memory_unmap (memory, &map);
++    }else{
++      g_warn_if_fail(FALSE && "Only support gbm/ion buf with valid memory and data address!");
+     }
+     if (memory)
+       gst_memory_unref (memory);
+@@ -1533,12 +1526,9 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+ 
+       if (gstwlbuf->wlbuffer) {
+         wlbufops.add (buffer, sink->display, gstwlbuf);
+-        /* although memory pointer won't be set to NULL,
+-         * remove the indicated dependence */
+-        GstMapInfo map1;
+-        gst_memory_map (mem_bak, &map1, GST_MAP_READ);
+-        gstwlbuf->data = map1.data;
+-        gst_memory_unmap (mem_bak, &map1);
++
++        gstwlbuf->data = data_bak;
++        GST_LOG_OBJECT(sink, "Insert new entry:%p to hash table", data_bak);
+         g_hash_table_insert (sink->buffer_table, bufkey, gstwlbuf);
+       } else {
+         g_object_unref (gstwlbuf);
+-- 
+2.7.4
+

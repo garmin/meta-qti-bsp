@@ -1,0 +1,501 @@
+From 79bd474b6bd267666439e69c0f2cf966e136ca5b Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Wed, 23 Oct 2019 14:13:14 +0800
+Subject: [PATCH 27/42] gst-omx: Add support for multi-slice in H264 and H265
+ encode
+
+Also add multislice info metadata feature and control for
+multislice extra data
+
+cherry-pick from 1853358 1958753 2150522
+
+Change-Id: I043868f0d9e06ca71b0d611cbaccd70f717b9c31
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ omx/gstomxh264enc.c | 146 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ omx/gstomxh264enc.h |  10 ++++
+ omx/gstomxh265enc.c | 134 +++++++++++++++++++++++++++++++++++++++++++++++
+ omx/gstomxh265enc.h |   9 ++++
+ 4 files changed, 299 insertions(+)
+
+diff --git a/omx/gstomxh264enc.c b/omx/gstomxh264enc.c
+index 3de470d..4fb500a 100644
+--- a/omx/gstomxh264enc.c
++++ b/omx/gstomxh264enc.c
+@@ -61,6 +61,9 @@ enum
+   PROP_ENTROPY_MODE,
+   PROP_CONSTRAINED_INTRA_PREDICTION,
+   PROP_LOOP_FILTER_MODE,
++  PROP_MULTISLICE_MODE,
++  PROP_MULTISLICE_VALUE,
++  PROP_MULTSLICEINFO_EXTRADATA
+ };
+ 
+ #define GST_OMX_H264_VIDEO_ENC_INLINE_SPS_PPS_HEADERS_DEFAULT      TRUE
+@@ -70,7 +73,28 @@ enum
+ #define GST_OMX_H264_VIDEO_ENC_ENTROPY_MODE_DEFAULT (0xffffffff)
+ #define GST_OMX_H264_VIDEO_ENC_CONSTRAINED_INTRA_PREDICTION_DEFAULT (FALSE)
+ #define GST_OMX_H264_VIDEO_ENC_LOOP_FILTER_MODE_DEFAULT (0xffffffff)
++#define GST_OMX_H264_VIDEO_ENC_MULTI_SLICE_MODE_DEFAULT GST_OMX_H264_ENC_SLICE_MODE_DISABLE
++#define GST_OMX_H264_VIDEO_ENC_MULTI_SLICE_VALUE_DEFAULT 2048
++#define GST_OMX_H264_VIDEO_ENC_MULTI_SLICE_INFO_EXTRADATA_DEFAULT  FALSE
+ 
++#define GST_OMX_H264_ENC_SLICE_MODE_TYPE (gst_omx_h264_enc_slice_mode_get_type())
++static GType
++gst_omx_h264_enc_slice_mode_get_type(void)
++{
++  static const GEnumValue multislice_mode_types[] = {
++    {GST_OMX_H264_ENC_SLICE_MODE_DISABLE, "disable multi-slice", "disable"},
++    {GST_OMX_H264_ENC_SLICE_MODE_MB, "multi-slice based on macro blocks", "mb"},
++    {GST_OMX_H264_ENC_SLICE_MODE_BITS, "multi-slice based on slice size in bits", "bits"},
++    {0, NULL, NULL},
++  };
++
++  static gsize mode = 0;
++  if ( g_once_init_enter( &mode ) ) {
++    GType _mode = g_enum_register_static ("GstOMXH264EncSliceModes", multislice_mode_types);
++    g_once_init_leave( &mode, _mode);
++  }
++  return (GType) mode;
++}
+ 
+ /* class initialization */
+ 
+@@ -145,6 +169,14 @@ gst_omx_h264_enc_class_init (GstOMXH264EncClass * klass)
+           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+           GST_PARAM_MUTABLE_READY));
+ 
++  g_object_class_install_property (gobject_class, PROP_MULTSLICEINFO_EXTRADATA,
++      g_param_spec_boolean ("multisliceinfo-extradata-enable",
++          "multisliceinfo-extradata-enable",
++          "Multislice info extradata enable",
++          GST_OMX_H264_VIDEO_ENC_MULTI_SLICE_INFO_EXTRADATA_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
++          GST_PARAM_MUTABLE_READY));
++
+   g_object_class_install_property (gobject_class, PROP_PERIODICITYOFIDRFRAMES,
+       g_param_spec_uint ("periodicity-idr", "IDR periodicity",
+           "Periodicity of IDR frames (0xffffffff=component default)",
+@@ -205,6 +237,26 @@ gst_omx_h264_enc_class_init (GstOMXH264EncClass * klass)
+           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+           GST_PARAM_MUTABLE_READY));
+ 
++  g_object_class_install_property (gobject_class,
++      PROP_MULTISLICE_MODE,
++      g_param_spec_enum ("multislice-mode",
++          "Multi slice mode",
++          "Multi slice mode",
++          GST_OMX_H264_ENC_SLICE_MODE_TYPE,
++          GST_OMX_H264_VIDEO_ENC_MULTI_SLICE_MODE_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
++          GST_PARAM_MUTABLE_READY));
++
++  g_object_class_install_property (gobject_class,
++      PROP_MULTISLICE_VALUE,
++      g_param_spec_uint ("multislice-value",
++          "Multi slice value based on multi-slice mode",
++          "Multi slice value based on multi-slice mode", 0,
++          G_MAXUINT,
++          GST_OMX_H264_VIDEO_ENC_MULTI_SLICE_VALUE_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
++          GST_PARAM_MUTABLE_READY));
++
+   basevideoenc_class->flush = gst_omx_h264_enc_flush;
+   basevideoenc_class->stop = gst_omx_h264_enc_stop;
+ 
+@@ -251,6 +303,15 @@ gst_omx_h264_enc_set_property (GObject * object, guint prop_id,
+     case PROP_LOOP_FILTER_MODE:
+       self->loop_filter_mode = g_value_get_enum (value);
+       break;
++    case PROP_MULTISLICE_MODE:
++      self->multislice_mode = (GstOMXH264EncSliceMode)g_value_get_enum (value);
++      break;
++    case PROP_MULTISLICE_VALUE:
++      self->multislice_value = g_value_get_uint (value);
++      break;
++    case PROP_MULTSLICEINFO_EXTRADATA:
++      self->multisliceinfo_extradata_enable = g_value_get_boolean (value);
++      break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+@@ -286,6 +347,15 @@ gst_omx_h264_enc_get_property (GObject * object, guint prop_id, GValue * value,
+     case PROP_LOOP_FILTER_MODE:
+       g_value_set_enum (value, self->loop_filter_mode);
+       break;
++    case PROP_MULTISLICE_MODE:
++      g_value_set_enum (value, self->multislice_mode);
++      break;
++    case PROP_MULTISLICE_VALUE:
++      g_value_set_uint (value, self->multislice_value);
++      break;
++    case PROP_MULTSLICEINFO_EXTRADATA:
++      g_value_set_boolean (value, self->multisliceinfo_extradata_enable);
++      break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+@@ -306,6 +376,12 @@ gst_omx_h264_enc_init (GstOMXH264Enc * self)
+   self->constrained_intra_prediction =
+       GST_OMX_H264_VIDEO_ENC_CONSTRAINED_INTRA_PREDICTION_DEFAULT;
+   self->loop_filter_mode = GST_OMX_H264_VIDEO_ENC_LOOP_FILTER_MODE_DEFAULT;
++  self->multislice_mode =
++      GST_OMX_H264_VIDEO_ENC_MULTI_SLICE_MODE_DEFAULT;
++  self->multislice_value =
++      GST_OMX_H264_VIDEO_ENC_MULTI_SLICE_VALUE_DEFAULT;
++  self->multisliceinfo_extradata_enable =
++      GST_OMX_H264_VIDEO_ENC_MULTI_SLICE_INFO_EXTRADATA_DEFAULT;
+ }
+ 
+ static gboolean
+@@ -384,6 +460,7 @@ update_param_avc (GstOMXH264Enc * self,
+ {
+   OMX_VIDEO_PARAM_AVCTYPE param;
+   OMX_ERRORTYPE err;
++  OMX_VIDEO_PARAM_ERRORCORRECTIONTYPE error_corr;
+ 
+   GST_OMX_INIT_STRUCT (&param);
+   param.nPortIndex = GST_OMX_VIDEO_ENC (self)->enc_out_port->index;
+@@ -462,7 +539,76 @@ update_param_avc (GstOMXH264Enc * self,
+         gst_omx_error_to_string (err), err);
+     return FALSE;
+   }
++  /* multi-slice configuration */
++  if (GST_OMX_H264_ENC_SLICE_MODE_BITS == self->multislice_mode) {
++    GST_OMX_INIT_STRUCT (&error_corr);
++    error_corr.nPortIndex = GST_OMX_VIDEO_ENC (self)->enc_out_port->index;
++    err =
++        gst_omx_component_get_parameter (GST_OMX_VIDEO_ENC (self)->enc,
++        OMX_IndexParamVideoErrorCorrection, &error_corr);
++    if (err != OMX_ErrorNone) {
++      GST_ERROR_OBJECT (self,
++        "Failed to get VideoErrorCorrection param setting, %s (0x%08x)",
++        gst_omx_error_to_string (err), err);
++      return FALSE;
++    }
++
++    error_corr.nResynchMarkerSpacing = self->multislice_value;
++    error_corr.bEnableResync = (error_corr.nResynchMarkerSpacing > 0) ? OMX_TRUE : OMX_FALSE;
++
++    err = gst_omx_component_set_parameter (GST_OMX_VIDEO_ENC (self)->enc,
++          OMX_IndexParamVideoErrorCorrection, &error_corr);
++    if (err != OMX_ErrorNone) {
++      GST_ERROR_OBJECT (self,
++            "Failed to set VideoErrorCorrection param setting, %s (0x%08x)",
++            gst_omx_error_to_string (err), err);
++      return FALSE;
++    }
+ 
++    if ((GST_OMX_H264_ENC_SLICE_MODE_DISABLE != self->multislice_mode) && self->multisliceinfo_extradata_enable)
++    {
++       QOMX_INDEXEXTRADATATYPE extra_data;
++       GST_OMX_INIT_STRUCT(&extra_data);
++       extra_data.nPortIndex = GST_OMX_VIDEO_ENC (self)->enc_out_port->index;
++       extra_data.nIndex = (OMX_INDEXTYPE)OMX_ExtraDataVideoEncoderSliceInfo;
++       extra_data.bEnabled = OMX_TRUE;
++       err = gst_omx_component_set_parameter(GST_OMX_VIDEO_ENC (self)->enc,
++                          OMX_QcomIndexParamIndexExtraDataType,
++                          &extra_data);
++       if (err != OMX_ErrorNone)
++       {
++          GST_ERROR_OBJECT (self,
++               "Failed to set OMX_QcomIndexParamIndexExtraDataType param setting, %s (0x%08x)",
++               gst_omx_error_to_string (err), err);
++          return FALSE;
++       }
++       GST_DEBUG_OBJECT (self, "OMX_ExtraDataVideoEncoderSliceInfo enabled" );
++    }
++  }else{
++    GST_OMX_INIT_STRUCT (&param);
++    err = gst_omx_component_get_parameter (GST_OMX_VIDEO_ENC (self)->enc,
++        OMX_IndexParamVideoAvc, &param);
++    if (err != OMX_ErrorNone) {
++      GST_ERROR_OBJECT (self,
++          "can't get OMX_IndexParamVideoAvc %s (0x%08x)",
++          gst_omx_error_to_string (err), err);
++      return FALSE;
++    }
++
++    param.nSliceHeaderSpacing = (GST_OMX_H264_ENC_SLICE_MODE_MB == self->multislice_mode) ?
++       self->multislice_value : 0;
++
++    err =
++        gst_omx_component_set_parameter (GST_OMX_VIDEO_ENC (self)->enc,
++              OMX_IndexParamVideoAvc, &param);
++
++    if (err != OMX_ErrorNone) {
++       GST_ERROR_OBJECT (self,
++            "Failed to set OMX_IndexParamVideoAvc param setting, %s (0x%08x)",
++            gst_omx_error_to_string (err), err);
++      return FALSE;
++    }
++  }
+   return TRUE;
+ }
+ 
+diff --git a/omx/gstomxh264enc.h b/omx/gstomxh264enc.h
+index d945db2..52645cf 100644
+--- a/omx/gstomxh264enc.h
++++ b/omx/gstomxh264enc.h
+@@ -42,6 +42,13 @@ G_BEGIN_DECLS
+ typedef struct _GstOMXH264Enc GstOMXH264Enc;
+ typedef struct _GstOMXH264EncClass GstOMXH264EncClass;
+ 
++typedef enum _GstOMXH264EncSliceMode
++{
++  GST_OMX_H264_ENC_SLICE_MODE_DISABLE = 0,
++  GST_OMX_H264_ENC_SLICE_MODE_MB = 2,
++  GST_OMX_H264_ENC_SLICE_MODE_BITS = 3
++}GstOMXH264EncSliceMode;
++
+ struct _GstOMXH264Enc
+ {
+   GstOMXVideoEnc parent;
+@@ -53,6 +60,9 @@ struct _GstOMXH264Enc
+   guint32 entropy_mode;
+   gboolean constrained_intra_prediction;
+   guint32 loop_filter_mode;
++  GstOMXH264EncSliceMode multislice_mode;
++  guint32 multislice_value;
++  gboolean multisliceinfo_extradata_enable;
+ 
+   GList *headers;
+ };
+diff --git a/omx/gstomxh265enc.c b/omx/gstomxh265enc.c
+index a92f0e9..382ae7a 100644
+--- a/omx/gstomxh265enc.c
++++ b/omx/gstomxh265enc.c
+@@ -51,6 +51,9 @@ enum
+   PROP_CONSTRAINED_INTRA_PREDICTION,
+   PROP_LOOP_FILTER_MODE,
+   PROP_INLINESPSPPSHEADERS,
++  PROP_MULTISLICE_MODE,
++  PROP_MULTISLICE_VALUE,
++  PROP_MULTSLICEINFO_EXTRADATA
+ };
+ 
+ #define GST_OMX_H265_ENC_INLINE_SPS_PPS_HEADERS_DEFAULT      TRUE
+@@ -61,6 +64,10 @@ enum
+ #define GST_OMX_H265_VIDEO_ENC_CONSTRAINED_INTRA_PREDICTION_DEFAULT (FALSE)
+ #define GST_OMX_H265_VIDEO_ENC_LOOP_FILTER_MODE_DEFAULT (0xffffffff)
+ 
++#define GST_OMX_H265_VIDEO_ENC_MULTI_SLICE_MODE_DEFAULT GST_OMX_H265_ENC_SLICE_MODE_DISABLE
++#define GST_OMX_H265_VIDEO_ENC_MULTI_SLICE_VALUE_DEFAULT 2048
++#define GST_OMX_H265_VIDEO_ENC_MULTI_SLICE_INFO_EXTRADATA_DEFAULT  FALSE
++
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+ /* zynqultrascaleplus's OMX uses a param struct different of Android's one */
+ #define INDEX_PARAM_VIDEO_HEVC OMX_ALG_IndexParamVideoHevc
+@@ -68,6 +75,25 @@ enum
+ #define INDEX_PARAM_VIDEO_HEVC OMX_IndexParamVideoHevc
+ #endif
+ 
++#define GST_OMX_H265_ENC_SLICE_MODE_TYPE (gst_omx_h265_enc_slice_mode_get_type())
++
++static GType
++gst_omx_h265_enc_slice_mode_get_type(void)
++{
++  static const GEnumValue multislice_mode_types[] = {
++    {GST_OMX_H265_ENC_SLICE_MODE_DISABLE, "disable multi-slice", "disable"},
++    {GST_OMX_H265_ENC_SLICE_MODE_BITS, "multi-slice based on slice size in bits", "bits"},
++    {0, NULL, NULL},
++  };
++
++  static gsize mode = 0;
++  if ( g_once_init_enter( &mode ) ) {
++    GType _mode = g_enum_register_static ("GstOMXH265EncSliceModes", multislice_mode_types);
++    g_once_init_leave( &mode, _mode);
++  }
++  return (GType) mode;
++}
++
+ /* class initialization */
+ 
+ #define DEBUG_INIT \
+@@ -137,6 +163,14 @@ gst_omx_h265_enc_class_init (GstOMXH265EncClass * klass)
+           GST_OMX_H265_ENC_INLINE_SPS_PPS_HEADERS_DEFAULT,
+           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+           GST_PARAM_MUTABLE_READY));
++
++  g_object_class_install_property (gobject_class, PROP_MULTSLICEINFO_EXTRADATA,
++		g_param_spec_boolean ("multisliceinfo-extradata-enable",
++			"multisliceinfo-extradata-enable",
++			"Multislice info extradata enable",
++			GST_OMX_H265_VIDEO_ENC_MULTI_SLICE_INFO_EXTRADATA_DEFAULT,
++			G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
++			GST_PARAM_MUTABLE_READY));
+   g_object_class_install_property (gobject_class, PROP_PERIODICITYOFIDRFRAMES,
+       g_param_spec_uint ("periodicity-idr", "IDR periodicity",
+           "Periodicity of IDR frames (0xffffffff=component default)",
+@@ -170,6 +204,23 @@ gst_omx_h265_enc_class_init (GstOMXH265EncClass * klass)
+           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+           GST_PARAM_MUTABLE_READY));
+ #endif
++  g_object_class_install_property (gobject_class, PROP_MULTISLICE_MODE,
++      g_param_spec_enum ("multislice-mode",
++          "Multi slice mode",
++          "Multi slice mode",
++          GST_OMX_H265_ENC_SLICE_MODE_TYPE,
++          GST_OMX_H265_VIDEO_ENC_MULTI_SLICE_MODE_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
++          GST_PARAM_MUTABLE_READY));
++
++  g_object_class_install_property (gobject_class, PROP_MULTISLICE_VALUE,
++      g_param_spec_uint ("multislice-value",
++          "Multi slice value based on multi-slice mode",
++          "Multi slice value based on multi-slice mode", 0,
++          G_MAXUINT,
++          GST_OMX_H265_VIDEO_ENC_MULTI_SLICE_VALUE_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
++          GST_PARAM_MUTABLE_READY));
+ 
+   videoenc_class->cdata.default_src_template_caps = "video/x-h265, "
+       "width=(int) [ 1, MAX ], " "height=(int) [ 1, MAX ], "
+@@ -201,6 +252,15 @@ gst_omx_h265_enc_set_property (GObject * object, guint prop_id,
+   case PROP_PERIODICITYOFIDRFRAMES:
+       self->periodicity_idr = g_value_get_uint (value);
+       break;
++  case PROP_MULTISLICE_MODE:
++      self->multislice_mode = (GstOMXH265EncSliceMode)g_value_get_enum (value);
++      break;
++  case PROP_MULTISLICE_VALUE:
++      self->multislice_value = g_value_get_uint (value);
++      break;
++  case PROP_MULTSLICEINFO_EXTRADATA:
++      self->multisliceinfo_extradata_enable = g_value_get_boolean (value);
++      break;
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+     case PROP_B_FRAMES:
+       self->b_frames = g_value_get_uint (value);
+@@ -234,6 +294,15 @@ gst_omx_h265_enc_get_property (GObject * object, guint prop_id, GValue * value,
+   case PROP_PERIODICITYOFIDRFRAMES:
+       g_value_set_uint (value, self->periodicity_idr);
+       break;
++  case PROP_MULTISLICE_MODE:
++      g_value_set_enum (value, self->multislice_mode);
++      break;
++  case PROP_MULTISLICE_VALUE:
++      g_value_set_uint (value, self->multislice_value);
++      break;
++  case PROP_MULTSLICEINFO_EXTRADATA:
++      g_value_set_boolean (value, self->multisliceinfo_extradata_enable);
++      break;
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+     case PROP_B_FRAMES:
+       g_value_set_uint (value, self->b_frames);
+@@ -260,6 +329,12 @@ gst_omx_h265_enc_init (GstOMXH265Enc * self)
+       GST_OMX_H265_ENC_INLINE_SPS_PPS_HEADERS_DEFAULT;
+   self->periodicity_idr =
+       GST_OMX_H265_VIDEO_ENC_PERIODICITY_OF_IDR_FRAMES_DEFAULT;
++  self->multislice_mode =
++      GST_OMX_H265_VIDEO_ENC_MULTI_SLICE_MODE_DEFAULT;
++  self->multislice_value =
++      GST_OMX_H265_VIDEO_ENC_MULTI_SLICE_VALUE_DEFAULT;
++  self->multisliceinfo_extradata_enable =
++      GST_OMX_H265_VIDEO_ENC_MULTI_SLICE_INFO_EXTRADATA_DEFAULT;
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+   self->b_frames = GST_OMX_H265_VIDEO_ENC_B_FRAMES_DEFAULT;
+   self->constrained_intra_prediction =
+@@ -465,6 +540,8 @@ gst_omx_h265_enc_set_format (GstOMXVideoEnc * enc, GstOMXPort * port,
+   OMX_VIDEO_HEVCLEVELTYPE level = OMX_VIDEO_HEVCLevelUnknown;
+   PrependSPSPPSToIDRFramesParams config_inline_header;
+   QOMX_VIDEO_INTRAPERIODTYPE config_hevcintraperiod;
++  OMX_VIDEO_PARAM_ERRORCORRECTIONTYPE error_corr;
++
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+   if (self->periodicity_idr !=
+       GST_OMX_H265_VIDEO_ENC_PERIODICITY_OF_IDR_FRAMES_DEFAULT)
+@@ -572,6 +649,63 @@ GST_OMX_INIT_STRUCT (&config_inline_header);
+         gst_omx_error_to_string (err), err);
+     return FALSE;
+   }
++
++  GST_OMX_INIT_STRUCT (&error_corr);
++
++  error_corr.nPortIndex = GST_OMX_VIDEO_ENC (self)->enc_out_port->index;
++
++  err =
++      gst_omx_component_get_parameter (GST_OMX_VIDEO_ENC (self)->enc,
++      OMX_IndexParamVideoErrorCorrection, &error_corr);
++
++  if (err != OMX_ErrorNone) {
++    GST_WARNING_OBJECT (self,
++        "Failed to get VideoErrorCorrection param setting");
++    return TRUE;
++  } else {
++    // enable multi-slice
++    switch (self->multislice_mode)
++    {
++      case GST_OMX_H265_ENC_SLICE_MODE_BITS:
++        error_corr.bEnableResync = (self->multislice_value > 0) ? OMX_TRUE : OMX_FALSE;
++        error_corr.nResynchMarkerSpacing = self->multislice_value;
++        break;
++      case GST_OMX_H265_ENC_SLICE_MODE_DISABLE:
++      default:
++        error_corr.bEnableResync = OMX_FALSE;
++        error_corr.nResynchMarkerSpacing = 0;
++        break;
++    }
++    err =
++        gst_omx_component_set_parameter (GST_OMX_VIDEO_ENC (self)->enc,
++          OMX_IndexParamVideoErrorCorrection, &error_corr);
++
++    if (err != OMX_ErrorNone) {
++      GST_ERROR_OBJECT (self,
++            "Failed to set VideoErrorCorrection param setting, %s (0x%08x)",
++             gst_omx_error_to_string (err), err);
++      return TRUE;
++    }
++    if (GST_OMX_H265_ENC_SLICE_MODE_DISABLE != self->multislice_mode)
++    {
++       QOMX_INDEXEXTRADATATYPE extra_data;
++       GST_OMX_INIT_STRUCT(&extra_data);
++       extra_data.nPortIndex = GST_OMX_VIDEO_ENC (self)->enc_out_port->index;
++       extra_data.nIndex = (OMX_INDEXTYPE)OMX_ExtraDataVideoEncoderSliceInfo;
++       extra_data.bEnabled = OMX_TRUE;
++       err = gst_omx_component_set_parameter(GST_OMX_VIDEO_ENC (self)->enc,
++                          OMX_QcomIndexParamIndexExtraDataType,
++                          &extra_data);
++       if (err != OMX_ErrorNone)
++       {
++          GST_ERROR_OBJECT (self,
++               "Failed to set OMX_QcomIndexParamIndexExtraDataType param setting, %s (0x%08x)",
++               gst_omx_error_to_string (err), err);
++          return FALSE;
++       }
++       GST_DEBUG_OBJECT (self, "OMX_ExtraDataVideoEncoderSliceInfo enabled" );
++    }
++  }
+   return TRUE;
+ 
+ unsupported_profile:
+diff --git a/omx/gstomxh265enc.h b/omx/gstomxh265enc.h
+index 27fa132..2efabf3 100644
+--- a/omx/gstomxh265enc.h
++++ b/omx/gstomxh265enc.h
+@@ -43,6 +43,12 @@ G_BEGIN_DECLS
+ typedef struct _GstOMXH265Enc GstOMXH265Enc;
+ typedef struct _GstOMXH265EncClass GstOMXH265EncClass;
+ 
++typedef enum _GstOMXH265EncSliceMode
++{
++  GST_OMX_H265_ENC_SLICE_MODE_DISABLE = 0,
++  GST_OMX_H265_ENC_SLICE_MODE_BITS = 3
++}GstOMXH265EncSliceMode;
++
+ struct _GstOMXH265Enc
+ {
+   GstOMXVideoEnc parent;
+@@ -56,6 +62,9 @@ struct _GstOMXH265Enc
+   gboolean constrained_intra_prediction;
+   guint32 loop_filter_mode;
+ #endif
++  GstOMXH265EncSliceMode multislice_mode;
++  guint32 multislice_value;
++  gboolean multisliceinfo_extradata_enable;
+ };
+ 
+ struct _GstOMXH265EncClass
+-- 
+2.7.4
+

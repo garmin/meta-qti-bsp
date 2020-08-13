@@ -1,0 +1,30 @@
+From 57edf2079afb567370df2a8508fb7b9c0b58689c Mon Sep 17 00:00:00 2001
+From: Bo Fang <bofang1@codeaurora.org>
+Date: Mon, 2 Mar 2020 01:57:41 +0800
+Subject: [PATCH 19/28] waylandsink: remove one useless log
+
+There are two log of "not have a wl_buffer from our display, creating it",
+remove the improper one.
+
+Change-Id: Ic3a61449ecf5b42e5b17fc184e5848f1c33ec663
+Signed-off-by: Bo Fang <bofang1@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 4ef4e22..472e28b 100755
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -1457,8 +1457,6 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+   }else{
+     wlbuf_ops wlbufops;
+     GstMemory *mem_bak = NULL;
+-    GST_LOG_OBJECT (sink, "buffer %p does not have a wl_buffer from our "
+-					"display, creating it", buffer);
+ 
+     if (G_UNLIKELY (!sink->buffer_table)) {
+       sink->buffer_table = g_hash_table_new_full (g_int64_hash, g_int64_equal,
+-- 
+2.7.4
+

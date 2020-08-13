@@ -1,0 +1,34 @@
+From 711edf65ba4535ae44b409f2fc1aef1a7b6080f0 Mon Sep 17 00:00:00 2001
+From: Bo Fang <bofang1@codeaurora.org>
+Date: Wed, 4 Dec 2019 16:55:59 +0800
+Subject: [PATCH 16/28] waylandsink: change gbm device node to renderD128 for
+ sw dec case
+
+HW decoder allocate gbm buffer through /dev/dri/renderD128 instead of
+/dev/dri/card0. For sw dec/filter case, waylandsink also need to allocate
+gbm buffer, change device node from card0 to renderD128 to align with
+hw decoder.
+
+Change-Id: Ibc5251b1c53cbcdff1b37f60e1309f367fa5c6bd
+Signed-off-by: Bo Fang <bofang1@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 6669b03..f27801b 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -1016,7 +1016,8 @@ static int gbm_swframe_mem_alloc_map(GstWaylandSink* sink, int w, int h, int idx
+     unsigned char* p;
+     if (mgr->gbm_dev == NULL) {
+       //first time
+-      mgr->gbm_node_fd = open("/dev/dri/card0", O_RDWR | O_CLOEXEC);
++#define GBMDEV_DEVICE_NODE "/dev/dri/renderD128"  //"/dev/dri/card0"
++      mgr->gbm_node_fd = open(GBMDEV_DEVICE_NODE, O_RDWR | O_CLOEXEC);
+       GST_DEBUG_OBJECT(sink, "open gbm node ret %d", mgr->gbm_node_fd);
+       if (mgr->gbm_node_fd <= 0) {
+         GST_ERROR_OBJECT(sink, "open gbm node fail %d!", mgr->gbm_node_fd);
+-- 
+2.7.4
+

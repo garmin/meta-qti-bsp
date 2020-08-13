@@ -1,0 +1,59 @@
+From ae669e9e5db5c3960760eb47892cebbb095793b2 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Tue, 22 Oct 2019 14:52:41 +0800
+Subject: [PATCH 3/4] Support NV12_512 color format in Gstreamer
+
+cherry-pick from 2732141 2742427
+
+Change-Id: I61385e52f715e067a1153c6fcb8f9710062cf934
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ gst-libs/gst/video/video-format.c | 2 ++
+ gst-libs/gst/video/video-format.h | 4 +++-
+ 2 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/gst-libs/gst/video/video-format.c b/gst-libs/gst/video/video-format.c
+index 1bcc2a8..7edd703 100644
+--- a/gst-libs/gst/video/video-format.c
++++ b/gst-libs/gst/video/video-format.c
+@@ -5674,6 +5674,8 @@ static const VideoFormat formats[] = {
+       DPTH888, PSTR122, PLANE011, OFFS001, SUB420, PACK_NV12),
+   MAKE_RGBA_FORMAT (RGBA_UBWC, "raw video", DPTH8888, PSTR4444, PLANE0, OFFS0123,
+       SUB4444, PACK_RGBA),
++  MAKE_YUV_FORMAT (NV12_512, "raw video", GST_MAKE_FOURCC ('Q', '5', '1', '2'),
++      DPTH888, PSTR122, PLANE011, OFFS001, SUB420, PACK_NV12),
+ };
+ 
+ static GstVideoFormat
+diff --git a/gst-libs/gst/video/video-format.h b/gst-libs/gst/video/video-format.h
+index 6099c40..7a9f355 100644
+--- a/gst-libs/gst/video/video-format.h
++++ b/gst-libs/gst/video/video-format.h
+@@ -120,6 +120,7 @@ G_BEGIN_DECLS
+  * @GST_VIDEO_FORMAT_BGR10A2_LE: packed 4:4:4 RGB with alpha channel(B-G-R-A), 10 bits for R/G/B channel and MSB 2 bits for alpha channel (Since: 1.16)
+  * @GST_VIDEO_FORMAT_NV12_UBWC: NV12 compressed
+  * @GST_VIDEO_FORMAT_RGBA_UBWC: RGBA compressed
++ * @GST_VIDEO_FORMAT_NV12_512: planar 4:2:0 YUV with interleaved UV plane, and stride is 512
+  *
+  * Enum value describing the most common video formats.
+  *
+@@ -215,6 +216,7 @@ typedef enum {
+   GST_VIDEO_FORMAT_BGR10A2_LE,
+   GST_VIDEO_FORMAT_NV12_UBWC,
+   GST_VIDEO_FORMAT_RGBA_UBWC,
++  GST_VIDEO_FORMAT_NV12_512,
+ } GstVideoFormat;
+ 
+ #define GST_VIDEO_MAX_PLANES 4
+@@ -566,7 +568,7 @@ gconstpointer  gst_video_format_get_palette          (GstVideoFormat format, gsi
+   "A420_10LE, A422_10BE, A422_10LE, A444_10BE, A444_10LE, NV61, P010_10BE, " \
+   "P010_10LE, IYU2, VYUY, GBRA, GBRA_10BE, GBRA_10LE, BGR10A2_LE, GBR_12BE, GBR_12LE, " \
+   "GBRA_12BE, GBRA_12LE, I420_12BE, I420_12LE, I422_12BE, I422_12LE, " \
+-  "Y444_12BE, Y444_12LE, GRAY10_LE32, NV12_10LE32, NV16_10LE32, NV12_10LE40, NV12_UBWC, RGBA_UBWC }"
++  "Y444_12BE, Y444_12LE, GRAY10_LE32, NV12_10LE32, NV16_10LE32, NV12_10LE40, NV12_UBWC, RGBA_UBWC, NV12_512 }"
+ 
+ /**
+  * GST_VIDEO_CAPS_MAKE:
+-- 
+2.7.4
+

@@ -1,0 +1,86 @@
+From fcc20d907950d0c40ec2f1da02fd93df8ad29159 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Tue, 18 Jun 2019 14:58:05 +0800
+Subject: [PATCH 08/42] gst-omx: support gbm buffer backend, disable some dec
+ pool code
+
+The patch also disable some gstreamer 1.16 specific code
+about checking OMX pool from downstream in gstomxvideodec.c.
+
+Origin patch on mm-gst.lnx.1.0 is 2112000.
+
+Change-Id: I418923e134a25fd3184f602af7d34b875809c174
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ configure.ac         | 14 ++++++++++++++
+ omx/gstomxvideodec.c | 14 ++++++++++----
+ 2 files changed, 24 insertions(+), 4 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 0d90f5e..bba8060 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -313,6 +313,20 @@ if test "x$HAVE_VIDEO_EXT" = "xyes"; then
+ "
+ fi
+ 
++saved_compiling=$cross_compiling
++cross_compiling=no
++AC_ARG_WITH([protocal-xml-path],
++      AS_HELP_STRING([--with-protocal-xml-path],[path of weston xml files]),
++  [protocol_xml_path="$withval"], [protocol_xml_path="none"])
++dnl Check for weston xml files
++if [ test x$protocol_xml_path != xno ]; then
++  AC_CHECK_FILE(${protocol_xml_path}/gbm-buffer-backend.xml,
++     [AC_DEFINE(USE_GBM, [], [define USE_GBM macro])],[])
++else
++  AC_MSG_RESULT([no gbm-buffer-backend.xml found])
++fi
++cross_compiling=$saved_compiling
++
+ if test "x$HAVE_INDEX_EXT" = "xyes"; then
+     AC_DEFINE(HAVE_INDEX_EXT, 1, [OpenMAX IL has OMX_IndexExt.h header])
+ fi
+diff --git a/omx/gstomxvideodec.c b/omx/gstomxvideodec.c
+index 605d6d4..ba59984 100644
+--- a/omx/gstomxvideodec.c
++++ b/omx/gstomxvideodec.c
+@@ -185,9 +185,15 @@ _omx_out_buffer_create (GstOMXVideoDec * dec, GstOMXBuffer * pBuffer)
+   */
+   pPMEMInfo->size = pBuffer->omx_buf->nFilledLen;
+ 
+-  GST_DEBUG_OBJECT(dec, "Found buffer meta: size %u, offset %u and fd %d", pPMEMInfo->size, pPMEMInfo->offset, pPMEMInfo->pmem_fd);
++#ifdef USE_GBM
++    GST_DEBUG_OBJECT(dec, "Found buffer meta: size %u, offset %u and fd %d  meta_fd %d", pPMEMInfo->size, pPMEMInfo->offset, pPMEMInfo->pmem_fd,pPMEMInfo->pmeta_fd);
+ 
+-  meta = gst_buffer_add_ionbuf_meta(out_buf, pPMEMInfo->pmem_fd, pPMEMInfo->offset, pPMEMInfo->size, FALSE);
++    meta = gst_buffer_add_ionbuf_meta(out_buf, pPMEMInfo->pmem_fd, pPMEMInfo->offset, pPMEMInfo->size, FALSE, pPMEMInfo->pmeta_fd,0,0,0);
++#else
++    GST_DEBUG_OBJECT(dec, "Found buffer meta: size %u, offset %u and fd %d", pPMEMInfo->size, pPMEMInfo->offset, pPMEMInfo->pmem_fd);
++
++    meta = gst_buffer_add_ionbuf_meta(out_buf, pPMEMInfo->pmem_fd, pPMEMInfo->offset, pPMEMInfo->size, FALSE);
++#endif
+ 
+   if (!meta) {
+     GST_ERROR_OBJECT (dec, "Addition of ionBufInfo metadata to decoder output buffer failed.\n");
+@@ -3456,7 +3462,7 @@ gst_omx_video_dec_decide_allocation (GstVideoDecoder * bdec, GstQuery * query)
+ #endif /* defined (HAVE_GST_GL) */
+ 
+   self->use_buffers = FALSE;
+-
++#if 0
+   /* Importing OMX buffers from downstream isn't supported.
+    * That wouldn't bring us much as the dynamic buffer mode already
+    * prevent copies between OMX components. */
+@@ -3476,7 +3482,7 @@ gst_omx_video_dec_decide_allocation (GstVideoDecoder * bdec, GstQuery * query)
+     if (pool)
+       gst_object_unref (pool);
+   }
+-
++#endif
+   if (!GST_VIDEO_DECODER_CLASS
+       (gst_omx_video_dec_parent_class)->decide_allocation (bdec, query))
+     return FALSE;
+-- 
+2.7.4
+

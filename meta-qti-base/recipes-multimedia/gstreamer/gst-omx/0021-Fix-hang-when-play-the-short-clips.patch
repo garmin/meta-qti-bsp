@@ -1,0 +1,73 @@
+From 4bb51b70b5349c21e3e857f0fed6439338f6092c Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Thu, 24 Oct 2019 11:58:19 +0800
+Subject: [PATCH 21/42] Fix hang when play the short clips
+
+At the same time as EOS event received by gstomxvideodec,
+the pipeline is in flushing state because of seeking, the two
+events will cause gstomxvideodec always wait the signal
+of drain_cond. So when the pipeline is in the flushing state,
+don't wait the drain_cond.
+
+cherry-pick from 2578290
+2578290 contains many modification which have been included in
+gstreamer 1.16.0
+
+Change-Id: I89298a35547a650cbf229a84548e7c883f3eb623
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ omx/gstomxvideodec.c | 6 ++++--
+ omx/gstomxvideodec.h | 2 +-
+ omx/gstomxvideoenc.c | 6 ++++--
+ 3 files changed, 9 insertions(+), 5 deletions(-)
+
+diff --git a/omx/gstomxvideodec.c b/omx/gstomxvideodec.c
+index 01e96d6..ba610b4 100644
+--- a/omx/gstomxvideodec.c
++++ b/omx/gstomxvideodec.c
+@@ -3448,8 +3448,10 @@ gst_omx_video_dec_finish (GstVideoDecoder * decoder)
+       GST_DEBUG_OBJECT (self, "Drained component");
+ 
+   } else {
+-    g_cond_wait (&self->drain_cond, &self->drain_lock);
+-    GST_DEBUG_OBJECT (self, "Drained component");
++    if (self->downstream_flow_ret != GST_FLOW_FLUSHING) {
++      g_cond_wait (&self->drain_cond, &self->drain_lock);
++    }
++    GST_DEBUG_OBJECT (self, "Drained component flow ret:%s", gst_flow_get_name (self->downstream_flow_ret));
+   }
+ 
+   g_mutex_unlock (&self->drain_lock);
+diff --git a/omx/gstomxvideodec.h b/omx/gstomxvideodec.h
+index 39154d5..9a6c7e3 100644
+--- a/omx/gstomxvideodec.h
++++ b/omx/gstomxvideodec.h
+@@ -66,7 +66,7 @@ struct _GstOMXVideoDec
+    * the first buffer */
+   gboolean started;
+    /* TRUE if the ports where disabled after being activated the first time. */
+-  gboolean disabled;
++  gboolean disabled; /* protected by drain_lock */
+ 
+   GstClockTime last_upstream_ts;
+ 
+diff --git a/omx/gstomxvideoenc.c b/omx/gstomxvideoenc.c
+index 557c0c7..ee09008 100644
+--- a/omx/gstomxvideoenc.c
++++ b/omx/gstomxvideoenc.c
+@@ -3161,8 +3161,10 @@ gst_omx_video_enc_drain (GstOMXVideoEnc * self)
+     return GST_FLOW_ERROR;
+   }
+   GST_DEBUG_OBJECT (self, "Waiting until component is drained");
+-  g_cond_wait (&self->drain_cond, &self->drain_lock);
+-  GST_DEBUG_OBJECT (self, "Drained component");
++  if (self->downstream_flow_ret != GST_FLOW_FLUSHING) {
++    g_cond_wait (&self->drain_cond, &self->drain_lock);
++  }
++  GST_DEBUG_OBJECT (self, "Drained component flow ret:%s", gst_flow_get_name (self->downstream_flow_ret));
+   g_mutex_unlock (&self->drain_lock);
+   GST_VIDEO_ENCODER_STREAM_LOCK (self);
+ 
+-- 
+2.7.4
+

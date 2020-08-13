@@ -1,0 +1,43 @@
+From 40238ee7e23006e0b9721227c6a43174e0d0face Mon Sep 17 00:00:00 2001
+From: Miaomiao Chen <miaochen@codeaurora.org>
+Date: Mon, 8 Apr 2019 10:15:52 +0800
+Subject: [PATCH 2/4] Support typefind of heic
+
+Change-Id: I5e4648a0f4b09c6978b96c076f350fedb4407121
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ gst/typefind/gsttypefindfunctions.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+ mode change 100644 => 100755 gst/typefind/gsttypefindfunctions.c
+
+diff --git a/gst/typefind/gsttypefindfunctions.c b/gst/typefind/gsttypefindfunctions.c
+old mode 100644
+new mode 100755
+index 11cee9a..c309fdc
+--- a/gst/typefind/gsttypefindfunctions.c
++++ b/gst/typefind/gsttypefindfunctions.c
+@@ -3329,6 +3329,12 @@ qt_type_find (GstTypeFind * tf, gpointer unused)
+       break;
+     }
+ 
++    if (STRNCMP (&data[4], "ftypmsf1", 8) == 0 ||
++        STRNCMP (&data[4], "ftypmif1", 8) == 0) {
++      tip = GST_TYPE_FIND_MAXIMUM;
++      break;
++    }
++
+     if (STRNCMP (&data[4], "ftypisom", 8) == 0 ||
+         STRNCMP (&data[4], "ftypavc1", 8) == 0 ||
+         STRNCMP (&data[4], "ftypmp42", 8) == 0) {
+@@ -5912,7 +5918,7 @@ plugin_init (GstPlugin * plugin)
+   TYPE_FIND_REGISTER (plugin, "application/x-3gp", GST_RANK_PRIMARY,
+       q3gp_type_find, "3gp", Q3GP_CAPS, NULL, NULL);
+   TYPE_FIND_REGISTER (plugin, "video/quicktime", GST_RANK_PRIMARY,
+-      qt_type_find, "mov,mp4", QT_CAPS, NULL, NULL);
++      qt_type_find, "mov,mp4,heic", QT_CAPS, NULL, NULL);
+   TYPE_FIND_REGISTER (plugin, "image/x-quicktime", GST_RANK_SECONDARY,
+       qtif_type_find, "qif,qtif,qti", QTIF_CAPS, NULL, NULL);
+   TYPE_FIND_REGISTER (plugin, "image/jp2", GST_RANK_PRIMARY,
+-- 
+2.7.4
+

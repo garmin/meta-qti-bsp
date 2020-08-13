@@ -1,0 +1,45 @@
+From 1e35a2d95b0c4603e212bc77fdc2623d7a063c70 Mon Sep 17 00:00:00 2001
+From: Miaomiao Chen <miaochen@codeaurora.org>
+Date: Fri, 15 May 2020 19:47:39 +0800
+Subject: [PATCH 4/4] videodecoder: expose function push_event
+
+Expose function gst_video_decoder_push_event.
+It's mainly to support 3170485.
+
+Change-Id: Ifb2053c80c77833865879dca5021ba0b674e1709
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ gst-libs/gst/video/gstvideodecoder.c | 2 +-
+ gst-libs/gst/video/gstvideodecoder.h | 3 +++
+ 2 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/gst-libs/gst/video/gstvideodecoder.c b/gst-libs/gst/video/gstvideodecoder.c
+index b49c4d1..0978a60 100644
+--- a/gst-libs/gst/video/gstvideodecoder.c
++++ b/gst-libs/gst/video/gstvideodecoder.c
+@@ -834,7 +834,7 @@ gst_video_decoder_create_merged_tags_event (GstVideoDecoder * dec)
+   return gst_event_new_tag (merged_tags);
+ }
+ 
+-static gboolean
++gboolean
+ gst_video_decoder_push_event (GstVideoDecoder * decoder, GstEvent * event)
+ {
+   switch (GST_EVENT_TYPE (event)) {
+diff --git a/gst-libs/gst/video/gstvideodecoder.h b/gst-libs/gst/video/gstvideodecoder.h
+index d77a7c9..e0a793a 100644
+--- a/gst-libs/gst/video/gstvideodecoder.h
++++ b/gst-libs/gst/video/gstvideodecoder.h
+@@ -477,6 +477,9 @@ GST_VIDEO_API
+ void             gst_video_decoder_set_use_default_pad_acceptcaps (GstVideoDecoder * decoder,
+                                                                    gboolean use);
+ 
++GST_VIDEO_API
++gboolean         gst_video_decoder_push_event (GstVideoDecoder * decoder, GstEvent * event);
++
+ #ifdef G_DEFINE_AUTOPTR_CLEANUP_FUNC
+ G_DEFINE_AUTOPTR_CLEANUP_FUNC(GstVideoDecoder, gst_object_unref)
+ #endif
+-- 
+2.7.4
+

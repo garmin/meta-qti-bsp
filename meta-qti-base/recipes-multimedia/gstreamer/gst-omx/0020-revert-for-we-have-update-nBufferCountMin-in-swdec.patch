@@ -1,0 +1,27 @@
+From d6413388cd8ef70e399d848567a89ef31fb128e9 Mon Sep 17 00:00:00 2001
+From: Laisheng Hu <laisheng@codeaurora.org>
+Date: Thu, 28 Mar 2019 12:22:25 +0800
+Subject: [PATCH 20/42] revert for we have update nBufferCountMin in swdec
+
+Change-Id: Iaf3f555eb78698f24ec0dc3d3903163d260f7695
+Signed-off-by: Laisheng Hu <laisheng@codeaurora.org>
+---
+ omx/gstomxvideodec.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/omx/gstomxvideodec.c b/omx/gstomxvideodec.c
+index 859144e..01e96d6 100644
+--- a/omx/gstomxvideodec.c
++++ b/omx/gstomxvideodec.c
+@@ -990,7 +990,7 @@ gst_omx_video_dec_allocate_output_buffers (GstOMXVideoDec * self)
+         (allocator ? allocator->mem_type : "(null)"));
+   } else {
+     gst_caps_replace (&caps, NULL);
+-    min = max = port->port_def.nBufferCountMin > 3 ? port->port_def.nBufferCountMin : 4;
++    min = max = port->port_def.nBufferCountMin;
+     GST_DEBUG_OBJECT (self, "No pool available, not negotiated yet");
+   }
+ 
+-- 
+2.7.4
+

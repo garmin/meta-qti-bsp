@@ -1,0 +1,141 @@
+From 5baf11c42dee43fea394fddf25d2efbd8f8abf6b Mon Sep 17 00:00:00 2001
+From: Miaomiao Chen <miaochen@codeaurora.org>
+Date: Tue, 25 Jun 2019 11:29:44 +0800
+Subject: [PATCH 10/28] VideoParser: verify the layer encoding
+
+1. Add parse svc layer information
+2. Add some log to print hevc layer information
+
+Change-Id: Ifa46daa575fdcc359bfd8286de81e153a3d5ded8
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ gst-libs/gst/codecparsers/gsth264parser.c | 23 +++++++++++++++++++++
+ gst-libs/gst/codecparsers/gsth264parser.h | 33 +++++++++++++++++++++++++++++++
+ gst-libs/gst/codecparsers/gsth265parser.c |  3 +++
+ 3 files changed, 59 insertions(+)
+
+diff --git a/gst-libs/gst/codecparsers/gsth264parser.c b/gst-libs/gst/codecparsers/gsth264parser.c
+index acc6fd9..1e91679 100644
+--- a/gst-libs/gst/codecparsers/gsth264parser.c
++++ b/gst-libs/gst/codecparsers/gsth264parser.c
+@@ -216,8 +216,25 @@ gst_h264_parse_nalu_header (GstH264NalUnit * nalu)
+ 
+       svc_extension_flag = gst_bit_reader_get_bits_uint8_unchecked (&br, 1);
+       if (svc_extension_flag) { /* SVC */
++        GstH264NalUnitExtensionSVC *const svc = &nalu->extension.svc;
+ 
+         nalu->extension_type = GST_H264_NAL_EXTENSION_SVC;
++        svc->idr_flag                 = gst_bit_reader_get_bits_uint8_unchecked (&br, 1);
++        svc->priority_id              = gst_bit_reader_get_bits_uint8_unchecked (&br, 6);
++        svc->no_inter_layer_pred_flag = gst_bit_reader_get_bits_uint8_unchecked (&br, 1);
++        svc->dependency_id            = gst_bit_reader_get_bits_uint8_unchecked (&br, 3);
++        svc->quality_id               = gst_bit_reader_get_bits_uint8_unchecked (&br, 4);
++        svc->temporal_id              = gst_bit_reader_get_bits_uint8_unchecked (&br, 3);
++        svc->use_ref_base_pic_flag    = gst_bit_reader_get_bits_uint8_unchecked (&br, 1);
++        svc->discardable_flag         = gst_bit_reader_get_bits_uint8_unchecked (&br, 1);
++        svc->output_flag              = gst_bit_reader_get_bits_uint8_unchecked (&br, 1);
++
++        GST_LOG ("svc idr_flag:%d prior_id:%d nflag:%d dep_id:%d q_id:%d temp_id:%d uflag:%d discard_flag:%d output_flag:%d",
++            svc->idr_flag, svc->priority_id, svc->no_inter_layer_pred_flag, svc->dependency_id,
++            svc->quality_id, svc->temporal_id, svc->use_ref_base_pic_flag, svc->discardable_flag, svc->output_flag);
++
++        /* Update IdrPicFlag (H.7.4.1.1) */
++        nalu->idr_pic_flag = svc->idr_flag;
+ 
+       } else {                  /* MVC */
+         GstH264NalUnitExtensionMVC *const mvc = &nalu->extension.mvc;
+@@ -1902,6 +1919,12 @@ gst_h264_parse_subset_sps (GstH264NalUnit * nalu, GstH264SPS * sps,
+       goto error;
+   }
+ 
++  if (sps->profile_idc == GST_H264_PROFILE_SCALABLE_BASELINE ||
++      sps->profile_idc == GST_H264_PROFILE_SCALABLE_HIGH) {
++    GST_LOG ("sps svc data inside");
++  }
++
++
+   sps->valid = TRUE;
+   return GST_H264_PARSER_OK;
+ 
+diff --git a/gst-libs/gst/codecparsers/gsth264parser.h b/gst-libs/gst/codecparsers/gsth264parser.h
+index d848404..c87b3c0 100644
+--- a/gst-libs/gst/codecparsers/gsth264parser.h
++++ b/gst-libs/gst/codecparsers/gsth264parser.h
+@@ -328,6 +328,7 @@ typedef struct _GstH264NalParser              GstH264NalParser;
+ 
+ typedef struct _GstH264NalUnit                GstH264NalUnit;
+ typedef struct _GstH264NalUnitExtensionMVC    GstH264NalUnitExtensionMVC;
++typedef struct _GstH264NalUnitExtensionSVC    GstH264NalUnitExtensionSVC;
+ 
+ typedef struct _GstH264SPSExtMVCView          GstH264SPSExtMVCView;
+ typedef struct _GstH264SPSExtMVCLevelValue    GstH264SPSExtMVCLevelValue;
+@@ -380,6 +381,37 @@ struct _GstH264NalUnitExtensionMVC
+ };
+ 
+ /**
++ * GstH264NalUnitExtensionSVC:
++ * @ idr_flag: If equal to 1, specifies that the current coded
++ *    picture is an IDR picture
++ * @ priority_id: specifies a priority identifier for the NAL unit
++ * @ no_inter_layer_pred_flag: specifies whether inter-layer prediction
++ *    may be used for decoding the coded slice
++ * @ dependency_id: specifies a dependency identifier for the NAL unit
++ * @ quality_id: specifies a quality identifier for the NAL unit.
++ * @ temporal_id: specifies a temporal identifier for the NAL unit
++ * @ use_ref_base_pic_flag: equal to 1 specifies that reference base pictures
++ *    (when present) and decoded pictures (when reference base pictures are not present)
++ *    are used as reference pictures for inter prediction
++ * @ discardable_flag: If equal to 1 specifies that the current NAL unit is not used
++ * @ output_flag: affects the decoded picture output and removal processes as specified
++ *    in Annex C. The value of output_flag shall be the same for all NAL units of a
++ *    dependency representation.
++ */
++struct _GstH264NalUnitExtensionSVC
++{
++  guint8 idr_flag;
++  guint8 priority_id;
++  guint8 no_inter_layer_pred_flag;
++  guint8 dependency_id;
++  guint8 quality_id;
++  guint8 temporal_id;
++  guint8 use_ref_base_pic_flag;
++  guint8 discardable_flag;
++  guint8 output_flag;
++};
++
++/**
+  * GstH264NalUnit:
+  * @ref_idc: not equal to 0 specifies that the content of the NAL unit
+  *  contains a sequence parameter set, a sequence parameter set
+@@ -420,6 +452,7 @@ struct _GstH264NalUnit
+   guint8 extension_type;
+   union {
+     GstH264NalUnitExtensionMVC mvc;
++    GstH264NalUnitExtensionSVC svc;
+   } extension;
+ };
+ 
+diff --git a/gst-libs/gst/codecparsers/gsth265parser.c b/gst-libs/gst/codecparsers/gsth265parser.c
+index 16fce00..2ec326a 100644
+--- a/gst-libs/gst/codecparsers/gsth265parser.c
++++ b/gst-libs/gst/codecparsers/gsth265parser.c
+@@ -239,6 +239,8 @@ gst_h265_parse_nalu_header (GstH265NalUnit * nalu)
+   nalu->layer_id = gst_bit_reader_get_bits_uint8_unchecked (&br, 6);
+   nalu->temporal_id_plus1 = gst_bit_reader_get_bits_uint8_unchecked (&br, 3);
+   nalu->header_bytes = 2;
++  GST_LOG ("Nalu type:%d layer_id:%d temporal_id:%d",
++    nalu->type, nalu->layer_id, nalu->temporal_id_plus1 - 1);
+ 
+   return TRUE;
+ }
+@@ -1669,6 +1671,7 @@ gst_h265_parse_sps (GstH265Parser * parser, GstH265NalUnit * nalu,
+   sps->vps = vps;
+ 
+   READ_UINT8 (&nr, sps->max_sub_layers_minus1, 3);
++  GST_LOG ("Max sub layers:%d", sps->max_sub_layers_minus1 + 1);
+   READ_UINT8 (&nr, sps->temporal_id_nesting_flag, 1);
+ 
+   if (!gst_h265_parse_profile_tier_level (&sps->profile_tier_level, &nr,
+-- 
+2.7.4
+

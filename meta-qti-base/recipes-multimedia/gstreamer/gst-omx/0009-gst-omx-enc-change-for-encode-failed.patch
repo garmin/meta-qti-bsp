@@ -1,0 +1,38 @@
+From 9231fb80f3f58e54de30c1c2849b359b62e31c49 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Wed, 26 Jun 2019 12:15:03 +0800
+Subject: [PATCH 09/42] gst-omx: enc: change for encode failed
+
+only for gstreamer 1.16.x
+
+Change-Id: I6c6c1a5e9d84d634d6f79638713a139b1de96481
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ omx/gstomxvideoenc.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/omx/gstomxvideoenc.c b/omx/gstomxvideoenc.c
+index 53c9b96..70322c2 100644
+--- a/omx/gstomxvideoenc.c
++++ b/omx/gstomxvideoenc.c
+@@ -1897,7 +1897,7 @@ gst_omx_video_enc_configure_input_buffer (GstOMXVideoEnc * self,
+     default:
+       GST_ERROR_OBJECT (self, "Unsupported port format %x",
+           port_def.format.video.eColorFormat);
+-      g_assert_not_reached ();
++      //g_assert_not_reached ();
+   }
+ 
+   GST_DEBUG_OBJECT (self,
+@@ -3272,7 +3272,7 @@ gst_omx_video_enc_propose_allocation (GstVideoEncoder * encoder,
+       "request at least %d buffers of size %" G_GSIZE_FORMAT, num_buffers,
+       info.size);
+   gst_query_add_allocation_pool (query, pool,
+-      self->enc_in_port->port_def.nBufferSize, num_buffers, 0);
++      GST_VIDEO_INFO_SIZE (&info), num_buffers, 0);
+ 
+   self->in_pool_used = FALSE;
+ 
+-- 
+2.7.4
+

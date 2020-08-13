@@ -1,0 +1,31 @@
+From 807d92ef3c7893bef9e0544f520ab2b6eaca154b Mon Sep 17 00:00:00 2001
+From: Bo Fang <bofang1@codeaurora.org>
+Date: Wed, 4 Dec 2019 13:06:32 +0800
+Subject: [PATCH 15/28] waylandsink: change a little in configure.ac
+
+using "test ${STAGING_INCDIR}" instead of "! -z ${STAGING_INCDIR}"
+
+come from part of 2747642
+
+Change-Id: I5a10a31141bedf6383ee4e0d8907ced15395a1ec
+Signed-off-by: Bo Fang <bofang1@codeaurora.org>
+---
+ configure.ac | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/configure.ac b/configure.ac
+index 638315d..2107e64 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1326,7 +1326,7 @@ AG_GST_CHECK_FEATURE(WAYLAND, [wayland sink], wayland , [
+       AC_SUBST(WAYLAND_PROTOCOLS_DATADIR, `$PKG_CONFIG --variable=pkgdatadir wayland-protocols`)
+       saved_compiling=$cross_compiling
+       cross_compiling=no
+-      if [ ! -z ${STAGING_INCDIR} ]; then
++      if [ test ${STAGING_INCDIR} ]; then
+         AC_CHECK_FILE(${STAGING_INCDIR}/gbm.h,
+ 		[AC_DEFINE(USE_GBM, [], [define USE_GBM macro])
+ 		AC_SUBST(GBM_LDFLAG, -lgbm)
+-- 
+2.7.4
+

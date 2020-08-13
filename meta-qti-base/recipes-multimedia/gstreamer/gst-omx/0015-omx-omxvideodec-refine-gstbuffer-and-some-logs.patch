@@ -1,0 +1,174 @@
+From 9de61fd1cc4ed6cb41878fc1b09c794849795c7b Mon Sep 17 00:00:00 2001
+From: Yiming Cao <cyiming@codeaurora.org>
+Date: Tue, 4 Sep 2018 16:59:17 +0800
+Subject: [PATCH 15/42] omx:omxvideodec: refine gstbuffer and some logs
+
+- refine created output gstbuffer by associating
+  a gstmemory, so that it can be mapped for access.
+- add some logs to track the buffer info.
+
+Change-Id: I5324c07f62be53f22953db26a8aa47bcd092fbae
+Signed-off-by: Yiming Cao <cyiming@codeaurora.org>
+---
+ omx/gstomxvideodec.c | 109 +++++++++++++++++++++++++++++++++++++--------------
+ 1 file changed, 80 insertions(+), 29 deletions(-)
+
+diff --git a/omx/gstomxvideodec.c b/omx/gstomxvideodec.c
+index ba59984..859144e 100644
+--- a/omx/gstomxvideodec.c
++++ b/omx/gstomxvideodec.c
+@@ -56,6 +56,8 @@
+ #include <gst/ionbuf/gstionbuf_meta.h>
+ #endif
+ 
++#include <media/msm_media_info.h>
++
+ GST_DEBUG_CATEGORY_STATIC (gst_omx_video_dec_debug_category);
+ #define GST_CAT_DEFAULT gst_omx_video_dec_debug_category
+ 
+@@ -162,28 +164,53 @@ _omx_out_buffer_create (GstOMXVideoDec * dec, GstOMXBuffer * pBuffer)
+ {
+   OMX_DECODER_OUT_BUFFER *pOutBuf;
+   GstBuffer *out_buf;
++  GstVideoCodecState *state;
++  GstVideoInfo *vinfo;
+ 
+   if (pBuffer == NULL)
+     return NULL;
+ 
+   pOutBuf = g_slice_new (OMX_DECODER_OUT_BUFFER);
+-  out_buf = gst_buffer_new ();
+-  if (out_buf) {
++  /* The memory align is as default for we use the system allocator
++   * as the allocator for the memory for simplicity, Otherwise we
++   * need a h/w related allocator and wrap the memory allocated
++   * from it as gstmemory.
++   * For NV12_UBWC, since it cannot be parsed by s/w, so ensure
++   * the size is same as maxsize for we won't set videometa
++   * for it later.
++   */
++  state =
++    gst_video_decoder_get_output_state (GST_VIDEO_DECODER (dec));
++  vinfo = &state->info;
++
++  if (GST_VIDEO_INFO_FORMAT (vinfo) == GST_VIDEO_FORMAT_NV12_UBWC)
++    out_buf = gst_buffer_new_wrapped_full (0,
++                (gpointer) pBuffer->omx_buf->pBuffer,
++                pBuffer->omx_buf->nAllocLen, 0,
++                pBuffer->omx_buf->nAllocLen, NULL, NULL);
++  else
++    out_buf = gst_buffer_new_wrapped_full (0,
++                (gpointer) pBuffer->omx_buf->pBuffer,
++                pBuffer->omx_buf->nAllocLen, pBuffer->omx_buf->nOffset,
++                pBuffer->omx_buf->nFilledLen, NULL, NULL);
+ 
++  if (out_buf) {
++    gsize offsets[GST_VIDEO_MAX_PLANES];
++    gint strides[GST_VIDEO_MAX_PLANES];
+     OMX_QCOM_PLATFORM_PRIVATE_PMEM_INFO *pPMEMInfo = NULL;
+     GstIonBufFdMeta *meta;
+     pPMEMInfo  = (OMX_QCOM_PLATFORM_PRIVATE_PMEM_INFO *)
+       ((OMX_QCOM_PLATFORM_PRIVATE_LIST *)pBuffer->omx_buf->pPlatformPrivate)->entryList->entry;
+ 
+-  if (!pPMEMInfo) {
+-    GST_ERROR_OBJECT (dec, "Read of ionBufInfo from port buffer failed.");
+-    return NULL;
+-  }
++    if (!pPMEMInfo) {
++      GST_ERROR_OBJECT (dec, "Read of ionBufInfo from port buffer failed.");
++      goto create_fail;
++    }
+ 
+-  /* MSM:8996- Update the "ion_buf_size" field using the "nFilledLen".
+-  * Ideally its expected to get updated from the underlying decoder.
+-  */
+-  pPMEMInfo->size = pBuffer->omx_buf->nFilledLen;
++    /* MSM:8996- Update the "ion_buf_size" field using the "nFilledLen".
++    * Ideally its expected to get updated from the underlying decoder.
++    */
++    pPMEMInfo->size = pBuffer->omx_buf->nFilledLen;
+ 
+ #ifdef USE_GBM
+     GST_DEBUG_OBJECT(dec, "Found buffer meta: size %u, offset %u and fd %d  meta_fd %d", pPMEMInfo->size, pPMEMInfo->offset, pPMEMInfo->pmem_fd,pPMEMInfo->pmeta_fd);
+@@ -195,35 +222,59 @@ _omx_out_buffer_create (GstOMXVideoDec * dec, GstOMXBuffer * pBuffer)
+     meta = gst_buffer_add_ionbuf_meta(out_buf, pPMEMInfo->pmem_fd, pPMEMInfo->offset, pPMEMInfo->size, FALSE);
+ #endif
+ 
+-  if (!meta) {
+-    GST_ERROR_OBJECT (dec, "Addition of ionBufInfo metadata to decoder output buffer failed.\n");
+-    return NULL;
+-  }
+-
+-  pOutBuf->self = g_object_ref (dec);
+-  pOutBuf->pBuffer = pBuffer;
+-  gst_mini_object_set_qdata (GST_MINI_OBJECT_CAST (out_buf),
+-    dec->omx_outbuf_quark, pOutBuf, _omx_out_buffer_destroy);
++    if (!meta) {
++      GST_ERROR_OBJECT (dec, "Addition of ionBufInfo metadata to decoder output buffer failed.\n");
++      goto create_fail;
++    }
+ 
+-  GST_BUFFER_PTS (out_buf) =
+-    gst_util_uint64_scale (pBuffer->omx_buf->nTimeStamp, GST_SECOND,
+-    OMX_TICKS_PER_SECOND);
++    GST_LOG_OBJECT (dec, "created new gstbuf %p (omxdecbuf: %p, pBuffer: %p)",
++        out_buf, pOutBuf, pBuffer);
++    pOutBuf->self = g_object_ref (dec);
++    pOutBuf->pBuffer = pBuffer;
++    gst_mini_object_set_qdata (GST_MINI_OBJECT_CAST (out_buf),
++      dec->omx_outbuf_quark, pOutBuf, _omx_out_buffer_destroy);
+ 
+-  if (pBuffer->omx_buf->nTickCount != 0)
+-    GST_BUFFER_DURATION (out_buf) =
+-      gst_util_uint64_scale (pBuffer->omx_buf->nTickCount, GST_SECOND,
+-      OMX_TICKS_PER_SECOND);
++    GST_BUFFER_PTS (out_buf) =
++      gst_util_uint64_scale (pBuffer->omx_buf->nTimeStamp, GST_SECOND,
++        OMX_TICKS_PER_SECOND);
+ 
+-  GST_DEBUG_OBJECT (dec,
+-    "gst out time: %" GST_TIME_FORMAT ", omx time: %" G_GINT64_FORMAT,
+-    GST_TIME_ARGS (out_buf->pts), pBuffer->omx_buf->nTimeStamp);
++    if (pBuffer->omx_buf->nTickCount != 0)
++      GST_BUFFER_DURATION (out_buf) =
++        gst_util_uint64_scale (pBuffer->omx_buf->nTickCount, GST_SECOND,
++          OMX_TICKS_PER_SECOND);
+ 
++    GST_DEBUG_OBJECT (dec,
++      "gst out time: %" GST_TIME_FORMAT ", omx time: %" G_GINT64_FORMAT,
++      GST_TIME_ARGS (out_buf->pts), pBuffer->omx_buf->nTimeStamp);
++
++    /* only add videometa on the buffer for NV12 for later map */
++    if (GST_VIDEO_INFO_FORMAT (vinfo) == GST_VIDEO_FORMAT_NV12) {
++      strides[0] = strides[1] =
++          VENUS_Y_STRIDE(COLOR_FMT_NV12, GST_VIDEO_INFO_WIDTH (vinfo));
++      offsets[0] = 0;
++      offsets[1] = strides[0] * VENUS_Y_SCANLINES(COLOR_FMT_NV12,
++          GST_VIDEO_INFO_HEIGHT (vinfo));
++
++      gst_buffer_add_video_meta_full (out_buf, GST_VIDEO_FRAME_FLAG_NONE,
++          GST_VIDEO_INFO_FORMAT (vinfo), GST_VIDEO_INFO_WIDTH (vinfo),
++          GST_VIDEO_INFO_HEIGHT (vinfo), GST_VIDEO_INFO_N_PLANES (vinfo),
++          offsets, strides);
++    }
+   }
+   else {
+     g_slice_free (OMX_DECODER_OUT_BUFFER, pOutBuf);
+     g_assert(0);
+   }
++
++done:
++  gst_video_codec_state_unref (state);
+   return out_buf;
++
++create_fail:
++  g_slice_free (OMX_DECODER_OUT_BUFFER, pOutBuf);
++  gst_buffer_unref (out_buf);
++  out_buf = NULL;
++  goto done;
+ }
+ 
+ #endif
+-- 
+2.7.4
+

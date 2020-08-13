@@ -1,0 +1,61 @@
+From ca22428ea4b6fa8487896c4045c6ba5cef51ff77 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Fri, 20 Sep 2019 14:55:23 +0800
+Subject: [PATCH 05/42] gstomxvideodec: resolve incorrect process in
+ _omx_out_buffer_destroy
+
+Change-Id: Idaefd847784a57d3ebd38874e9d49822fad7c35f
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ omx/gstomxvideodec.c | 34 +++++++++++++++++++++++++++++++---
+ 1 file changed, 31 insertions(+), 3 deletions(-)
+
+diff --git a/omx/gstomxvideodec.c b/omx/gstomxvideodec.c
+index e385151..6830cac 100644
+--- a/omx/gstomxvideodec.c
++++ b/omx/gstomxvideodec.c
+@@ -117,10 +117,38 @@ static void
+ _omx_out_buffer_destroy (OMX_DECODER_OUT_BUFFER * pOutBuf)
+ {
+ 
+-  if (pOutBuf && pOutBuf->self) {
+-    if (gst_omx_component_get_state (pOutBuf->self->dec, 0) > OMX_StateIdle)
+-    {
++  if (pOutBuf && pOutBuf->self && pOutBuf->self->dec) {
++    gboolean port_actived;
++    GstOMXPort * port;
++    port = pOutBuf->self->dec_out_port;
++
++    g_mutex_lock (&port->comp->lock);
++    port_actived =
++        !port->flushing && !port->disabled_pending && port->port_def.bEnabled;
++    g_mutex_unlock (&port->comp->lock);
++
++    /* better to have a valid timeout, otherwise get_state will
++     * immediately return false when there is no msgs in the
++     * msg queue, and causes the buffer won't be reused for not
++     * in the pending buffer queue */
++    if (gst_omx_component_get_state (pOutBuf->self->dec,
++          1 * GST_MSECOND) > OMX_StateIdle && port_actived) {
++      GST_LOG_OBJECT (pOutBuf->self, "release pBuffer %p (omxdecbuf %p)",
++          pOutBuf->pBuffer, pOutBuf);
+       gst_omx_port_release_buffer (pOutBuf->self->dec_out_port,pOutBuf->pBuffer);
++    } else {
++      GstOMXPort *port1, *port2;
++
++      port1 = pOutBuf->pBuffer->port;
++      port2 = pOutBuf->self->dec_out_port;
++      if (port1 && port2 && port1 == port2) {
++        /* ensure the buffer can be reused again, otherwise
++         * will cause the available buffers decreases to
++         * pipeline cannot roll */
++        g_queue_push_tail (&port1->pending_buffers,
++            pOutBuf->pBuffer);
++        g_cond_broadcast (&port1->comp->messages_cond);
++      }
+     }
+     g_object_unref (pOutBuf->self);
+   }
+-- 
+2.7.4
+

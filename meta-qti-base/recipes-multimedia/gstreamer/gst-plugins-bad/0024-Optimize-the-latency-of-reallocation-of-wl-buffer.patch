@@ -1,0 +1,102 @@
+From d1ab09600c3a7d82d476c5943e0c2734ed58b345 Mon Sep 17 00:00:00 2001
+From: Miaomiao Chen <miaochen@codeaurora.org>
+Date: Tue, 18 Feb 2020 17:40:33 +0800
+Subject: [PATCH 24/28] Optimize the latency of reallocation of wl buffer
+
+When resolution change, the wayland buffer should
+be destoried at first. But the process will cost
+much time. So destory only one wayland buffer when
+one frame showed, utill all old wayland buffers are
+destoried.
+
+Change-Id: Ibcfd8e463a7d35c9e2d0bf18d11e8a5637004dd3
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 22 ++++++++++++++++++----
+ ext/wayland/wlbuffer.h       |  1 +
+ 2 files changed, 19 insertions(+), 4 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index e1e0496..e1ead67 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -481,7 +481,7 @@ gst_wayland_sink_setup_egl (GstWaylandSink * sink)
+     }
+ 
+     if (sink->eglCreateWaylandBufferFromImage == NULL) {
+-      GST_ERROR_OBJECT(sink,"Failed to get EGL_WL_create_wayland_buffer_from_image");	
++      GST_ERROR_OBJECT(sink,"Failed to get EGL_WL_create_wayland_buffer_from_image");
+     }
+   }
+ }
+@@ -897,7 +897,7 @@ gst_wayland_sink_create_wl_buffer(GstWaylandSink *sink, GstWlBuffer *self,
+   /* MSM8996: Updated the offset with correct width allignment */
+   attribs[13] = ionBufFdMeta->offset + ((w + 127) & ~127) * ((h + 31) & ~31);
+ 
+-  GST_DEBUG_OBJECT(sink, "create wl buffer from elg :%p fd %d size  %d, w h %d %d",	
++  GST_DEBUG_OBJECT(sink, "create wl buffer from elg :%p fd %d size  %d, w h %d %d",
+     sink->egldpy,ionBufFdMeta->fd,ionBufFdMeta->size,w ,h);
+ 
+   eglimg = sink->eglCreateImage(sink->egldpy, EGL_NO_CONTEXT, EGL_LINUX_DMA_BUF_EXT, NULL, attribs);
+@@ -1229,6 +1229,14 @@ static int gbm_swframe_fill(GstWaylandSink* sink, int idx, GstBuffer* gbm_buf, G
+ }
+ #endif
+ 
++void
++_set_old_flag_for_old_wlbuffer (gpointer key, gpointer value, gpointer user_data)
++{
++  GstWlBuffer *wl_buf = (GstWlBuffer*) value;
++  if (wl_buf)
++    wl_buf->old_config = TRUE;
++}
++
+ static GstFlowReturn
+ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+ {
+@@ -1282,9 +1290,9 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+         gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
+      sink->window->video_height = info->height;
+ 
+-     /*reset buffer table while video info change */
++     /*mark the old wayland buffer of buffer table while video info change */
+      if (sink->buffer_table)
+-         g_hash_table_remove_all(sink->buffer_table);
++         g_hash_table_foreach (sink->buffer_table, _set_old_flag_for_old_wlbuffer, NULL);
+ 
+      /* set the initial size to be the same as the reported video size */
+      if (gst_wl_window_is_toplevel (sink->window))
+@@ -1477,6 +1485,11 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+     GST_LOG_OBJECT (sink, "egl buffer %p fd %d offset %d ", buffer,ionBufFdMeta->fd,ionBufFdMeta->offset);
+ #endif
+     gstwlbuf = (GstWlBuffer *) g_hash_table_lookup(sink->buffer_table, &key);
++    if (gstwlbuf && gstwlbuf->old_config) {
++      g_hash_table_remove (sink->buffer_table, &key);
++      GST_LOG_OBJECT (sink, "remove the old wl buffer:%p", gstwlbuf);
++      gstwlbuf = NULL;
++    }
+     /* the underlying memory may be changed when the new gstbuffer
+      * has same fd and offset of an old gstbuffer to which a gstwlbuf
+      * was related */
+@@ -1513,6 +1526,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+       gint64 *bufkey = g_malloc(sizeof(*bufkey));
+       gstwlbuf = g_object_new (GST_TYPE_WL_BUFFER, NULL);
+       *bufkey = key;
++      gstwlbuf->old_config = FALSE;
+ 
+       wlbufops.create (sink, gstwlbuf, ionBufFdMeta);
+       GST_LOG_OBJECT(sink, "Created new wl buf %p. Usually, needn't create new wl buf for each frame showing", gstwlbuf->wlbuffer);
+diff --git a/ext/wayland/wlbuffer.h b/ext/wayland/wlbuffer.h
+index 2a2e648..d9659ef 100644
+--- a/ext/wayland/wlbuffer.h
++++ b/ext/wayland/wlbuffer.h
+@@ -45,6 +45,7 @@ struct _GstWlBuffer
+   GstWlDisplay *display;
+   guint8 *data;
+   gboolean used_by_compositor;
++  gboolean old_config;
+ };
+ 
+ struct _GstWlBufferClass
+-- 
+2.7.4
+

@@ -1,0 +1,545 @@
+From 1d56f31ff8b5631768217b22851a8179709a02d0 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Fri, 31 May 2019 15:53:18 +0800
+Subject: [PATCH 01/42] gst-omx: add qti openmax il target
+
+Change-Id: Id4fd9f9e9a02dad2cec47ef544c0e9e9a6a6297a
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ config/Makefile.am            |   2 +-
+ config/meson.build            |   2 +
+ config/qti/Makefile.am        |  11 +++
+ config/qti/gstomx.conf        | 184 ++++++++++++++++++++++++++++++++++++++++++
+ config/qti/vpu554/gstomx.conf | 184 ++++++++++++++++++++++++++++++++++++++++++
+ configure.ac                  |  19 ++++-
+ meson.build                   |   2 +
+ omx/gstomx.h                  |  14 ++++
+ 8 files changed, 415 insertions(+), 3 deletions(-)
+ create mode 100644 config/qti/Makefile.am
+ create mode 100644 config/qti/gstomx.conf
+ create mode 100644 config/qti/vpu554/gstomx.conf
+
+diff --git a/config/Makefile.am b/config/Makefile.am
+index 008e823..91b94d4 100644
+--- a/config/Makefile.am
++++ b/config/Makefile.am
+@@ -1 +1 @@
+-SUBDIRS = bellagio rpi tizonia zynqultrascaleplus
++SUBDIRS = bellagio rpi tizonia zynqultrascaleplus qti
+diff --git a/config/meson.build b/config/meson.build
+index 1068c6d..2169358 100644
+--- a/config/meson.build
++++ b/config/meson.build
+@@ -6,6 +6,8 @@ elif omx_target == 'zynqultrascaleplus'
+   sub = 'zynqultrascaleplus'
+ elif omx_target == 'tizonia'
+   sub = 'tizonia'
++elif omx_target == 'qti'
++  sub = 'qti'
+ else
+   # No config file defined for the 'generic' target
+   sub = ''
+diff --git a/config/qti/Makefile.am b/config/qti/Makefile.am
+new file mode 100644
+index 0000000..a5419e1
+--- /dev/null
++++ b/config/qti/Makefile.am
+@@ -0,0 +1,11 @@
++EXTRA_DIST = gstomx.conf
++
++if USE_OMX_TARGET_QTI
++configdir = $(sysconfdir)/xdg
++if TARGET_VPU554
++config_DATA = vpu554/gstomx.conf
++else
++config_DATA = gstomx.conf
++endif
++endif
++
+diff --git a/config/qti/gstomx.conf b/config/qti/gstomx.conf
+new file mode 100644
+index 0000000..cde2582
+--- /dev/null
++++ b/config/qti/gstomx.conf
+@@ -0,0 +1,184 @@
++#Copyright (c) 2019, The Linux Foundation. All rights reserved.
++#
++#Redistribution and use in source and binary forms, with or without
++#modification, are permitted provided that the following conditions are
++#met:
++#     * Redistributions of source code must retain the above copyright
++#       notice, this list of conditions and the following disclaimer.
++#     * Redistributions in binary form must reproduce the above
++#       copyright notice, this list of conditions and the following
++#       disclaimer in the documentation and/or other materials provided
++#       with the distribution.
++#     * Neither the name of The Linux Foundation nor the names of its
++#       contributors may be used to endorse or promote products derived
++#       from this software without specific prior written permission.
++#
++# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
++# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
++# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
++# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
++# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
++# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
++# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
++# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
++# (IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++#
++[omxvp8dec]
++type-name=GstOMXVP8Dec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.vp8
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++[omxvp9dec]
++type-name=GstOMXVP9Dec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.vp9
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++[omxh265dec]
++type-name=GstOMXH265Dec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.hevc
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++[omxh264dec]
++type-name=GstOMXH264Dec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.avc
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++#sink-template-caps=video/x-h264,stream-format=(string)avc,alignment=(string)au,level=(string)2.1,profile=(string)constrained-baseline
++#src-template-caps=video/x-raw-yuv,width=(int)[16,4096],height=(int)[16,4096],framerate=(fraction)[0,max],format=(string){I420,YUY2,UYVY,NV12}
++
++[omxh263dec]
++type-name=GstOMXH263Dec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.h263
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++#[omxaacdec]
++#type-name=GstOMXAACDec
++#core-name=/usr/lib64/libOmxCore.so
++#component-name=OMX.qcom.audio.decoder.aac
++#rank=256
++#in-port-index=0
++#out-port-index=1
++#hacks=no-disable-outport
++
++[omxmpeg4videodec]
++type-name=GstOMXMPEG4VideoDec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.mpeg4
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++sink-template-caps=video/mpeg, width=(int)[ 1, 2147483647 ], height=(int)[ 1, 2147483647 ], mpegversion=(int)4, systemstream=(boolean)false
++
++[omxdivx311videodec]
++type-name=GstOMXDIVX311VideoDec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.divx311
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++sink-template-caps=video/x-divx, width=(int)[ 1, 2147483647 ], height=(int)[ 1, 2147483647 ], divxversion=(int)3
++
++[omxdivxvideodec]
++type-name=GstOMXDIVXVideoDec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.divx
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++sink-template-caps=video/x-divx, width=(int)[ 1, 2147483647 ], height=(int)[ 1, 2147483647 ], divxversion=(int)[ 4, 6 ]
++
++[omxmpeg2dec]
++type-name=GstOMXMPEG2VideoDec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.mpeg2
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++[omxwmvdec]
++type-name=GstOMXWMVDec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.wmv
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++[omxh264enc]
++type-name=GstOMXH264Enc
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.encoder.avc
++rank=256
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++[omxh263enc]
++type-name=GstOMXH263Enc
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.encoder.h263
++rank=256
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++#[omxaacenc]
++#type-name=GstOMXAACEnc
++#core-name=/usr/lib64/libOmxCore.so
++#component-name=OMX.qcom.audio.encoder.aac
++#rank=256
++#in-port-index=0
++#out-port-index=1
++#hacks=no-disable-outport
++
++[omxmpeg4videoenc]
++type-name=GstOMXMPEG4VideoEnc
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.encoder.mpeg4
++rank=256
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport;skip-input-bufs
++
++[omxh265enc]
++type-name=GstOMXH265Enc
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.encoder.hevc
++rank=256
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport;skip-input-bufs
++
++[omxheicenc]
++type-name=GstOMXHEICEnc
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.encoder.heic
++rank=256
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport;skip-input-bufs
+diff --git a/config/qti/vpu554/gstomx.conf b/config/qti/vpu554/gstomx.conf
+new file mode 100644
+index 0000000..0a76823
+--- /dev/null
++++ b/config/qti/vpu554/gstomx.conf
+@@ -0,0 +1,184 @@
++#Copyright (c) 2019, The Linux Foundation. All rights reserved.
++#
++#Redistribution and use in source and binary forms, with or without
++#modification, are permitted provided that the following conditions are
++#met:
++#     * Redistributions of source code must retain the above copyright
++#       notice, this list of conditions and the following disclaimer.
++#     * Redistributions in binary form must reproduce the above
++#       copyright notice, this list of conditions and the following
++#       disclaimer in the documentation and/or other materials provided
++#       with the distribution.
++#     * Neither the name of The Linux Foundation nor the names of its
++#       contributors may be used to endorse or promote products derived
++#       from this software without specific prior written permission.
++#
++# THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
++# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
++# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
++# ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
++# BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
++# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
++# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
++# BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
++# WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
++# OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
++# (IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
++#
++[omxvp8dec]
++type-name=GstOMXVP8Dec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.vp8
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++[omxvp9dec]
++type-name=GstOMXVP9Dec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.vp9
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++[omxh265dec]
++type-name=GstOMXH265Dec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.hevc
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++[omxh264dec]
++type-name=GstOMXH264Dec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.avc
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++#sink-template-caps=video/x-h264,stream-format=(string)avc,alignment=(string)au,level=(string)2.1,profile=(string)constrained-baseline
++#src-template-caps=video/x-raw-yuv,width=(int)[16,4096],height=(int)[16,4096],framerate=(fraction)[0,max],format=(string){I420,YUY2,UYVY,NV12}
++
++[omxh263dec]
++type-name=GstOMXH263Dec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qti.video.decoder.h263sw
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++#[omxaacdec]
++#type-name=GstOMXAACDec
++#core-name=/usr/lib64/libOmxCore.so
++#component-name=OMX.qcom.audio.decoder.aac
++#rank=256
++#in-port-index=0
++#out-port-index=1
++#hacks=no-disable-outport
++
++[omxmpeg4videodec]
++type-name=GstOMXMPEG4VideoDec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qti.video.decoder.mpeg4sw
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++sink-template-caps=video/mpeg, width=(int)[ 1, 2147483647 ], height=(int)[ 1, 2147483647 ], mpegversion=(int)4, systemstream=(boolean)false
++
++[omxdivxvideodec]
++type-name=GstOMXDIVXVideoDec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qti.video.decoder.divxsw
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++sink-template-caps=video/x-divx, width=(int)[ 1, 2147483647 ], height=(int)[ 1, 2147483647 ], divxversion=(int)[ 4, 6 ]
++
++[omxmpeg2dec]
++type-name=GstOMXMPEG2VideoDec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.decoder.mpeg2
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++[omxwmvdec]
++type-name=GstOMXWMVDec
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qti.video.decoder.vc1sw
++rank=258
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport;no-component-reconfigure
++
++[omxh264enc]
++type-name=GstOMXH264Enc
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.encoder.avc
++rank=256
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++[omxh263enc]
++type-name=GstOMXH263Enc
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.encoder.h263sw
++rank=256
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport
++
++#[omxaacenc]
++#type-name=GstOMXAACEnc
++#core-name=/usr/lib64/libOmxCore.so
++#component-name=OMX.qcom.audio.encoder.aac
++#rank=256
++#in-port-index=0
++#out-port-index=1
++#hacks=no-disable-outport
++
++[omxmpeg4videoenc]
++type-name=GstOMXMPEG4VideoEnc
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.encoder.mpeg4sw
++rank=256
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport;skip-input-bufs
++
++[omxh265enc]
++type-name=GstOMXH265Enc
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.encoder.hevc
++rank=256
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport;skip-input-bufs
++
++[omxheicenc]
++type-name=GstOMXHEICEnc
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.encoder.heic
++rank=256
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport;skip-input-bufs
++
++[omxvp8enc]
++type-name=GstOMXVP8Enc
++core-name=/usr/lib64/libOmxCore.so
++component-name=OMX.qcom.video.encoder.vp8
++rank=256
++in-port-index=0
++out-port-index=1
++hacks=no-disable-outport;skip-input-bufs
++
+diff --git a/configure.ac b/configure.ac
+index d767764..0d90f5e 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -184,6 +184,16 @@ PKG_CHECK_MODULES([X11], [x11], [
+ ], [HAVE_X11=no])
+ AM_CONDITIONAL(HAVE_X11, test "x$HAVE_X11" = "xyes")
+ 
++AC_ARG_ENABLE([target-vpu554],
++        AC_HELP_STRING([--enable-target-vpu554],
++                [Enable conditional compile for target VPU554 [default=no]]),
++        [target_vpu554="${enableval}"])
++
++AM_CONDITIONAL(TARGET_VPU554, [test "x$target_vpu554" = "xyes"])
++if test "x$target_vpu554" = "xyes"; then
++AC_DEFINE(_USE_TARGET_VPU554_, 1, [vpu554 related platform support])
++fi
++
+ dnl Check for -Bsymbolic-functions linker flag used to avoid
+ dnl intra-library PLT jumps, if available.
+ AC_ARG_ENABLE(Bsymbolic,
+@@ -200,7 +210,7 @@ AC_ARG_ENABLE(Bsymbolic,
+                LDFLAGS="${SAVED_LDFLAGS}" LIBS="${SAVED_LIBS}"])
+ 
+ AC_ARG_WITH([omx-target],
+-        AS_HELP_STRING([--with-omx-target],[Use this OpenMAX IL target (generic, bellagio, rpi, tizonia, zynqultrascaleplus)]),
++        AS_HELP_STRING([--with-omx-target],[Use this OpenMAX IL target (generic, bellagio, rpi, tizonia, zynqultrascaleplus, qti)]),
+         [ac_cv_omx_target="$withval"], [ac_cv_omx_target="none"])
+ 
+ ac_cv_omx_target_struct_packing="none"
+@@ -223,8 +233,11 @@ case "${ac_cv_omx_target}" in
+   tizonia)
+     AC_DEFINE(USE_OMX_TARGET_TIZONIA, 1, [Use Tizonia OpenMAX IL target])
+     ;;
++qti)
++    AC_DEFINE(USE_OMX_TARGET_QTI, 1, [Use QTI OpenMAX IL target])
++    ;;
+   none|*)
+-    AC_ERROR([invalid OpenMAX IL target, you must specify one of --with-omx-target={generic,rpi,bellagio,tizonia,zynqultrascaleplus}])
++    AC_ERROR([invalid OpenMAX IL target, you must specify one of --with-omx-target={generic,rpi,bellagio,tizonia,zynqultrascaleplus,qti}])
+     ;;
+ esac
+ AM_CONDITIONAL(USE_OMX_TARGET_GENERIC, test "x$ac_cv_omx_target" = "xgeneric")
+@@ -232,6 +245,7 @@ AM_CONDITIONAL(USE_OMX_TARGET_BELLAGIO, test "x$ac_cv_omx_target" = "xbellagio")
+ AM_CONDITIONAL(USE_OMX_TARGET_TIZONIA, test "x$ac_cv_omx_target" = "xtizonia")
+ AM_CONDITIONAL(USE_OMX_TARGET_RPI, test "x$ac_cv_omx_target" = "xrpi")
+ AM_CONDITIONAL(USE_OMX_TARGET_ZYNQ_USCALE_PLUS, test "x$ac_cv_omx_target" = "xzynqultrascaleplus")
++AM_CONDITIONAL(USE_OMX_TARGET_QTI, test "x$ac_cv_omx_target" = "xqti")
+ 
+ AC_ARG_WITH([omx-struct-packing],
+         AS_HELP_STRING([--with-omx-struct-packing],[Force OpenMAX struct packing, (default is none)]),
+@@ -463,6 +477,7 @@ tools/Makefile
+ config/Makefile
+ config/bellagio/Makefile
+ config/rpi/Makefile
++config/qti/Makefile
+ config/tizonia/gstomx.conf
+ config/tizonia/Makefile
+ config/zynqultrascaleplus/Makefile
+diff --git a/meson.build b/meson.build
+index cdd6d17..c849d19 100644
+--- a/meson.build
++++ b/meson.build
+@@ -197,6 +197,8 @@ elif omx_target == 'rpi'
+   endif
+ elif omx_target == 'bellagio'
+   cdata.set('USE_OMX_TARGET_BELLAGIO', 1)
++elif omx_target == 'qti'
++  cdata.set('USE_OMX_TARGET_QTI', 1)
+ elif omx_target == 'zynqultrascaleplus'
+   cdata.set('USE_OMX_TARGET_ZYNQ_USCALE_PLUS', 1)
+   have_allegro_header = cc.has_header (
+diff --git a/omx/gstomx.h b/omx/gstomx.h
+index 4b61343..8112334 100644
+--- a/omx/gstomx.h
++++ b/omx/gstomx.h
+@@ -96,6 +96,7 @@
+ 
+ G_BEGIN_DECLS
+ 
++#if 0 /* Original Code is commented */
+ #define GST_OMX_INIT_STRUCT(st) G_STMT_START { \
+   memset ((st), 0, sizeof (*(st))); \
+   (st)->nSize = sizeof (*(st)); \
+@@ -105,6 +106,19 @@ G_BEGIN_DECLS
+   (st)->nVersion.s.nStep = OMX_VERSION_STEP; \
+ } G_STMT_END
+ 
++#else
++/* Support for MSM 8996:
++ * Version updated to 0x00000101 as required by MSM-OMX;
++ * OMX_Types.h is updated in MSM-OMX: does not contain required Version details
++ * Updated OMX_Types.h doesn't contain version macros like"OMX_VERSION_MAJOR".
++ */
++#define GST_OMX_INIT_STRUCT(st) G_STMT_START { \
++  memset ((st), 0, sizeof (*(st))); \
++  (st)->nSize = sizeof (*(st)); \
++  (st)->nVersion.nVersion = ((OMX_U32)0x00000101);\
++} G_STMT_END
++#endif
++
+ #ifdef OMX_SKIP64BIT
+ #define GST_OMX_GET_TICKS(ticks) ((((guint64) (ticks).nHighPart) << 32) | ((ticks).nLowPart))
+ #define GST_OMX_SET_TICKS(ticks, i) G_STMT_START { \
+-- 
+2.7.4
+

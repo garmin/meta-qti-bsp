@@ -1,0 +1,153 @@
+From 369496e949cb5a8199370e6c64679ed67b44407c Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Thu, 4 Jul 2019 11:18:30 +0800
+Subject: [PATCH 04/28] wayland: add NV12_UBWC format and disable-ubwc property
+
+Origin patch on mm-gst.lnx.1.0 is 2375491
+
+Change-Id: I6c0124f285e51273a86cfe63c3c76e5e3293daa8
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 43 ++++++++++++++++++++++++++++++++++---------
+ ext/wayland/gstwaylandsink.h |  1 +
+ ext/wayland/wlvideoformat.c  |  1 +
+ 3 files changed, 36 insertions(+), 9 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 7edcf64..1df4eda 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -49,6 +49,10 @@
+ 
+ #include <gst/wayland/wayland.h>
+ #include <gst/video/videooverlay.h>
++#include <gbm_priv.h>
++#include <gbm.h>
++#include <msmgbm.h>
++
+ #define USE_OMX_TARGET_VENUS
+ 
+ /* signals */
+@@ -63,7 +67,8 @@ enum
+ {
+   PROP_0,
+   PROP_DISPLAY,
+-  PROP_FULLSCREEN
++  PROP_FULLSCREEN,
++  PROP_DISABLE_UBWC,
+ };
+ 
+ GST_DEBUG_CATEGORY (gstwayland_debug);
+@@ -75,15 +80,12 @@ GST_DEBUG_CATEGORY (gstwayland_debug);
+ #include <EGL/eglext.h>
+ #include <drm/drm_fourcc.h>
+ #endif
+-#if (defined (USE_OMX_TARGET_VENUS))
+-#define WL_VIDEO_FORMATS \
+-    "{ NV12 }"
+-#else
++
+ #define WL_VIDEO_FORMATS \
+     "{ BGRx, BGRA, RGBx, xBGR, xRGB, RGBA, ABGR, ARGB, RGB, BGR, " \
+     "RGB16, BGR16, YUY2, YVYU, UYVY, AYUV, NV12, NV21, NV16, " \
+     "YUV9, YVU9, Y41B, I420, YV12, Y42B, v308 }"
+-#endif
++
+ static GstStaticPadTemplate sink_template = GST_STATIC_PAD_TEMPLATE ("sink",
+     GST_PAD_SINK,
+     GST_PAD_ALWAYS,
+@@ -235,6 +237,10 @@ gst_wayland_sink_class_init (GstWaylandSinkClass * klass)
+       g_param_spec_boolean ("fullscreen", "Fullscreen",
+           "Whether the surface should be made fullscreen ", FALSE,
+           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
++  g_object_class_install_property (gobject_class, PROP_DISABLE_UBWC,
++      g_param_spec_boolean ("disable-ubwc", "Disable UBWC",
++          "Disable UBWC in the video sink",
++          FALSE, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
+ }
+ 
+ static void
+@@ -273,6 +279,11 @@ gst_wayland_sink_get_property (GObject * object,
+       g_value_set_boolean (value, sink->fullscreen);
+       GST_OBJECT_UNLOCK (sink);
+       break;
++    case PROP_DISABLE_UBWC:
++      GST_OBJECT_LOCK (sink);
++      g_value_set_boolean (value, sink->disable_ubwc);
++      GST_OBJECT_UNLOCK (sink);
++      break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+@@ -296,6 +307,11 @@ gst_wayland_sink_set_property (GObject * object,
+       gst_wayland_sink_set_fullscreen (sink, g_value_get_boolean (value));
+       GST_OBJECT_UNLOCK (sink);
+       break;
++    case PROP_DISABLE_UBWC:
++      GST_OBJECT_LOCK (sink);
++      sink->disable_ubwc = g_value_get_boolean (value);
++      GST_OBJECT_UNLOCK (sink);
++      break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+@@ -546,12 +562,15 @@ gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
+     GValue shm_list = G_VALUE_INIT, dmabuf_list = G_VALUE_INIT;
+     GValue value = G_VALUE_INIT;
+     GArray *formats;
+-    gint i;
++    gint i, ubwc_status;
+     guint fmt;
+ 
+     g_value_init (&shm_list, GST_TYPE_LIST);
+     g_value_init (&dmabuf_list, GST_TYPE_LIST);
+-
++    // check UBWC status from graphic
++    ubwc_status = is_ubwc_enabled(GBM_FORMAT_NV12,
++                    GBM_BO_USAGE_UBWC_ALIGNED_QTI | GBM_BO_USAGE_HW_RENDERING_QTI,
++                    0);
+     /* Add corresponding shm formats */
+     formats = sink->display->shm_formats;
+     for (i = 0; i < formats->len; i++) {
+@@ -560,7 +579,13 @@ gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
+       g_value_set_static_string (&value, gst_wl_shm_format_to_string (fmt));
+       gst_value_list_append_and_take_value (&shm_list, &value);
+     }
+-
++    // Add NV12_UBWC format string
++    if (ubwc_status && !sink->disable_ubwc) {
++      g_value_init (&value, G_TYPE_STRING);
++      g_value_set_static_string (&value,
++              gst_video_format_to_string (GST_VIDEO_FORMAT_NV12_UBWC));
++      gst_value_list_append_and_take_value (&shm_list, &value);
++    }
+     gst_structure_take_value (gst_caps_get_structure (caps, 0), "format",
+         &shm_list);
+ 
+diff --git a/ext/wayland/gstwaylandsink.h b/ext/wayland/gstwaylandsink.h
+index 421ef5a..97f2455 100644
+--- a/ext/wayland/gstwaylandsink.h
++++ b/ext/wayland/gstwaylandsink.h
+@@ -73,6 +73,7 @@ struct _GstWaylandSink
+   gboolean fullscreen;
+ 
+   gchar *display_name;
++  gboolean disable_ubwc;
+ 
+   gboolean redraw_pending;
+   GMutex render_lock;
+diff --git a/ext/wayland/wlvideoformat.c b/ext/wayland/wlvideoformat.c
+index 77cfac8..1969684 100644
+--- a/ext/wayland/wlvideoformat.c
++++ b/ext/wayland/wlvideoformat.c
+@@ -72,6 +72,7 @@ static const wl_ShmVideoFormat shm_formats[] = {
+   {WL_SHM_FORMAT_UYVY, GST_VIDEO_FORMAT_UYVY},
+   {WL_SHM_FORMAT_AYUV, GST_VIDEO_FORMAT_AYUV},
+   {WL_SHM_FORMAT_NV12, GST_VIDEO_FORMAT_NV12},
++  {WL_SHM_FORMAT_NV12, GST_VIDEO_FORMAT_NV12_UBWC},
+   {WL_SHM_FORMAT_NV21, GST_VIDEO_FORMAT_NV21},
+   {WL_SHM_FORMAT_NV16, GST_VIDEO_FORMAT_NV16},
+   {WL_SHM_FORMAT_YUV410, GST_VIDEO_FORMAT_YUV9},
+-- 
+2.7.4
+

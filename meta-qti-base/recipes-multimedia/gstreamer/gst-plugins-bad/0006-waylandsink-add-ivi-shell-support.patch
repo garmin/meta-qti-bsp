@@ -1,0 +1,269 @@
+From 41dbb1fac9928e06df605f33a3aee0d732ceb5ee Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Wed, 4 Sep 2019 18:09:35 +0800
+Subject: [PATCH 06/28] waylandsink: add ivi-shell support
+
+Origin patch on mm-gst.lnx.1.0 is 1971297
+
+Change-Id: I3271404c65f6f296161a3a54f44a76f89213d42d
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ ext/wayland/Makefile.am         |   7 ++-
+ ext/wayland/ivi-application.xml | 100 ++++++++++++++++++++++++++++++++++++++++
+ ext/wayland/wldisplay.c         |   2 +
+ ext/wayland/wldisplay.h         |   4 ++
+ ext/wayland/wlwindow.c          |  37 +++++++++++++++
+ ext/wayland/wlwindow.h          |   1 +
+ 6 files changed, 149 insertions(+), 2 deletions(-)
+ create mode 100644 ext/wayland/ivi-application.xml
+
+diff --git a/ext/wayland/Makefile.am b/ext/wayland/Makefile.am
+index 3245023..1504e8b 100644
+--- a/ext/wayland/Makefile.am
++++ b/ext/wayland/Makefile.am
+@@ -8,7 +8,9 @@ BUILT_SOURCES = \
+ 	fullscreen-shell-unstable-v1-protocol.c \
+ 	fullscreen-shell-unstable-v1-client-protocol.h \
+ 	xdg-shell-protocol.c \
+-	xdg-shell-client-protocol.h
++	xdg-shell-client-protocol.h \
++    ivi-application-protocol.c \
++    ivi-application-client-protocol.h
+ if HAVE_GBM_BUFFER_BACKEND
+ BUILT_SOURCES += gbm-buffer-backend-protocol.c \
+         gbm-buffer-backend-client-protocol.h
+@@ -26,7 +28,8 @@ nodist_libgstwaylandsink_la_SOURCES = \
+ 	viewporter-protocol.c \
+ 	linux-dmabuf-unstable-v1-protocol.c \
+ 	fullscreen-shell-unstable-v1-protocol.c \
+-	xdg-shell-protocol.c
++	xdg-shell-protocol.c \
++    ivi-application-protocol.c
+ if HAVE_GBM_BUFFER_BACKEND
+ nodist_libgstwaylandsink_la_SOURCES += gbm-buffer-backend-protocol.c
+ endif
+diff --git a/ext/wayland/ivi-application.xml b/ext/wayland/ivi-application.xml
+new file mode 100644
+index 0000000..8f24226
+--- /dev/null
++++ b/ext/wayland/ivi-application.xml
+@@ -0,0 +1,100 @@
++<?xml version="1.0" encoding="UTF-8"?>
++<protocol name="ivi_application">
++
++  <copyright>
++    Copyright (C) 2013 DENSO CORPORATION
++    Copyright (c) 2013 BMW Car IT GmbH
++
++    Permission is hereby granted, free of charge, to any person obtaining a
++    copy of this software and associated documentation files (the "Software"),
++    to deal in the Software without restriction, including without limitation
++    the rights to use, copy, modify, merge, publish, distribute, sublicense,
++    and/or sell copies of the Software, and to permit persons to whom the
++    Software is furnished to do so, subject to the following conditions:
++
++    The above copyright notice and this permission notice (including the next
++    paragraph) shall be included in all copies or substantial portions of the
++    Software.
++
++    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
++    THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
++    FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
++    DEALINGS IN THE SOFTWARE.
++  </copyright>
++
++  <interface name="ivi_surface" version="1">
++    <description summary="application interface to surface in ivi compositor"/>
++
++    <request name="destroy" type="destructor">
++      <description summary="destroy ivi_surface">
++        This removes link from ivi_id to wl_surface and destroys ivi_surface.
++        The ID, ivi_id, is free and can be used for surface_create again.
++      </description>
++    </request>
++
++    <event name="configure">
++      <description summary="suggest resize">
++        The configure event asks the client to resize its surface.
++
++        The size is a hint, in the sense that the client is free to
++        ignore it if it doesn't resize, pick a smaller size (to
++        satisfy aspect ratio or resize in steps of NxM pixels).
++
++        The client is free to dismiss all but the last configure
++        event it received.
++
++        The width and height arguments specify the size of the window
++        in surface local coordinates.
++      </description>
++      <arg name="width" type="int"/>
++      <arg name="height" type="int"/>
++    </event>
++  </interface>
++
++  <interface name="ivi_application" version="1">
++    <description summary="create ivi-style surfaces">
++      This interface is exposed as a global singleton.
++      This interface is implemented by servers that provide IVI-style user interfaces.
++      It allows clients to associate a ivi_surface with wl_surface.
++    </description>
++
++    <enum name="error">
++      <entry name="role" value="0" summary="given wl_surface has another role"/>
++      <entry name="ivi_id" value="1" summary="given ivi_id is assigned to another wl_surface"/>
++    </enum>
++
++    <request name="surface_create">
++      <description summary="create ivi_surface with numeric ID in ivi compositor">
++        This request gives the wl_surface the role of an IVI Surface. Creating more than
++        one ivi_surface for a wl_surface is not allowed. Note, that this still allows the
++        following example:
++
++         1. create a wl_surface
++         2. create ivi_surface for the wl_surface
++         3. destroy the ivi_surface
++         4. create ivi_surface for the wl_surface (with the same or another ivi_id as before)
++
++        surface_create will create a interface:ivi_surface with numeric ID; ivi_id in
++        ivi compositor. These ivi_ids are defined as unique in the system to identify
++        it inside of ivi compositor. The ivi compositor implements business logic how to
++        set properties of the surface with ivi_id according to status of the system.
++        E.g. a unique ID for Car Navigation application is used for implementing special
++        logic of the application about where it shall be located.
++        The server regards following cases as protocol errors and disconnects the client.
++         - wl_surface already has an nother role.
++         - ivi_id is already assigned to an another wl_surface.
++
++        If client destroys ivi_surface or wl_surface which is assigne to the ivi_surface,
++        ivi_id which is assigned to the ivi_surface is free for reuse.
++      </description>
++      <arg name="ivi_id" type="uint"/>
++      <arg name="surface" type="object" interface="wl_surface"/>
++      <arg name="id" type="new_id" interface="ivi_surface"/>
++    </request>
++
++  </interface>
++
++</protocol>
+diff --git a/ext/wayland/wldisplay.c b/ext/wayland/wldisplay.c
+index 1c6c3b4..ff7dfdc 100644
+--- a/ext/wayland/wldisplay.c
++++ b/ext/wayland/wldisplay.c
+@@ -235,6 +235,8 @@ registry_handle_global (void *data, struct wl_registry *registry,
+     self->dmabuf =
+         wl_registry_bind (registry, id, &zwp_linux_dmabuf_v1_interface, 1);
+     zwp_linux_dmabuf_v1_add_listener (self->dmabuf, &dmabuf_listener, self);
++  } else if (g_strcmp0 (interface, "ivi_application") == 0) {
++    self->ivi_application = wl_registry_bind(registry, id, &ivi_application_interface, 1);
+   }
+ #ifdef USE_GBM
+   else if (g_strcmp0 (interface, "gbm_buffer_backend") == 0) {
+diff --git a/ext/wayland/wldisplay.h b/ext/wayland/wldisplay.h
+index f2198ba..499fd5e 100644
+--- a/ext/wayland/wldisplay.h
++++ b/ext/wayland/wldisplay.h
+@@ -28,6 +28,7 @@
+ #include "viewporter-client-protocol.h"
+ #include "linux-dmabuf-unstable-v1-client-protocol.h"
+ #include "fullscreen-shell-unstable-v1-client-protocol.h"
++#include "ivi-application-client-protocol.h"
+ #ifdef USE_GBM
+ #include "gbm-buffer-backend-client-protocol.h"
+ #endif
+@@ -42,6 +43,8 @@ G_BEGIN_DECLS
+ #define GST_IS_WL_DISPLAY_CLASS(klass)       (G_TYPE_CHECK_CLASS_TYPE ((klass), GST_TYPE_WL_DISPLAY))
+ #define GST_WL_DISPLAY_GET_CLASS(obj)        (G_TYPE_INSTANCE_GET_CLASS ((obj), GST_TYPE_WL_DISPLAY, GstWlDisplayClass))
+ 
++#define IVI_SURFACE_ID 9000
++
+ typedef struct _GstWlDisplay GstWlDisplay;
+ typedef struct _GstWlDisplayClass GstWlDisplayClass;
+ 
+@@ -62,6 +65,7 @@ struct _GstWlDisplay
+   struct xdg_wm_base *xdg_wm_base;
+   struct zwp_fullscreen_shell_v1 *fullscreen_shell;
+   struct wl_shm *shm;
++  struct ivi_application *ivi_application;
+   struct wp_viewporter *viewporter;
+   struct zwp_linux_dmabuf_v1 *dmabuf;
+ #ifdef USE_GBM
+diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
+index 52330df..df83dc3 100644
+--- a/ext/wayland/wlwindow.c
++++ b/ext/wayland/wlwindow.c
+@@ -135,6 +135,16 @@ static const struct wl_shell_surface_listener wl_shell_surface_listener = {
+ };
+ 
+ static void
++handle_ivi_surface_configure(void *data, struct ivi_surface *ivi_surface,
++    int32_t width, int32_t height)
++{
++}
++
++static const struct ivi_surface_listener ivi_surface_listener = {
++  handle_ivi_surface_configure,
++};
++
++static void
+ gst_wl_window_class_init (GstWlWindowClass * klass)
+ {
+   GObjectClass *gobject_class = G_OBJECT_CLASS (klass);
+@@ -157,6 +167,11 @@ gst_wl_window_finalize (GObject * gobject)
+ {
+   GstWlWindow *self = GST_WL_WINDOW (gobject);
+ 
++ if (self->display->ivi_application) {
++    ivi_surface_destroy(self->ivi_surface);
++    ivi_application_destroy(self->display->ivi_application);
++  }
++
+   if (self->wl_shell_surface)
+     wl_shell_surface_destroy (self->wl_shell_surface);
+ 
+@@ -313,6 +328,28 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
+     zwp_fullscreen_shell_v1_present_surface (display->fullscreen_shell,
+         window->area_surface, ZWP_FULLSCREEN_SHELL_V1_PRESENT_METHOD_ZOOM,
+         NULL);
++  } else if (display->ivi_application) {
++    /* set the initial size to be the same as the reported video size */
++    window->render_rectangle.x = 0;
++    window->render_rectangle.y = 0;
++    window->render_rectangle.w =
++        gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
++    window->render_rectangle.h = info->height;
++
++    uint32_t id_ivisurf = IVI_SURFACE_ID + (uint32_t)getpid();
++    window->ivi_surface =
++        ivi_application_surface_create(display->ivi_application,
++                                       id_ivisurf, window->area_surface);
++
++    if (window->ivi_surface) {
++      ivi_surface_add_listener(window->ivi_surface,
++                               &ivi_surface_listener, window);
++    } else {
++      GST_ERROR ("Unable to get ivi_surface");
++
++      g_object_unref (window);
++      return NULL;
++    }
+   } else {
+     GST_ERROR ("Unable to use either wl_shell, xdg_wm_base or "
+         "zwp_fullscreen_shell.");
+diff --git a/ext/wayland/wlwindow.h b/ext/wayland/wlwindow.h
+index c3f0172..b994f51 100644
+--- a/ext/wayland/wlwindow.h
++++ b/ext/wayland/wlwindow.h
+@@ -55,6 +55,7 @@ struct _GstWlWindow
+   struct wl_shell_surface *wl_shell_surface;
+   struct xdg_surface *xdg_surface;
+   struct xdg_toplevel *xdg_toplevel;
++  struct ivi_surface *ivi_surface;
+   gboolean configured;
+   GCond configure_cond;
+   GMutex configure_mutex;
+-- 
+2.7.4
+
