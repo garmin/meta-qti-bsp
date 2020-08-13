@@ -1,6 +1,8 @@
-#This bbappend are from AGL
+FILESEXTRAPATHS_prepend := "${THISDIR}/${BPN}-${PV}:"
+
 inherit distro_features_check
 
+# AGL 5.0
 SRC_URI += "\
 	https://source.codeaurora.org/quic/le/AGL/meta-agl/plain/meta-ivi-common/recipes-multimedia/pulseaudio/pulseaudio-10.0/0001-install-files-for-a-module-development.patch?h=automotivelinux/eel;downloadfilename=0001-install-files-for-a-module-development.patch;md5sum=0ad43d60adc2746787f2266ac647363d;sha256sum=cbbb1bf93bf3ba4ac4e6f3f1b0a4d83fa8d99d4a044021a6e4c6667257b1e755 \
 	https://source.codeaurora.org/quic/le/AGL/meta-agl/plain/meta-ivi-common/recipes-multimedia/pulseaudio/pulseaudio-10.0/0002-volume-ramp-additions-to-the-low-level-infra.patch?h=automotivelinux/eel;downloadfilename=0002-volume-ramp-additions-to-the-low-level-infra.patch;md5sum=c272d39b46f5bd976b3f8dd04c54f1b1;sha256sum=085d2dd1c778f5a2fd76fd0b7a8a65f15493e0096bde0ddc96d276dda4753c91 \
@@ -9,33 +11,22 @@ SRC_URI += "\
 	https://source.codeaurora.org/quic/le/AGL/meta-agl/plain/meta-ivi-common/recipes-multimedia/pulseaudio/pulseaudio-10.0/0005-sink-input-volume-Add-support-for-volume-ramp-factor.patch?h=automotivelinux/eel;downloadfilename=0005-sink-input-volume-Add-support-for-volume-ramp-factor.patch;md5sum=e714011cf29d1fc02ec5d9157c04e495;sha256sum=493c5179598fe852014e00443795a6e8b0cfdddffe60133027dac449c2730d5a \
 "
 
-do_install_append() {
-	# Install pulseaudio systemd service
-	if ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'true', 'false', d)}; then
-		install -m 644 -p -D ${WORKDIR}/build/src/pulseaudio.service ${D}${systemd_user_unitdir}/pulseaudio.service
-		install -m 644 -p -D ${WORKDIR}/pulseaudio-${PV}/src/daemon/systemd/user/pulseaudio.socket ${D}${systemd_user_unitdir}/pulseaudio.socket
-
-		# Execute these manually on behalf of systemctl script (from systemd-systemctl-native.bb)
-		# because it does not support systemd's user mode.
-		install -d ${D}${systemd_user_unitdir}/sockets.target.wants/
-		ln -sf ${systemd_user_unitdir}/pulseaudio.socket ${D}${systemd_user_unitdir}/sockets.target.wants/
-
-		install -d ${D}${systemd_user_unitdir}/default.target.wants/
-		ln -sf ${systemd_user_unitdir}/pulseaudio.service ${D}${systemd_user_unitdir}/default.target.wants/
-	fi
-	mkdir -p ${D}/${bindir}
-	install -m 755 -p -D ${WORKDIR}/build/src/.libs/pacat ${D}/${bindir}/
-}
-
-FILES_${PN}-server += " \
-	${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_user_unitdir}/pulseaudio.socket', '', d)} \
-	${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_user_unitdir}/sockets.target.wants/pulseaudio.socket', '', d)} \
-	${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_user_unitdir}/pulseaudio.service', '', d)} \
-	${@bb.utils.contains('DISTRO_FEATURES', 'systemd', '${systemd_user_unitdir}/default.target.wants/pulseaudio.service', '', d)} \
+SRC_URI += "\
+    file://0001-disable-timer-based-scheduling.patch \
+    file://0002-default.pa-Load-acdb-and-codec-control-modules.patch \
+    file://0007-stream-event-extension.patch \
+    file://0008-Pulseaudio-service-need-to-wait-for-sound-card-ready.patch \
+    file://0003-default.pa-Load-agl-audio-plugin-module.patch \
+    file://0006-Support-PulseAudio-Client-API-for-Module-Codec-Control.patch \
+    file://0001-pulseaudio-config-default.pa-to-disable-default-ALSA.patch \
 "
 
-PACKAGES =+ "pulseaudio-module-dev"
+REQUIRED_DISTRO_FEATURES = "systemd"
+
+RDEPENDS_pulseaudio-server += "\
+    ${@bb.utils.contains('DISTRO_FEATURES', 'systemd', 'pulseaudio-module-systemd-login', '', d)} \
+"
+
+PACKAGES =+ " pulseaudio-module-dev"
 
 FILES_pulseaudio-module-dev = "${includedir}/pulsemodule/* ${libdir}/pkgconfig/pulseaudio-module-devel.pc"
-
-REQUIRED_DISTRO_FEATURES = "systemd"
