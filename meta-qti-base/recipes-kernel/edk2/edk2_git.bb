@@ -41,7 +41,8 @@ EXTRA_OEMAKE = "'CLANG_BIN=${CLANG_BIN_PATH}' \
                 'VERITY_LE=${VERITY_ENABLED}'\
                 'INIT_BIN_LE=\"/sbin/init\"'\
                 'EDK_TOOLS_PATH=${S}/BaseTools'\
-                'EARLY_ETH_ENABLED=${EARLY_ETH}'"
+                'EARLY_ETH_ENABLED=${EARLY_ETH}'\
+                'UBSAN_UEFI_GCC_FLAG_ALIGNMENT=-Wno-misleading-indentation'"
 
 EXTRA_OEMAKE_append_qcs40x = " 'DISABLE_PARALLEL_DOWNLOAD_FLASH=1'"
 
