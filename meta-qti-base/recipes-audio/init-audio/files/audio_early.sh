@@ -35,7 +35,7 @@ modprobe stub_dlkm
 /bin/mount -o ro /dev/sde4 /firmware
 /bin/mount -o ro /dev/mmcblk0p28 /firmware
 /bin/echo 0 > /sys/module/subsystem_restart/parameters/enable_debug
-/bin/echo 1 > /sys/kernel/boot_adsp/boot
+/bin/echo 2 > /sys/kernel/boot_adsp/boot
 modprobe platform_dlkm
 nice -n -20 modprobe machine_dlkm
 modprobe hdmi_dlkm
