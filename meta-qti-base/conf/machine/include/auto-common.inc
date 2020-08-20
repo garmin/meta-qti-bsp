@@ -37,7 +37,7 @@ PREFERRED_PROVIDER_virtual/libgles2     = "adreno"
 # Prefer iproute2
 PREFERRED_VERSION_iproute2         ?= "4.11"
 
-PREFERRED_VERSION_libdrm  = "2.4.66"
+PREFERRED_VERSION_libdrm  = "2.4.100"
 
 LICENSE_FLAGS_WHITELIST += "commercial_gstreamer1.0-libav commercial_gstreamer1.0-omx"
 LICENSE_FLAGS_WHITELIST += "commercial_gstreamer1.0-plugins-ugly commercial_opencore-amr"
