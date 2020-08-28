@@ -1,0 +1,68 @@
+From 5a338b30313e66e372cd6009c257883099e10e29 Mon Sep 17 00:00:00 2001
+From: Miaomiao Chen <miaochen@codeaurora.org>
+Date: Wed, 12 Feb 2020 19:34:19 +0800
+Subject: [PATCH 41/42] The crop event need be handled before eos event
+
+The crop event will be lost if the eos event is handled earlier
+than crop event, especially when the clip file is too short.
+If the crop event is lost, some multi-resolution clips will
+be blurred when resolution changed.
+
+Change-Id: Id13cc57e7dc1d9d4cc31fc6842940f21560c1585
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ omx/gstomx.c | 31 ++++++++++++++++---------------
+ 1 file changed, 16 insertions(+), 15 deletions(-)
+
+diff --git a/omx/gstomx.c b/omx/gstomx.c
+index e5298a8..4ff8a6e 100755
+--- a/omx/gstomx.c
++++ b/omx/gstomx.c
+@@ -2224,6 +2224,22 @@ retry:
+     goto done;
+   }
+ 
++  if (port->port_def.eDir == OMX_DirOutput &&
++      port->rect_changed == TRUE) {
++    if (port->pending_bufs_before_rect_change > 0) {
++      GST_DEBUG_OBJECT (comp->parent, "%s output port %u has rect change"
++          "pending buffer", comp->name, port->index);
++      _buf = g_queue_pop_head (&port->pending_buffers);
++
++      port->pending_bufs_before_rect_change--;
++      ret = GST_OMX_ACQUIRE_BUFFER_OK;
++      goto done;
++    }
++    port->rect_changed = FALSE;
++    ret = GST_OMX_ACQUIRE_BUFFER_RECT_CHANGED;
++    goto done;
++  }
++
+   if (port->port_def.eDir == OMX_DirOutput && port->eos) {
+     if (!g_queue_is_empty (&port->pending_buffers)) {
+       GST_DEBUG_OBJECT (comp->parent, "%s output port %u is EOS but has "
+@@ -2250,21 +2266,6 @@ retry:
+     }
+   }
+ 
+-  if (port->port_def.eDir == OMX_DirOutput &&
+-      port->rect_changed == TRUE) {
+-    if (port->pending_bufs_before_rect_change > 0) {
+-      GST_DEBUG_OBJECT (comp->parent, "%s output port %u has rect change"
+-          "pending buffer", comp->name, port->index);
+-      _buf = g_queue_pop_head (&port->pending_buffers);
+-
+-      port->pending_bufs_before_rect_change--;
+-      ret = GST_OMX_ACQUIRE_BUFFER_OK;
+-      goto done;
+-    }
+-    port->rect_changed = FALSE;
+-    ret = GST_OMX_ACQUIRE_BUFFER_RECT_CHANGED;
+-    goto done;
+-  }
+   /*
+    * At this point we have no error or flushing/eos port
+    * and a properly configured port.
+-- 
+2.7.4
+

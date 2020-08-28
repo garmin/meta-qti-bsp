@@ -1,0 +1,109 @@
+From 4a8f5c4938fc1aac11a26fc3a61c8f39a30197e5 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Fri, 20 Sep 2019 13:15:15 +0800
+Subject: [PATCH 08/28] waylandsink: change for video playback hang
+
+Change-Id: I825d5b1a08d6520e12cdc06ba7dfc3a3cef77e2d
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 38 ++------------------------------------
+ ext/wayland/wlbuffer.c       |  6 ++++++
+ 2 files changed, 8 insertions(+), 36 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index cbf5b62..00dfdb5 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -510,7 +510,6 @@ gst_wayland_sink_change_state (GstElement * element, GstStateChange transition)
+         }
+         g_clear_object (&sink->display);
+ 
+-        g_atomic_int_set (&sink->redraw_pending, FALSE);
+ 
+       }
+       g_mutex_unlock (&sink->display_lock);
+@@ -834,7 +833,7 @@ static const struct wl_callback_listener sync_listener = {
+ static gint
+ gst_wl_display_roundtrip (GstWlDisplay * self)
+ {
+-#if 0
++
+   struct wl_callback *callback;
+   gint ret = 0;
+   gboolean done = FALSE;
+@@ -850,33 +849,6 @@ gst_wl_display_roundtrip (GstWlDisplay * self)
+   wl_callback_destroy (callback);
+ 
+   return ret;
+-#endif
+-struct wl_display *display_wrapper;
+-	struct wl_callback *callback;
+-	int done, ret = 0;
+-
+-	done = 0;
+-
+-	display_wrapper = wl_proxy_create_wrapper(self->display);
+-	if (!display_wrapper)
+-		return -1;
+-
+-	wl_proxy_set_queue((struct wl_proxy *) display_wrapper, self->queue);
+-	callback = wl_display_sync(display_wrapper);
+-	wl_proxy_wrapper_destroy(display_wrapper);
+-
+-	if (callback == NULL)
+-		return -1;
+-
+-	wl_callback_add_listener(callback, &sync_listener, &done);
+-	while (!done && ret >= 0)
+-		ret = wl_display_dispatch_queue(self->display, self->queue);
+-
+-	if (ret == -1 && !done)
+-		wl_callback_destroy(callback);
+-
+-	return ret;
+-
+ }
+ static void
+ gbmbuf_create_succeeded(void *data, struct gbm_buffer_params *params, struct wl_buffer *new_buffer)
+@@ -918,12 +890,6 @@ gst_wayland_sink_create_wl_buffer_gbm (GstWaylandSink *sink,GstWlBuffer * self,
+         }
+         wl_display_roundtrip (sink->display->display);
+ 
+-        if (gst_wl_display_roundtrip (sink->display) < 0) {
+-       //if(wl_display_roundtrip_queue (sink->display, sink->display->queue)) {
+-           GST_ERROR_OBJECT(self, "gst_wayland_sink_create_wl_buffer_gbm::Failed at wl_display_roundtrip\n");
+-           return NULL;
+-        }
+-
+         while((self->wlbuffer == NULL) && i < 6) {
+            usleep(5000);
+            i++;
+@@ -1013,7 +979,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+   /* drop buffers until we get a frame callback */
+   if (g_atomic_int_get (&sink->redraw_pending) == TRUE) {
+     GST_LOG_OBJECT (sink, "buffer %p dropped (redraw pending)", buffer);
+-     goto done;
++    // goto done;
+   }
+ 
+   /* make sure that the application has called set_render_rectangle() */
+diff --git a/ext/wayland/wlbuffer.c b/ext/wayland/wlbuffer.c
+index 9ea5073..2474fa1 100644
+--- a/ext/wayland/wlbuffer.c
++++ b/ext/wayland/wlbuffer.c
+@@ -112,6 +112,12 @@ gst_wl_buffer_finalize (GObject * gobject)
+   if (self->wlbuffer)
+     wl_buffer_destroy (self->wlbuffer);
+ 
++  if (self->used_by_compositor && GST_IS_BUFFER (self->gstbuffer)) {
++    gst_mini_object_steal_qdata ((GstMiniObject *) self->gstbuffer,
++          gst_wl_buffer_qdata_quark ());
++    self->used_by_compositor = FALSE;
++    gst_buffer_unref (self->gstbuffer);
++  }
+   G_OBJECT_CLASS (gst_wl_buffer_parent_class)->finalize (gobject);
+ }
+ 
+-- 
+2.7.4
+

@@ -1,0 +1,60 @@
+From 20cb282afd0ffe5a1d2b86fdae6dcdb370248b85 Mon Sep 17 00:00:00 2001
+From: Bo Fang <bofang1@codeaurora.org>
+Date: Fri, 13 Mar 2020 17:31:41 +0800
+Subject: [PATCH 36/42] gst omx dec: attach omx filled data length on output
+ gstbuffer
+
+Previously, attach omx allocated total memory size on output gstbuffer when
+format is NV12_UBWC. Now, only attach omx filled data length on output
+gstbuffer, then, filesink could dump valid NV12_UBWC data directly. Such
+filesink dump is equivalent to omx decoder debug dump function through
+"setprop vendor.vidc.dec.log.out 1". Those dump NV12_UBWC file could be open
+by our ImagePlayer tool, and also could be used by "gst-launch-1.0 filesrc
+location=dump_ubwc_file blocksize=xxx ! ... ! omxh264enc ..." pipeline cmd.
+
+As there is some padding/random byte in those filled data range, NV12_UBWC
+dump file probably isn't constant. However, the real valid pixel data in it
+is always constant.
+
+Change-Id: I69e12a17515af2e6383a7eff2f218059217df141
+Signed-off-by: Bo Fang <bofang1@codeaurora.org>
+---
+ omx/gstomxvideodec.c | 17 ++++-------------
+ 1 file changed, 4 insertions(+), 13 deletions(-)
+
+diff --git a/omx/gstomxvideodec.c b/omx/gstomxvideodec.c
+index 87f24e8..d80da9e 100644
+--- a/omx/gstomxvideodec.c
++++ b/omx/gstomxvideodec.c
+@@ -188,24 +188,15 @@ _omx_out_buffer_create (GstOMXVideoDec * dec, GstOMXBuffer * pBuffer)
+    * as the allocator for the memory for simplicity, Otherwise we
+    * need a h/w related allocator and wrap the memory allocated
+    * from it as gstmemory.
+-   * For NV12_UBWC, since it cannot be parsed by s/w, so ensure
+-   * the size is same as maxsize for we won't set videometa
+-   * for it later.
+    */
+   state =
+     gst_video_decoder_get_output_state (GST_VIDEO_DECODER (dec));
+   vinfo = &state->info;
+ 
+-  if (GST_VIDEO_INFO_FORMAT (vinfo) == GST_VIDEO_FORMAT_NV12_UBWC)
+-    out_buf = gst_buffer_new_wrapped_full (0,
+-                (gpointer) pBuffer->omx_buf->pBuffer,
+-                pBuffer->omx_buf->nAllocLen, 0,
+-                pBuffer->omx_buf->nAllocLen, NULL, NULL);
+-  else
+-    out_buf = gst_buffer_new_wrapped_full (0,
+-                (gpointer) pBuffer->omx_buf->pBuffer,
+-                pBuffer->omx_buf->nAllocLen, pBuffer->omx_buf->nOffset,
+-                pBuffer->omx_buf->nFilledLen, NULL, NULL);
++  out_buf = gst_buffer_new_wrapped_full (0,
++              (gpointer) pBuffer->omx_buf->pBuffer,
++              pBuffer->omx_buf->nAllocLen, pBuffer->omx_buf->nOffset,
++              pBuffer->omx_buf->nFilledLen, NULL, NULL);
+ 
+   if (out_buf) {
+     gsize offsets[GST_VIDEO_MAX_PLANES];
+-- 
+2.7.4
+

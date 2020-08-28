@@ -1,0 +1,52 @@
+From a18ad2f8865153369e51c468dcc5457dc8eed9c9 Mon Sep 17 00:00:00 2001
+From: Bo Fang <bofang1@codeaurora.org>
+Date: Thu, 28 May 2020 14:54:55 +0800
+Subject: [PATCH 39/42] omx video enc: remove FractionToQ16 definition
+
+Previous Log2 and FractionToQ16 definition are not clear. Use more
+direct method to convert to Q16.
+
+Change-Id: Ib30bad06887c042d89824ef909e57f35bcdad0d6
+Signed-off-by: Bo Fang <bofang1@codeaurora.org>
+---
+ omx/gstomxvideoenc.c | 10 ++++++----
+ 1 file changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/omx/gstomxvideoenc.c b/omx/gstomxvideoenc.c
+index 7479481..53315a6 100755
+--- a/omx/gstomxvideoenc.c
++++ b/omx/gstomxvideoenc.c
+@@ -35,8 +35,6 @@
+ #include <gst/ionbuf/gstionbuf_meta.h>
+ #include <gbm_priv.h>
+ 
+-#define Log2(number, power)  { OMX_U32 temp = number; power = 0; while( (0 == (temp & 0x1)) &&  power < 16) { temp >>=0x1; power++; } }
+-#define FractionToQ16(q,num,den) { OMX_U32 power; Log2(den,power); q = num << (16 - power); }
+ 
+ #ifndef ALIGN
+ #define ALIGN(__sz, __align) (((__align) & ((__align) - 1)) ?\
+@@ -2894,7 +2892,10 @@ gst_omx_video_enc_set_format (GstVideoEncoder * encoder,
+ 
+       GST_OMX_INIT_STRUCT (&enc_framerate);
+       enc_framerate.nPortIndex = self->enc_out_port->index;
+-      FractionToQ16(enc_framerate.xEncodeFramerate, (int) (info->fps_n * 2), 2);
++      //FractionToQ16(enc_framerate.xEncodeFramerate, (int) (info->fps_n * 2), 2);
++      //TODO: previous code seems only consider integer fps, however, omx should support non-integer fps
++      g_warn_if_fail(info->fps_d == 1 && "Only consider integer fps!");
++      enc_framerate.xEncodeFramerate = (info->fps_n)*65536;//convert to Q16 format
+       err =
+          gst_omx_component_set_config (self->enc,
+          OMX_IndexConfigVideoFramerate, &enc_framerate);
+@@ -3014,7 +3015,8 @@ gst_omx_video_enc_set_format (GstVideoEncoder * encoder,
+     out_port_def.format.video.nBitrate  = self->target_bitrate;
+     out_port_def.format.video.nFrameWidth = port_def.format.video.nFrameWidth;
+     out_port_def.format.video.nFrameHeight = port_def.format.video.nFrameHeight;
+-    FractionToQ16(out_port_def.format.video.xFramerate,(int) (port_def.format.video.xFramerate * 2),2);
++    //FractionToQ16(out_port_def.format.video.xFramerate,(int) (port_def.format.video.xFramerate * 2),2);
++    out_port_def.format.video.xFramerate = (port_def.format.video.xFramerate)*65536;//convert to Q16
+     if (gst_omx_port_update_port_definition (self->enc_out_port,
+     &out_port_def) != OMX_ErrorNone)
+       return FALSE;
+-- 
+2.7.4
+

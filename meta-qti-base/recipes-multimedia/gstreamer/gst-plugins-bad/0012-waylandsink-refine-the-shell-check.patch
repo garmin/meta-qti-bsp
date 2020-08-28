@@ -1,0 +1,37 @@
+From a917062be366eb4a7d32b5b24d23e3702d4df534 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Thu, 17 Oct 2019 12:24:52 +0800
+Subject: [PATCH 12/28] waylandsink: refine the shell check
+
+related original patch is 2657600
+
+Change-Id: I478ea6032fd45f327846d4a42946d2ae8d1e2697
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ ext/wayland/wldisplay.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/ext/wayland/wldisplay.c b/ext/wayland/wldisplay.c
+index 75b13aa..e5bef2b 100644
+--- a/ext/wayland/wldisplay.c
++++ b/ext/wayland/wldisplay.c
+@@ -360,13 +360,13 @@ gst_wl_display_new_existing (struct wl_display * display,
+     g_warning ("Could not bind to zwp_linux_dmabuf_v1");
+   }
+ 
+-  if (!self->wl_shell && !self->xdg_wm_base && !self->fullscreen_shell) {
++  if (!self->wl_shell && !self->xdg_wm_base && !self->fullscreen_shell && !self->ivi_application) {
+     /* If wl_surface and wl_display are passed via GstContext
+      * wl_shell, xdg_shell and zwp_fullscreen_shell are not used.
+      * In this case is correct to continue.
+      */
+-    g_warning ("Could not bind to either wl_shell, xdg_wm_base or "
+-        "zwp_fullscreen_shell, video display may not work properly.");
++    g_warning ("Could not bind to either wl_shell, xdg_wm_base, "
++        "zwp_fullscreen_shell or ivi_application, video display may not work properly.");
+   }
+ 
+   self->thread = g_thread_try_new ("GstWlDisplay", gst_wl_display_thread_run,
+-- 
+2.7.4
+

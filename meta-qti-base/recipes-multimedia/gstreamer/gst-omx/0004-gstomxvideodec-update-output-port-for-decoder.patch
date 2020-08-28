@@ -1,0 +1,47 @@
+From 9322115e267a8bf098bc0ddbdcc6207a43e5432a Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Wed, 4 Sep 2019 15:28:31 +0800
+Subject: [PATCH 04/42] gstomxvideodec: update output port for decoder
+
+Change-Id: I165b6e995d78363006ee87146ac96c0e16f9e13a
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ omx/gstomxvideodec.c | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/omx/gstomxvideodec.c b/omx/gstomxvideodec.c
+index 420d5fd..e385151 100644
+--- a/omx/gstomxvideodec.c
++++ b/omx/gstomxvideodec.c
+@@ -903,7 +903,7 @@ gst_omx_video_dec_allocate_output_buffers (GstOMXVideoDec * self)
+         (allocator ? allocator->mem_type : "(null)"));
+   } else {
+     gst_caps_replace (&caps, NULL);
+-    min = max = port->port_def.nBufferCountMin;
++    min = max = port->port_def.nBufferCountMin > 3 ? port->port_def.nBufferCountMin : 4;
+     GST_DEBUG_OBJECT (self, "No pool available, not negotiated yet");
+   }
+ 
+@@ -2811,10 +2811,18 @@ gst_omx_video_dec_set_format (GstVideoDecoder * decoder,
+       return FALSE;
+     }
+   }
++  /*sa8155 swdec should update dimension on outport*/
++  gst_omx_port_get_port_definition (self->dec_out_port, &port_def);
++  port_def.format.video.nFrameWidth = info->width;
++  port_def.format.video.nFrameHeight = info->height;
+ 
++  if (info->fps_n == 0)
++    port_def.format.video.xFramerate = 0;
++  else
++    port_def.format.video.xFramerate = framerate_q16;
+   GST_DEBUG_OBJECT (self, "Updating ports definition");
+   if (gst_omx_port_update_port_definition (self->dec_out_port,
+-          NULL) != OMX_ErrorNone)
++          &port_def) != OMX_ErrorNone)
+     return FALSE;
+   if (gst_omx_port_update_port_definition (self->dec_in_port,
+           NULL) != OMX_ErrorNone)
+-- 
+2.7.4
+

@@ -1,0 +1,75 @@
+From bc437339ab70084f81f6faf657fec7c374f9b437 Mon Sep 17 00:00:00 2001
+From: Miaomiao Chen <miaochen@codeaurora.org>
+Date: Tue, 14 Jan 2020 13:56:24 +0800
+Subject: [PATCH 18/28] waylansink: Calculate the latency of resolution change
+
+Calculate the latency of resolution change
+
+Change-Id: Ic31e11cddf35ff714568e313fddbc0920a53a47d
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 14 ++++++++++++++
+ ext/wayland/gstwaylandsink.h |  1 +
+ 2 files changed, 15 insertions(+)
+ mode change 100644 => 100755 ext/wayland/gstwaylandsink.c
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+old mode 100644
+new mode 100755
+index 67adf78..4ef4e22
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -297,6 +297,7 @@ gst_wayland_sink_init (GstWaylandSink * sink)
+   g_mutex_init (&sink->display_lock);
+   g_mutex_init (&sink->render_lock);
+   sink->swframe_manager = NULL;
++  memset (&sink->render_time, 0, sizeof(struct timeval));
+ #ifdef DISABLE_SHM
+   sink->swframe_manager = calloc(1, sizeof(swfrm_gbm_manager));
+   if (sink->swframe_manager) {
+@@ -822,6 +823,12 @@ static const struct wl_callback_listener frame_callback_listener = {
+   frame_redraw_callback
+ };
+ 
++static guint32
++caluculate_interval_ms(struct timeval *start, struct timeval *end)
++{
++  return (end->tv_sec - start->tv_sec) * 1000 + (end->tv_usec - start->tv_usec) / 1000;
++}
++
+ /* must be called with the render lock */
+ static void
+ render_last_buffer (GstWaylandSink * sink, gboolean redraw)
+@@ -838,10 +845,17 @@ render_last_buffer (GstWaylandSink * sink, gboolean redraw)
+   callback = wl_surface_frame (surface);
+   wl_callback_add_listener (callback, &frame_callback_listener, sink);
+ 
++  struct timeval cur_render_time;
++  memset (&cur_render_time, 0, sizeof(struct timeval));
++  gettimeofday(&cur_render_time, NULL);
+   if (G_UNLIKELY (sink->video_info_changed && !redraw)) {
+     info = &sink->video_info;
+     sink->video_info_changed = FALSE;
++    if ((sink->render_time.tv_sec != 0) && (sink->render_time.tv_usec != 0)) {
++      GST_INFO_OBJECT (sink, "latency of resolution change is %dms", caluculate_interval_ms(&sink->render_time, &cur_render_time));
++    }
+   }
++  memcpy (&sink->render_time, &cur_render_time, sizeof(struct timeval));
+   gst_wl_window_render (sink->window, wlbuffer, info);
+ }
+ 
+diff --git a/ext/wayland/gstwaylandsink.h b/ext/wayland/gstwaylandsink.h
+index 6b32982..3879fef 100644
+--- a/ext/wayland/gstwaylandsink.h
++++ b/ext/wayland/gstwaylandsink.h
+@@ -79,6 +79,7 @@ struct _GstWaylandSink
+   GMutex render_lock;
+   GstBuffer *last_buffer;
+   void * swframe_manager;//To manage those frame buffers which are from 3rd party software dec or filter
++  struct timeval render_time;
+ };
+ 
+ struct _GstWaylandSinkClass
+-- 
+2.7.4
+

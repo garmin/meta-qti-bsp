@@ -1,0 +1,539 @@
+From b708b8483709553172a131cf51fa5133e977a69b Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Thu, 17 Oct 2019 16:05:47 +0800
+Subject: [PATCH 14/28] waylandsink: use gbm instead of shm for still image sw
+ dec
+
+  For those frame from sw decoder or plugin, send gbm buf
+  instead of shm buf, to wayland. Before sending, need copy
+  content from those sw plugin output buffer.
+
+  For sw plugin frame, only support NV12 format, and no
+  pool mechanism now. USE_GBM and DISABLE_SHM macro should
+  be defined. And gstreamer cmd line must explicitly set NV12
+  format before waylandsink, like:
+  gst-launch-1.0 uridecodebin uri=file:///RAW.CR2 ! imagefreeze
+   ! videoconvert ! video/x-raw,format=NV12,framerate=1/5 !
+   waylandsink
+  gst-launch-1.0 uridecodebin uri=file:///xxx.jpg ! imagefreeze
+   ! videoconvert ! video/x-raw,format=NV12,framerate=1/5 !
+   waylandsink
+  gst-launch-1.0 uridecodebin uri=file:///OGG_1280_11_4mg.ogg !
+   videoconvert ! video/x-raw,format=NV12 ! waylandsink
+
+  Previously, for sw plugin frame, support BGRA, BGRx and
+  RGB16, and use shm memory pool mechanism, but have issue
+  for large frame, like 8000 x 8000 BGRA.
+
+  BTW, to support sw RGBA frame, like gdkpixbufdec output
+  frame, could use qvconv after sw plugin to convert sw
+  RGBA to hw NV12. Then, no need to go through this sw NV12
+  path.
+
+  cherry-pick from 2686731
+
+  change some code aline
+
+Change-Id: Iff393e44c787e58bc63b99aa23ff99fc0469f1b8
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 347 ++++++++++++++++++++++++++++++++++++++++++-
+ ext/wayland/gstwaylandsink.h |   1 +
+ 2 files changed, 341 insertions(+), 7 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 81407cd..6669b03 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -47,6 +47,12 @@
+ #include "wlshmallocator.h"
+ #include "wllinuxdmabuf.h"
+ 
++#include <stdlib.h>
++#include <string.h>
++#include <fcntl.h>
++#include <unistd.h>
++#include <sys/mman.h>
++
+ #include <gst/wayland/wayland.h>
+ #include <gst/video/videooverlay.h>
+ #include <gbm_priv.h>
+@@ -80,6 +86,40 @@ GST_DEBUG_CATEGORY (gstwayland_debug);
+ #include <EGL/eglext.h>
+ #include <drm/drm_fourcc.h>
+ #endif
++#ifdef USE_GBM
++#define DISABLE_SHM  //shm is only for sw dec or filter cases, for example, still image decoding, or sw video decoding like theoradec plugin case
++#endif
++#ifdef DISABLE_SHM
++#include <media/msm_media_info.h>
++typedef struct {
++  int w;
++  int h;
++  int bo_fd;
++  int meta_fd;
++  struct gbm_bo *bo;
++  unsigned char* mem_cpu_addr;
++  int status;//0 no alloc; 1 alloc but idle; 2 using;
++  GMutex* plock;
++} swfrm_gbm_item;
++#define GBM_SWFRM_ARR_SZ 4
++typedef struct {
++  int w;
++  int h;
++  int gbm_node_fd;
++  struct gbm_device* gbm_dev;
++  GQuark swfrm_quark;
++  GMutex status_lock;
++  swfrm_gbm_item gbm_swfrms[GBM_SWFRM_ARR_SZ];
++} swfrm_gbm_manager;
++
++static inline void gbm_swframe_mem_destroy(swfrm_gbm_item* item)
++{
++  gbm_bo_destroy(item->bo);
++  memset(item, 0, sizeof(swfrm_gbm_item));
++  return;
++}
++
++#endif
+ 
+ #define WL_VIDEO_FORMATS \
+     "{ BGRx, BGRA, RGBx, xBGR, xRGB, RGBA, ABGR, ARGB, RGB, BGR, " \
+@@ -108,8 +148,15 @@ static void gst_wayland_sink_set_context (GstElement * element,
+ static GstCaps *gst_wayland_sink_get_caps (GstBaseSink * bsink,
+     GstCaps * filter);
+ static gboolean gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps);
++//For still image SW dec, previously, use shm and pool mechanism, format is BGRA.
++//For BGRA, frame memory layout is same between still image SW dec and hw dec for most of cases.
++//Now, use gbm instead of shm, and format is NV12(gbm not support BGRA). For most of cases, still image SW dec's
++//frame memory layout isn't same as hw dec NV12. Then, using pool mechanism still need memory copy.
++//So, needn't pool mechanism.
++#ifndef DISABLE_SHM
+ static gboolean
+ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query);
++#endif
+ static gboolean gst_wayland_sink_show_frame (GstVideoSink * bsink,
+     GstBuffer * buffer);
+ 
+@@ -222,9 +269,10 @@ gst_wayland_sink_class_init (GstWaylandSinkClass * klass)
+ 
+   gstbasesink_class->get_caps = GST_DEBUG_FUNCPTR (gst_wayland_sink_get_caps);
+   gstbasesink_class->set_caps = GST_DEBUG_FUNCPTR (gst_wayland_sink_set_caps);
++#ifndef DISABLE_SHM
+   gstbasesink_class->propose_allocation =
+       GST_DEBUG_FUNCPTR (gst_wayland_sink_propose_allocation);
+-
++#endif
+   gstvideosink_class->show_frame =
+       GST_DEBUG_FUNCPTR (gst_wayland_sink_show_frame);
+ 
+@@ -248,6 +296,14 @@ gst_wayland_sink_init (GstWaylandSink * sink)
+ {
+   g_mutex_init (&sink->display_lock);
+   g_mutex_init (&sink->render_lock);
++  sink->swframe_manager = NULL;
++#ifdef DISABLE_SHM
++  sink->swframe_manager = calloc(1, sizeof(swfrm_gbm_manager));
++  if (sink->swframe_manager) {
++    swfrm_gbm_manager* mgr = (swfrm_gbm_manager*)sink->swframe_manager;
++    g_mutex_init (&mgr->status_lock);
++  }
++#endif
+ }
+ 
+ static void
+@@ -344,6 +400,34 @@ gst_wayland_sink_finalize (GObject * object)
+   g_mutex_clear (&sink->display_lock);
+   g_mutex_clear (&sink->render_lock);
+ 
++#ifdef DISABLE_SHM
++  if (sink->swframe_manager) {
++    swfrm_gbm_manager* mgr = (swfrm_gbm_manager*)sink->swframe_manager;
++    int i;
++    GST_DEBUG_OBJECT(sink, "release sink swframe_manager resource begin");
++    for (i =0; i < GBM_SWFRM_ARR_SZ; i++) {
++      if (mgr->gbm_swfrms[i].bo_fd) {
++        if (mgr->gbm_swfrms[i].status == 2) {
++          GST_ERROR_OBJECT(sink, "gbm_swfrms[%d] is still using, will force release!", i);
++        }
++        gbm_swframe_mem_destroy(&mgr->gbm_swfrms[i]);
++      }
++    }
++    if (mgr->gbm_dev) {
++      gbm_device_destroy(mgr->gbm_dev);
++      mgr->gbm_dev = NULL;
++    }
++    if (mgr->gbm_node_fd) {
++      close(mgr->gbm_node_fd);
++      mgr->gbm_node_fd = 0;
++    }
++    g_mutex_clear(&mgr->status_lock);
++    free(sink->swframe_manager);
++    sink->swframe_manager = NULL;
++    GST_DEBUG_OBJECT(sink, "release sink swframe_manager resource end");
++  }
++#endif
++
+   G_OBJECT_CLASS (parent_class)->finalize (object);
+ }
+ 
+@@ -660,10 +744,12 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+   format = GST_VIDEO_INFO_FORMAT (&sink->video_info);
+   sink->video_info_changed = TRUE;
+ 
++#ifndef DISABLE_SHM
+   /* create a new pool for the new caps */
+   if (sink->pool)
+     gst_object_unref (sink->pool);
+   sink->pool = gst_wayland_create_pool (sink, caps);
++#endif
+ 
+   use_dmabuf = gst_caps_features_contains (gst_caps_get_features (caps, 0),
+       GST_CAPS_FEATURE_MEMORY_DMABUF);
+@@ -693,7 +779,7 @@ unsupported_format:
+     return FALSE;
+   }
+ }
+-
++#ifndef DISABLE_SHM
+ static gboolean
+ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+ {
+@@ -719,6 +805,7 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+ 
+   return TRUE;
+ }
++#endif
+ 
+ static void
+ frame_redraw_callback (void *data, struct wl_callback *callback, uint32_t time)
+@@ -919,6 +1006,213 @@ typedef struct _wlbuf_ops {
+   void (*set) (GstWlBuffer *self, GstBuffer * gstbuffer);
+ } wlbuf_ops;
+ 
++#ifdef DISABLE_SHM
++static int gbm_swframe_mem_alloc_map(GstWaylandSink* sink, int w, int h, int idx)
++{
++  swfrm_gbm_manager* mgr = (swfrm_gbm_manager*)sink->swframe_manager;
++  if (mgr) {
++    struct gbm_bo * bo;
++    int bo_fd, meta_fd, mapsz;
++    unsigned char* p;
++    if (mgr->gbm_dev == NULL) {
++      //first time
++      mgr->gbm_node_fd = open("/dev/dri/card0", O_RDWR | O_CLOEXEC);
++      GST_DEBUG_OBJECT(sink, "open gbm node ret %d", mgr->gbm_node_fd);
++      if (mgr->gbm_node_fd <= 0) {
++        GST_ERROR_OBJECT(sink, "open gbm node fail %d!", mgr->gbm_node_fd);
++        mgr->gbm_node_fd = 0;
++        return -1;
++      }
++      mgr->gbm_dev = gbm_create_device(mgr->gbm_node_fd);
++      GST_DEBUG_OBJECT(sink, "gbm_create_device ret %p", mgr->gbm_dev);
++      if (mgr->gbm_dev == NULL) {
++        GST_ERROR_OBJECT(sink, "gbm_create_device fail %p!", mgr->gbm_dev);
++        return -2;
++      }
++      mgr->swfrm_quark = g_quark_from_static_string ("for_swdec_buffer");
++    }
++    bo = gbm_bo_create(mgr->gbm_dev, w, h, GBM_FORMAT_NV12, GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING);
++    GST_DEBUG_OBJECT(sink, "gbm_bo_create ret %p", bo);
++    if (bo == NULL) {
++      GST_ERROR_OBJECT(sink, "gbm_bo_create fail, %p!", bo);
++      return -3;
++    }
++    bo_fd = gbm_bo_get_fd(bo);
++    GST_DEBUG_OBJECT(sink, "gbm_bo_get_fd(%p) ret %d", bo, bo_fd);
++    if (bo_fd <= 0) {
++      GST_ERROR_OBJECT(sink, "gbm_bo_get_fd(%p) fail, %d!", bo, bo_fd);
++      return -4;
++    }
++    gbm_perform(GBM_PERFORM_GET_METADATA_ION_FD, bo, &meta_fd);
++    GST_DEBUG_OBJECT(sink, "gbm_perform GBM_PERFORM_GET_METADATA_ION_FD on bo %p, get meta fd %d", bo, meta_fd);
++    if (meta_fd <= 0) {
++      GST_ERROR_OBJECT(sink, "gbm_perform GBM_PERFORM_GET_METADATA_ION_FD on bo %p fail, %d!", bo, meta_fd);
++      return -5;
++    }
++    mapsz = VENUS_Y_STRIDE(COLOR_FMT_NV12, w) * VENUS_Y_SCANLINES(COLOR_FMT_NV12, h) + VENUS_UV_STRIDE(COLOR_FMT_NV12, w) * VENUS_UV_SCANLINES(COLOR_FMT_NV12, h);
++    p = (unsigned char*)mmap(NULL, mapsz, PROT_READ|PROT_WRITE, MAP_SHARED, bo_fd, 0);
++    GST_DEBUG_OBJECT(sink, "mmap sz %d on bo fd %d ret %p", mapsz, bo_fd, p);
++    if (p == NULL || p == MAP_FAILED) {
++      GST_ERROR_OBJECT(sink, "mmap sz %d on bo fd %d fail, ret %p!", mapsz, bo_fd, p);
++      return -6;
++    }
++    mgr->gbm_swfrms[idx].bo_fd = bo_fd;
++    mgr->gbm_swfrms[idx].meta_fd = meta_fd;
++    mgr->gbm_swfrms[idx].bo = bo;
++    mgr->gbm_swfrms[idx].mem_cpu_addr = p;
++    mgr->gbm_swfrms[idx].w = w;
++    mgr->gbm_swfrms[idx].h = h;
++    mgr->gbm_swfrms[idx].status = 1;
++    GST_DEBUG_OBJECT(sink, "allocate and map on idx %d sw gbm buf suc", idx);
++    return 0;
++  }else{
++    GST_ERROR_OBJECT(sink, "sink->swframe_manager is NULL!");
++    return -10;
++  }
++}
++
++static int gbm_swframe_mem_require(GstWaylandSink* sink)
++{
++  swfrm_gbm_manager* mgr = (swfrm_gbm_manager*)sink->swframe_manager;
++  int i = 0;
++  int found_1st_idle = -1, found_1st_noalloc = -1;
++  if (mgr->w == 0 || mgr->h == 0) {
++    GST_ERROR_OBJECT(sink, "gbm_swframe_mem_require(%p) fail as err w x h %d x %d!", sink, mgr->w, mgr->h);
++    return -1;
++  }
++  g_mutex_lock(&mgr->status_lock);
++  for (; i < GBM_SWFRM_ARR_SZ; i++) {
++    if (mgr->gbm_swfrms[i].status == 1) {
++      found_1st_idle = i;
++      break;
++    }else if (mgr->gbm_swfrms[i].status == 0 && found_1st_noalloc == -1) {
++      found_1st_noalloc = i;
++    }
++  }
++  g_mutex_unlock(&mgr->status_lock);
++  if (found_1st_idle != -1) {
++    if (mgr->gbm_swfrms[found_1st_idle].w == mgr->w && mgr->gbm_swfrms[found_1st_idle].h == mgr->h) {
++      mgr->gbm_swfrms[found_1st_idle].status = 2;
++      return found_1st_idle;
++    }else{
++      gbm_swframe_mem_destroy(&mgr->gbm_swfrms[found_1st_idle]);
++      found_1st_noalloc = found_1st_idle;
++    }
++  }
++  if (found_1st_noalloc != -1){
++    int ret = gbm_swframe_mem_alloc_map(sink, mgr->w, mgr->h, found_1st_noalloc);
++    if (ret == 0) {
++      mgr->gbm_swfrms[found_1st_noalloc].status = 2;
++      mgr->gbm_swfrms[found_1st_noalloc].plock = &mgr->status_lock;
++      return found_1st_noalloc;
++    }
++  }
++  GST_ERROR_OBJECT(sink, "require_gbm_swframe_buf(%p) fail!", sink);
++  return -2;
++}
++
++void gbm_swframe_displayed(swfrm_gbm_item* item)
++{
++  g_mutex_lock(item->plock);
++  item->status = 1;
++  g_mutex_unlock(item->plock);
++  return;
++}
++
++static GstBuffer * gbm_swframe_create(GstWaylandSink* sink, int idx)
++{
++  swfrm_gbm_manager* mgr = (swfrm_gbm_manager*)sink->swframe_manager;
++  int mapsz = VENUS_Y_STRIDE(COLOR_FMT_NV12, mgr->w) * VENUS_Y_SCANLINES(COLOR_FMT_NV12, mgr->h) + VENUS_UV_STRIDE(COLOR_FMT_NV12, mgr->w) * VENUS_UV_SCANLINES(COLOR_FMT_NV12, mgr->h);
++  GstBuffer * out_buf = gst_buffer_new();
++  if (out_buf) {
++    GstIonBufFdMeta *meta = NULL;
++    GST_DEBUG_OBJECT(sink, "Found buffer meta: size %u, offset %u and fd %d  meta_fd %d", mapsz, 0, mgr->gbm_swfrms[idx].bo_fd, mgr->gbm_swfrms[idx].meta_fd);
++    //gst_buffer_add_ionbuf_meta() is depended on USE_GBM. If not define USE_GBM, parameter list for this function is different.
++    meta = gst_buffer_add_ionbuf_meta(out_buf, mgr->gbm_swfrms[idx].bo_fd, 0, mapsz, FALSE, mgr->gbm_swfrms[idx].meta_fd, 0, 0, 0);//this 0,0,0 haven't been used
++
++    if (!meta) {
++      GST_ERROR_OBJECT(sink, "Addition of ionBufInfo metadata to gbm sw frame buffer failed.\n");
++      gst_buffer_unref (out_buf);
++      return NULL;
++    }
++
++    gst_mini_object_set_qdata(GST_MINI_OBJECT_CAST (out_buf), mgr->swfrm_quark, &(mgr->gbm_swfrms[idx]), gbm_swframe_displayed);
++
++    return out_buf;
++  }
++  GST_ERROR_OBJECT(sink, "gst_buffer_new in gbm_swframe_create ret NULL!");
++  return NULL;
++}
++
++static int is_frame_from_3rdparty_sw(GstWaylandSink* sink, GstBuffer* buf)
++{
++  if (NULL != gst_buffer_get_ionfd_meta(buf)) {
++    //for hw dec or filter, frame buf always attach ion
++    return 0;
++  }else{
++    return 1;
++  }
++}
++
++static int gbm_swframe_fill(GstWaylandSink* sink, int idx, GstBuffer* gbm_buf, GstBuffer* buf)
++{
++  swfrm_gbm_manager* mgr = (swfrm_gbm_manager*)sink->swframe_manager;
++  int w = mgr->gbm_swfrms[idx].w;
++  int h = mgr->gbm_swfrms[idx].h;
++  GstVideoInfo *info = &sink->video_info;
++  GstVideoFrame frame;
++  guint8* src, * dst;
++  int i;
++  int src_stride, dst_stride;
++
++  if (GST_VIDEO_INFO_FORMAT(info) != GST_VIDEO_FORMAT_NV12) {
++    GST_ERROR_OBJECT(sink, "for gbm sw frame, source format %d(%s) not supported, only support NV12!", GST_VIDEO_INFO_FORMAT(info), GST_VIDEO_INFO_NAME(info));
++    return -1;
++  }
++
++  if (gst_video_frame_map(&frame, info, buf, GST_MAP_READ)) {
++    //Y plane
++    dst = mgr->gbm_swfrms[idx].mem_cpu_addr;
++    dst_stride = VENUS_Y_STRIDE(COLOR_FMT_NV12, w);
++    src_stride = GST_VIDEO_FRAME_COMP_STRIDE(&frame, 0);
++    src = GST_VIDEO_FRAME_COMP_DATA(&frame, 0);
++    if (src_stride == dst_stride) {
++      memcpy(dst, src, src_stride*h);
++    }else{
++      for (i=0;i<h;i++) {
++        memcpy(dst, src, w);
++        src += src_stride;
++        dst += dst_stride;
++      }
++    }
++
++    //UV plane
++    dst = mgr->gbm_swfrms[idx].mem_cpu_addr + dst_stride*VENUS_Y_SCANLINES(COLOR_FMT_NV12, h);
++    dst_stride = VENUS_UV_STRIDE(COLOR_FMT_NV12, w);
++    src_stride = GST_VIDEO_FRAME_COMP_STRIDE(&frame, 1);
++    src = GST_VIDEO_FRAME_COMP_DATA(&frame, 1);
++    if (src_stride == dst_stride) {
++      memcpy(dst, src, src_stride*h>>1);
++    }else{
++      for (i=0;i<(h>>1);i++) {
++        memcpy(dst, src, w);
++        src += src_stride;
++        dst += dst_stride;
++      }
++    }
++    gst_video_frame_unmap(&frame);
++  }else{
++    GST_ERROR_OBJECT(sink, "gst_video_frame_map fail in gbm_swframe_fill()!");
++    return -2;
++  }
++
++  GST_BUFFER_PTS (gbm_buf) = GST_BUFFER_PTS(buf);
++  GST_BUFFER_DTS (gbm_buf) = GST_BUFFER_DTS(buf);
++  GST_BUFFER_DURATION (gbm_buf) = GST_BUFFER_DURATION(buf);
++  return 0;
++}
++#endif
++
+ static GstFlowReturn
+ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+ {
+@@ -929,10 +1223,11 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+   GstVideoFormat format;
+   GstVideoInfo old_vinfo;
+   GstMemory *mem;
+-   GstMemory *memory = NULL;
++  GstMemory *memory = NULL;
++  GstBuffer * gbm_frame_for_sw = NULL;
+   struct wl_buffer *wbuf = NULL;
+-     GstWlBuffer *gstwlbuf = NULL;
+-     gint64 key;
++  GstWlBuffer *gstwlbuf = NULL;
++  gint64 key;
+   GstFlowReturn ret = GST_FLOW_OK;
+ #if defined(USE_OMX_TARGET_VENUS)
+   GstIonBufFdMeta *ionBufFdMeta;
+@@ -960,6 +1255,13 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+   {
+      GstVideoRectangle *render_rectangle = &sink->window->render_rectangle;
+      const GstVideoInfo *info = &sink->video_info;
++#ifdef DISABLE_SHM
++     swfrm_gbm_manager* mgr = (swfrm_gbm_manager*)sink->swframe_manager;
++     if (mgr) {
++       mgr->w = info->width;
++       mgr->h = info->height;
++     }
++#endif
+      sink->window->video_width =
+         gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
+      sink->window->video_height = info->height;
+@@ -986,6 +1288,27 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+   if (G_UNLIKELY (sink->window->render_rectangle.w == 0))
+     goto no_window_size;
+ 
++#ifdef DISABLE_SHM
++  if (sink->swframe_manager && is_frame_from_3rdparty_sw(sink, buffer)) {
++    int suc = 0;
++    int idx = gbm_swframe_mem_require(sink);
++    if (idx >= 0) {
++      gbm_frame_for_sw = gbm_swframe_create(sink, idx);
++      if (gbm_frame_for_sw) {
++        if (0 == gbm_swframe_fill(sink, idx, gbm_frame_for_sw, buffer)) {
++          //later, render gbm_frame_for_sw instead of original buffer
++          buffer = gbm_frame_for_sw;
++          suc = 1;
++        }
++      }
++    }
++    if (suc == 0) {
++      ret = GST_FLOW_ERROR;
++      goto done;
++    }
++  }
++#endif
++
+   wlbuffer = gst_buffer_get_wl_buffer (buffer);
+ 
+   if (G_LIKELY (wlbuffer && wlbuffer->display == sink->display)) {
+@@ -997,6 +1320,12 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+ 
+   ionBufFdMeta = gst_wayland_sink_read_ionbuffd(sink, buffer);
+   if (!ionBufFdMeta) {
++#ifdef DISABLE_SHM
++    GST_ERROR_OBJECT (sink, "As shm is disabled, code should not go here");
++    ret = GST_FLOW_ERROR;
++    goto done;
++#else
++
+     /* update video info from video meta */
+     mem = gst_buffer_peek_memory (buffer, 0);
+ 
+@@ -1109,6 +1438,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+ 
+     gst_buffer_add_wl_buffer (buffer, wbuf, sink->display);
+     to_render = buffer;
++#endif
+   }else{
+     wlbuf_ops wlbufops;
+     GstMemory *mem_bak = NULL;
+@@ -1233,10 +1563,10 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+       }
+ 
+       gst_buffer_map (buffer, &src, GST_MAP_READ);
+-                      gst_buffer_fill (to_render, 0, src.data, src.size);
++      gst_buffer_fill (to_render, 0, src.data, src.size);
+       gst_buffer_unmap (buffer, &src);
+     }
+-}
++  }
+ render:
+   /* drop double rendering */
+   if (G_UNLIKELY (to_render == sink->last_buffer)) {
+@@ -1301,6 +1631,9 @@ dst_map_failed:
+ done:
+   {
+     g_mutex_unlock (&sink->render_lock);
++    if (gbm_frame_for_sw) {
++      gst_buffer_unref(gbm_frame_for_sw);
++    }
+     return ret;
+   }
+ }
+diff --git a/ext/wayland/gstwaylandsink.h b/ext/wayland/gstwaylandsink.h
+index db0c655..6b32982 100644
+--- a/ext/wayland/gstwaylandsink.h
++++ b/ext/wayland/gstwaylandsink.h
+@@ -78,6 +78,7 @@ struct _GstWaylandSink
+   gboolean redraw_pending;
+   GMutex render_lock;
+   GstBuffer *last_buffer;
++  void * swframe_manager;//To manage those frame buffers which are from 3rd party software dec or filter
+ };
+ 
+ struct _GstWaylandSinkClass
+-- 
+2.7.4
+

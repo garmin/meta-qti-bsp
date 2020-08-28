@@ -1,0 +1,56 @@
+From be5bbfd2f324c07c4bfe12e5d85a4a684af7f84c Mon Sep 17 00:00:00 2001
+From: Miaomiao Chen <miaochen@codeaurora.org>
+Date: Fri, 15 May 2020 20:04:40 +0800
+Subject: [PATCH 40/42] omxvideodec: push the cached segment event when seek
+ multi-resolution clips
+
+When seek multi-resolutionc clips, the segment state of some elements
+(e.g. basesink) will be flushed. Sometimes, the gstbuffer will be
+pushed to downstream without going throught the normal flow, which
+will make the gstbuffer pushed earlier than new segment event pushed.
+It will cause the segment failed error. So ensure to push the cached
+segment event before pushing the gstbuffer.
+
+Depend on 3170471
+
+Change-Id: I6191b7737d2ae0717a7f0bbb45fd653845c9b4dc
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ omx/gstomxvideodec.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/omx/gstomxvideodec.c b/omx/gstomxvideodec.c
+index c3a266b..4feca49 100644
+--- a/omx/gstomxvideodec.c
++++ b/omx/gstomxvideodec.c
+@@ -1809,6 +1809,9 @@ gst_omx_video_dec_loop (GstOMXVideoDec * self)
+   GstFlowReturn flow_ret = GST_FLOW_OK;
+   GstOMXAcquireBufferReturn acq_return;
+   OMX_ERRORTYPE err;
++  GstOMXComponent *comp;
++  GList *cur = NULL;
++  GstEvent *event = NULL;
+ 
+ #if defined (USE_OMX_TARGET_RPI) && defined (HAVE_GST_GL)
+   port = self->eglimage ? self->egl_out_port : self->dec_out_port;
+@@ -2048,6 +2051,17 @@ gst_omx_video_dec_loop (GstOMXVideoDec * self)
+         buf = NULL;
+         if (!GST_CLOCK_TIME_IS_VALID(frame->output_buffer->pts) && self->video_info_changed) {
+           frame->output_buffer = gst_buffer_ref (frame->output_buffer);
++          for (cur = frame->events; cur; ) {
++            event = (GstEvent*) cur->data;
++            if (GST_EVENT_TYPE (event) == GST_EVENT_SEGMENT) {
++              GST_DEBUG_OBJECT (self, "Push the cached segment event before pushing new buffer");
++              gst_video_decoder_push_event (GST_VIDEO_DECODER (self), event);
++              frame->events = g_list_delete_link (frame->events, cur);
++              break;
++            }
++            cur = g_list_next (cur);
++          }
++
+           self->video_info_changed = FALSE;
+           flow_ret = gst_pad_push (GST_VIDEO_DECODER_SRC_PAD (self), frame->output_buffer);
+           gst_video_decoder_release_frame (GST_VIDEO_DECODER (self), frame);
+-- 
+2.7.4
+

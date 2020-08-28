@@ -1,0 +1,35 @@
+From c76f6326adbe066ec719e9201fd0747c9ecf4855 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Thu, 31 Oct 2019 16:54:08 +0800
+Subject: [PATCH 2/3] qtdemux: add handle of shorter stream
+
+cherry-pick from 2061601
+
+Change-Id: Iabb6079d4990cd2d6d8caece8c02ffcb4f18e031
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ gst/isomp4/qtdemux.c | 3 +++
+ 1 file changed, 3 insertions(+)
+ mode change 100644 => 100755 gst/isomp4/qtdemux.c
+
+diff --git a/gst/isomp4/qtdemux.c b/gst/isomp4/qtdemux.c
+old mode 100644
+new mode 100755
+index ad07c1e..5a1ed51
+--- a/gst/isomp4/qtdemux.c
++++ b/gst/isomp4/qtdemux.c
+@@ -10538,8 +10538,11 @@ qtdemux_parse_trak (GstQTDemux * qtdemux, GNode * trak)
+           "found, assuming preview image or something; skipping track",
+           stream->duration, stream->timescale, qtdemux->duration,
+           qtdemux->timescale);
++/*shourd handle short stream*/
++#if 0
+       gst_qtdemux_stream_unref (stream);
+       return TRUE;
++#endif
+     }
+   }
+ 
+-- 
+2.7.4
+

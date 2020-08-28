@@ -1,0 +1,170 @@
+From de3b75bd0a6afbdb28dc9af54b4ca83bec67ddfa Mon Sep 17 00:00:00 2001
+From: Miaomiao Chen <miaochen@codeaurora.org>
+Date: Fri, 21 Jun 2019 14:19:44 +0800
+Subject: [PATCH 32/42] gstomx Enc: Support intra MB refresh
+
+Support cyclic mode of intra MB refresh, user could set number of
+consecutive MB which will be encoded as intra MB. The number should
+be 4 aligned.
+
+Change-Id: I5ebfc0899a430ddcaeb173fbee308e7a49a32046
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ omx/gstomxvideoenc.c | 77 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ omx/gstomxvideoenc.h |  3 ++
+ 2 files changed, 80 insertions(+)
+
+diff --git a/omx/gstomxvideoenc.c b/omx/gstomxvideoenc.c
+index 4151f60..1f52524 100644
+--- a/omx/gstomxvideoenc.c
++++ b/omx/gstomxvideoenc.c
+@@ -94,6 +94,24 @@ gst_omx_video_enc_mirror_get_type (void)
+   return qtype;
+ }
+ 
++#define GST_TYPE_OMX_VIDEO_ENC_INTRA_REFRESH_MODE (gst_omx_video_enc_intra_refresh_mode_get_type ())
++static GType
++gst_omx_video_enc_intra_refresh_mode_get_type (void)
++{
++  static GType qtype = 0;
++
++  if (qtype == 0) {
++    static const GEnumValue values[] = {
++      {OMX_VIDEO_IntraRefreshCyclic, "Cyclic", "cyclic"},
++      {0x7fffffff, "Component Default", "default"},
++      {0, NULL, NULL}
++    };
++
++    qtype = g_enum_register_static ("GstOMXVideoEncIntraRefreshMode", values);
++  }
++  return qtype;
++}
++
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+ #define GST_TYPE_OMX_VIDEO_ENC_QP_MODE (gst_omx_video_enc_qp_mode_get_type ())
+ static GType
+@@ -299,6 +317,8 @@ enum
+   PROP_DEFAULT_ROI_QUALITY,
+   PROP_ROTATION,
+   PROP_MIRROR,
++  PROP_INTRA_REFRESH_MODE,
++  PROP_INTRA_REFRESH_MBS,
+ };
+ 
+ /* FIXME: Better defaults */
+@@ -335,6 +355,7 @@ enum
+ #define GST_OMX_VIDEO_ENC_DEFAULT_ROI_QUALITY OMX_ALG_ROI_QUALITY_HIGH
+ #define GST_OMX_VIDEO_ENC_ROTATION_DEFAULT (0)
+ #define GST_OMX_VIDEO_ENC_MIRROR_DEFAULT (0)
++#define GST_OMX_VIDEO_ENC_INTRA_REFRESH_MODE_DEFAULT (0x7fffffff)
+ 
+ 
+ /* class initialization */
+@@ -598,6 +619,21 @@ gst_omx_video_enc_class_init (GstOMXVideoEncClass * klass)
+           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+           GST_PARAM_MUTABLE_READY));
+ 
++  g_object_class_install_property (gobject_class, PROP_INTRA_REFRESH_MODE,
++      g_param_spec_enum ("intra-refresh-mode", "Intra refresh mode",
++          "Intra refresh mode, only support cyclic mode on latest FW",
++          GST_TYPE_OMX_VIDEO_ENC_INTRA_REFRESH_MODE,
++          GST_OMX_VIDEO_ENC_INTRA_REFRESH_MODE_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
++          GST_PARAM_MUTABLE_READY));
++
++  g_object_class_install_property (gobject_class, PROP_INTRA_REFRESH_MBS,
++      g_param_spec_uint ("intra-refresh-mbs", "Intra refresh mbs",
++          "Number of consecutive macroblocks to be coded as intra, the number will be 4-aligned",
++          0, G_MAXUINT, 0,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
++          GST_PARAM_MUTABLE_READY));
++
+   element_class->change_state =
+       GST_DEBUG_FUNCPTR (gst_omx_video_enc_change_state);
+ 
+@@ -665,6 +701,8 @@ gst_omx_video_enc_init (GstOMXVideoEnc * self)
+   self->default_target_bitrate = GST_OMX_PROP_OMX_DEFAULT;
+   self->rotation = GST_OMX_VIDEO_ENC_ROTATION_DEFAULT;
+   self->mirror = GST_OMX_VIDEO_ENC_MIRROR_DEFAULT;
++  self->intra_refresh_mode = GST_OMX_VIDEO_ENC_INTRA_REFRESH_MODE_DEFAULT;
++  self->intra_refresh_mbs = 0;
+ 
+   g_mutex_init (&self->drain_lock);
+   g_cond_init (&self->drain_cond);
+@@ -1175,6 +1213,33 @@ gst_omx_video_enc_open (GstVideoEncoder * encoder)
+       }
+     }
+ 
++    if (self->intra_refresh_mode != 0x7fffffff && self->intra_refresh_mbs != 0) {
++      OMX_VIDEO_PARAM_INTRAREFRESHTYPE intra_refresh;
++      GST_OMX_INIT_STRUCT (&intra_refresh);
++      err = gst_omx_component_get_parameter (self->enc, (OMX_INDEXTYPE)OMX_IndexParamVideoIntraRefresh, &intra_refresh);
++
++      if (err == OMX_ErrorNone) {
++        GST_INFO_OBJECT (self, "get intra refresh:%d mbs:%d", intra_refresh.eRefreshMode, intra_refresh.nCirMBs);
++
++        intra_refresh.nPortIndex = self->enc_out_port->index;
++        intra_refresh.eRefreshMode = (OMX_VIDEO_INTRAREFRESHTYPE)self->intra_refresh_mode;
++        intra_refresh.nCirMBs = self->intra_refresh_mbs;
++        err = gst_omx_component_set_parameter (self->enc, (OMX_INDEXTYPE)OMX_IndexParamVideoIntraRefresh, &intra_refresh);
++        if (err != OMX_ErrorNone) {
++          GST_ERROR_OBJECT (self,
++              "Failed to set intra refresh parameter: %s (0x%08x)",
++              gst_omx_error_to_string (err), err);
++          return FALSE;
++        } else {
++          GST_INFO_OBJECT (self, "set intra refresh:%d mbs:%d", self->intra_refresh_mode, self->intra_refresh_mbs);
++        }
++      } else {
++          GST_ERROR_OBJECT (self,
++            "Failed to get intra refresh parameter: %s (0x%08x)",
++            gst_omx_error_to_string (err), err);
++      }
++    }
++
+   }
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+   if (!set_zynqultrascaleplus_props (self))
+@@ -1380,6 +1445,12 @@ gst_omx_video_enc_set_property (GObject * object, guint prop_id,
+       self->mirror = g_value_get_enum (value);
+       GST_INFO_OBJECT(self, "set mirror:%d", self->mirror);
+       break;
++    case PROP_INTRA_REFRESH_MODE:
++      self->intra_refresh_mode = g_value_get_enum (value);
++      break;
++    case PROP_INTRA_REFRESH_MBS:
++      self->intra_refresh_mbs = g_value_get_uint (value);
++      break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+@@ -1495,6 +1566,12 @@ gst_omx_video_enc_get_property (GObject * object, guint prop_id, GValue * value,
+     case PROP_MIRROR:
+       g_value_set_enum (value, self->mirror);
+       break;
++    case PROP_INTRA_REFRESH_MODE:
++      g_value_set_enum (value, self->intra_refresh_mode);
++      break;
++    case PROP_INTRA_REFRESH_MBS:
++      g_value_set_uint (value, self->intra_refresh_mbs);
++      break;
+     default:
+       G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+       break;
+diff --git a/omx/gstomxvideoenc.h b/omx/gstomxvideoenc.h
+index 8c31b88..7f5f6da 100644
+--- a/omx/gstomxvideoenc.h
++++ b/omx/gstomxvideoenc.h
+@@ -114,6 +114,9 @@ struct _GstOMXVideoEnc
+ 
+   guint32 rotation;
+   guint32 mirror;
++  guint32 intra_refresh_mode;
++  guint32 intra_refresh_mbs;
++
+   guint32 default_target_bitrate;
+ 
+   GstFlowReturn downstream_flow_ret;
+-- 
+2.7.4
+

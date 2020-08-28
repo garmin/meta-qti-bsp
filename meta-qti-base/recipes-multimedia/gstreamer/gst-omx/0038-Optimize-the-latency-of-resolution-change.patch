@@ -1,0 +1,97 @@
+From 4d2acf0ae00dac7cfb94407bf6ecd3cc6622cd4c Mon Sep 17 00:00:00 2001
+From: Miaomiao Chen <miaochen@codeaurora.org>
+Date: Tue, 18 Feb 2020 13:18:52 +0800
+Subject: [PATCH 38/42] Optimize the latency of resolution change
+
+To reduce the latency of resolution change, set the
+pts of first frame after resolution changed to invaild ,
+which will make this frame push to the downstream as soon
+as possible.
+
+Change-Id: I66e60544f4394760f4f4124bd77e23a4a481bee8
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ omx/gstomxvideodec.c | 38 +++++++++++++++++++++++++++++++-------
+ omx/gstomxvideodec.h |  3 +++
+ 2 files changed, 34 insertions(+), 7 deletions(-)
+
+diff --git a/omx/gstomxvideodec.c b/omx/gstomxvideodec.c
+index d80da9e..c3a266b 100644
+--- a/omx/gstomxvideodec.c
++++ b/omx/gstomxvideodec.c
+@@ -238,9 +238,25 @@ _omx_out_buffer_create (GstOMXVideoDec * dec, GstOMXBuffer * pBuffer)
+     gst_mini_object_set_qdata (GST_MINI_OBJECT_CAST (out_buf),
+       dec->omx_outbuf_quark, pOutBuf, _omx_out_buffer_destroy);
+ 
+-    GST_BUFFER_PTS (out_buf) =
+-      gst_util_uint64_scale (pBuffer->omx_buf->nTimeStamp, GST_SECOND,
+-        OMX_TICKS_PER_SECOND);
++    if ((dec->width != vinfo->width) || (dec->height != vinfo->height)) {
++
++      GST_DEBUG_OBJECT (dec, "resolution changed width:%d->%d height:%d->%d", dec->width, vinfo->width, dec->height, vinfo->height);
++      if (dec->width != 0 || dec->height != 0) {
++        GST_BUFFER_PTS (out_buf) = GST_CLOCK_TIME_NONE;
++        dec->video_info_changed = TRUE;
++      } else {
++        GST_BUFFER_PTS (out_buf) =
++        gst_util_uint64_scale (pBuffer->omx_buf->nTimeStamp, GST_SECOND,
++          OMX_TICKS_PER_SECOND);
++      }
++
++      dec->width = vinfo->width;
++      dec->height = vinfo->height;
++    } else {
++      GST_BUFFER_PTS (out_buf) =
++        gst_util_uint64_scale (pBuffer->omx_buf->nTimeStamp, GST_SECOND,
++          OMX_TICKS_PER_SECOND);
++    }
+ 
+     if (pBuffer->omx_buf->nTickCount != 0)
+       GST_BUFFER_DURATION (out_buf) =
+@@ -395,6 +411,9 @@ gst_omx_video_dec_init (GstOMXVideoDec * self)
+   g_mutex_init (&self->drain_lock);
+   g_cond_init (&self->drain_cond);
+   self->outstanding_bufs = NULL;
++  self->width = 0;
++  self->height = 0;
++  self->video_info_changed = FALSE;
+ }
+ 
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+@@ -2027,10 +2046,15 @@ gst_omx_video_dec_loop (GstOMXVideoDec * self)
+         frame->output_buffer = _omx_out_buffer_create (self, buf);
+ 
+         buf = NULL;
+-
+-        flow_ret =
+-          gst_video_decoder_finish_frame (GST_VIDEO_DECODER (self), frame);
+-
++        if (!GST_CLOCK_TIME_IS_VALID(frame->output_buffer->pts) && self->video_info_changed) {
++          frame->output_buffer = gst_buffer_ref (frame->output_buffer);
++          self->video_info_changed = FALSE;
++          flow_ret = gst_pad_push (GST_VIDEO_DECODER_SRC_PAD (self), frame->output_buffer);
++          gst_video_decoder_release_frame (GST_VIDEO_DECODER (self), frame);
++        } else {
++          flow_ret =
++            gst_video_decoder_finish_frame (GST_VIDEO_DECODER (self), frame);
++        }
+         frame = NULL;
+       }
+ 
+diff --git a/omx/gstomxvideodec.h b/omx/gstomxvideodec.h
+index 7e3d660..e754372 100644
+--- a/omx/gstomxvideodec.h
++++ b/omx/gstomxvideodec.h
+@@ -104,6 +104,9 @@ struct _GstOMXVideoDec
+   GQuark omx_outbuf_quark;
+ #endif
+   GList *outstanding_bufs;
++  gint width;
++  gint height;
++  gboolean video_info_changed;
+ };
+ 
+ struct _GstOMXVideoDecClass
+-- 
+2.7.4
+

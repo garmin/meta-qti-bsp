@@ -1,0 +1,95 @@
+From 9f1b3ed8b1b8ca46ef43e573f27f4da7c8476a7a Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Wed, 4 Sep 2019 15:31:01 +0800
+Subject: [PATCH 03/28] gstwaylandsink: support video size change
+
+From part of origin patch 1849252, which is on mm-gst.lnx.1.0
+
+Change-Id: I266eee91edfd6c2cbf9b3e009f7152c2c2bd6d4c
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 27 ++++++++++++++++++++++++---
+ ext/wayland/wlwindow.c       |  8 --------
+ 2 files changed, 24 insertions(+), 11 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index a67663a..7edcf64 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -311,6 +311,8 @@ gst_wayland_sink_finalize (GObject * object)
+ 
+   if (sink->last_buffer)
+     gst_buffer_unref (sink->last_buffer);
++  if (sink->buffer_table)
++    g_hash_table_destroy(sink->buffer_table);
+   if (sink->egldpy)
+     eglTerminate(sink->egldpy);
+   if (sink->display)
+@@ -758,8 +760,8 @@ gst_wayland_sink_create_wl_buffer(GstWaylandSink *sink, GstIonBufFdMeta *ionBufF
+     EGL_DMA_BUF_PLANE1_FD_EXT, 0,
+     EGL_DMA_BUF_PLANE1_OFFSET_EXT, 0,
+     EGL_NONE};
+-  int w = sink->window->video_width;
+-  int h = sink->window->video_height;
++  int w = sink->video_info.width;
++  int h = sink->video_info.height;
+ 
+   attribs[1]  = w;
+   attribs[3]  = h;
+@@ -946,7 +948,26 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+           G_CALLBACK (on_window_closed), sink, 0);
+     }
+   }
+-
++  if (sink->video_info_changed)
++  {
++     GstVideoRectangle *render_rectangle = &sink->window->render_rectangle;
++     const GstVideoInfo *info = &sink->video_info;
++     sink->window->video_width =
++        gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
++     sink->window->video_height = info->height;
++
++     /*reset buffer table while video info change */
++     if (sink->buffer_table)
++         g_hash_table_remove_all(sink->buffer_table);
++
++     /* set the initial size to be the same as the reported video size */
++     if (gst_wl_window_is_toplevel (sink->window))
++         gst_wl_window_set_render_rectangle (sink->window,
++            render_rectangle->x, render_rectangle->y, info->width, info->height);
++     else
++        gst_wl_window_set_render_rectangle (sink->window,
++            render_rectangle->x, render_rectangle->y, render_rectangle->w, render_rectangle->h);
++  }
+   /* drop buffers until we get a frame callback */
+   if (g_atomic_int_get (&sink->redraw_pending) == TRUE) {
+     GST_LOG_OBJECT (sink, "buffer %p dropped (redraw pending)", buffer);
+diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
+index 6ead147..52330df 100644
+--- a/ext/wayland/wlwindow.c
++++ b/ext/wayland/wlwindow.c
+@@ -318,12 +318,6 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
+         "zwp_fullscreen_shell.");
+     goto error;
+   }
+-
+-  /* set the initial size to be the same as the reported video size */
+-  width =
+-      gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
+-  gst_wl_window_set_render_rectangle (window, 0, 0, width, info->height);
+-
+   return window;
+ 
+ error:
+@@ -536,8 +530,6 @@ gst_wl_window_set_render_rectangle (GstWlWindow * window, gint x, gint y,
+   window->render_rectangle.y = y;
+   window->render_rectangle.w = w;
+   window->render_rectangle.h = h;
+-  window->video_width = w;
+-  window->video_height = h;
+ 
+   /* position the area inside the parent - needs a parent commit to apply */
+   if (window->area_subsurface)
+-- 
+2.7.4
+

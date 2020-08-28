@@ -1,0 +1,207 @@
+From 97fb7dfd4e352c2e99a3685ab5ef7ce13d56f1b4 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Wed, 12 Aug 2020 18:11:33 +0800
+Subject: [PATCH 42/42] change meson for build
+
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ config/qti/meson.build |  5 +++++
+ meson.build            | 60 +++++++++++++++++++++++++++++++++++++++++++++++++-
+ meson_options.txt      | 10 ++++++++-
+ omx/meson.build        | 16 +++++++++++++-
+ 4 files changed, 88 insertions(+), 3 deletions(-)
+ create mode 100755 config/qti/meson.build
+ mode change 100644 => 100755 meson.build
+ mode change 100644 => 100755 meson_options.txt
+ mode change 100644 => 100755 omx/meson.build
+
+diff --git a/config/qti/meson.build b/config/qti/meson.build
+new file mode 100755
+index 0000000..d561372
+--- /dev/null
++++ b/config/qti/meson.build
+@@ -0,0 +1,5 @@
++if omx_enable_target_vpu554 == 'yes'
++install_data (['vpu554/gstomx.conf'], install_dir : omx_conf_dir)
++else
++install_data (['gstomx.conf'], install_dir : omx_conf_dir)
++endif
+\ No newline at end of file
+diff --git a/meson.build b/meson.build
+old mode 100644
+new mode 100755
+index c849d19..b455a43
+--- a/meson.build
++++ b/meson.build
+@@ -156,6 +156,8 @@ gstcheck_dep = dependency('gstreamer-check-1.0', version : gst_req,
+     fallback : ['gstreamer', 'gst_check_dep'])
+ 
+ libm = cc.find_library('m', required : false)
++libgstionbuf = cc.find_library('gstionbuf-1.0', required : false)
++libgbm_dep = cc.find_library('gbm', required : false)
+ glib_dep = dependency('glib-2.0', version : glib_req)
+ gio_dep = dependency('gio-2.0', version : glib_req)
+ gmodule_dep = dependency('gmodule-2.0', version : glib_req)
+@@ -170,6 +172,20 @@ else
+   omx_inc = include_directories (join_paths ('omx', 'openmax'))
+ endif
+ 
++omx_kernel_path = get_option('kernel_path')
++if omx_kernel_path != ''
++  gst_omx_args += ['-I' + omx_kernel_path]
++endif
++omx_staging_inc_path = get_option('staging_inc_path')
++if omx_staging_inc_path != ''
++  gst_omx_args += ['-I' + omx_staging_inc_path]
++endif
++omx_enable_encoder_heic = get_option('enable-encoder-heic')
++if omx_enable_encoder_heic == 'yes'
++  cdata.set('_ENABLE_ENCODER_HEIC_', 1)
++else
++  cdata.set('_ENABLE_ENCODER_HEIC_', 0)
++endif
+ default_omx_struct_packing = 0
+ omx_target = get_option ('target')
+ if omx_target == 'generic'
+@@ -218,10 +234,23 @@ else
+   error ('Unsupported omx target specified. Use the -Dtarget option')
+ endif
+ 
++omx_enable_target_vpu554 = get_option('enable-target-vpu554')
++if omx_enable_target_vpu554 == 'yes'
++  cdata.set('_USE_TARGET_VPU554_', 1)
++else
++  cdata.set('_USE_TARGET_VPU554_', 0)
++endif
+ extra_video_headers = ''
+ # Check for optional OpenMAX extension headers
+ 
+ if cc.has_header (
++    'gbm.h',
++    args : gst_omx_args,
++    include_directories : [omx_inc])
++  cdata.set ('USE_GBM', 1)
++endif
++
++if cc.has_header (
+     'OMX_VideoExt.h',
+     args : gst_omx_args,
+     include_directories : [omx_inc])
+@@ -284,6 +313,27 @@ if have_omx_vp8
+   cdata.set('HAVE_VP8', 1)
+ endif
+ 
++have_omx_vp9 = cc.has_header_symbol(
++    'OMX_Video.h',
++    'OMX_VIDEO_CodingVP9',
++    prefix : extra_video_headers,
++    args : gst_omx_args,
++    include_directories : [omx_inc])
++if have_omx_vp9
++  cdata.set('HAVE_VP9', 1)
++endif
++
++gst_omx_inc = include_directories (join_paths ('omx', 'openmax'))
++have_omx_divx = cc.has_header_symbol(
++    'OMX_Video.h',
++    'OMX_VIDEO_CodingDIVX',
++    prefix : extra_video_headers,
++    args : gst_omx_args,
++    include_directories : [gst_omx_inc])
++if have_omx_divx
++  cdata.set('HAVE_DIVX', 1)
++endif
++
+ have_omx_theora = cc.has_header_symbol(
+     'OMX_Video.h',
+     'OMX_VIDEO_CodingTheora',
+@@ -303,7 +353,15 @@ have_omx_hevc = cc.has_header_symbol(
+ if have_omx_hevc
+   cdata.set('HAVE_HEVC', 1)
+ endif
+-
++have_spspps = cc.has_header_symbol(
++    'OMX_Video.h',
++    'PrependSPSPPSToIDRFramesParams',
++    prefix : extra_video_headers,
++    args : gst_omx_args,
++    include_directories : [omx_inc])
++if not have_spspps
++  cdata.set('NO_DEF_SPSPPSPAR', 1)
++endif
+ if gstgl_dep.found()
+   cdata.set ('HAVE_GST_GL', 1)
+ endif
+diff --git a/meson_options.txt b/meson_options.txt
+old mode 100644
+new mode 100755
+index 75985ce..cf13d0f
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -1,11 +1,19 @@
+ option('header_path', type : 'string', value : '',
+     description : 'An extra include directory to find the OpenMax headers')
++option('enable-encoder-heic', type : 'string', value : '',
++    description : 'enable encoder heic')
++option('kernel_path', type : 'string', value : '',
++    description : 'An extra include directory to find the kernel headers')
++option('staging_inc_path', type : 'string', value : '',
++    description : 'An extra include directory to find the headers')
+ option('target', type : 'combo',
+-    choices : ['none', 'generic', 'rpi', 'bellagio', 'tizonia', 'zynqultrascaleplus'], value : 'none',
++    choices : ['none', 'generic', 'rpi', 'bellagio', 'tizonia', 'zynqultrascaleplus', 'qti'], value : 'none',
+     description : 'The OMX platform to target')
+ option('struct_packing', type : 'combo',
+     choices : ['0', '1', '2', '4', '8'], value : '0',
+     description : 'Force OpenMAX struct packing')
++option('enable-target-vpu554', type : 'string', value : '',
++    description : 'enable target vpu554')
+ 
+ # Common feature options
+ option('examples', type : 'feature', value : 'auto', yield : true)
+diff --git a/omx/meson.build b/omx/meson.build
+old mode 100644
+new mode 100755
+index b68cc55..46e5a2e
+--- a/omx/meson.build
++++ b/omx/meson.build
+@@ -30,6 +30,11 @@ extra_c_args = []
+ 
+ if have_omx_vp8
+   omx_sources += 'gstomxvp8dec.c'
++  omx_sources += 'gstomxvp8enc.c'
++endif
++
++if have_omx_vp9
++  omx_sources += 'gstomxvp9dec.c'
+ endif
+ 
+ if have_omx_theora
+@@ -42,6 +47,15 @@ if have_omx_hevc
+   omx_sources += 'gstomxh265dec.c'
+ endif
+ 
++if have_omx_divx
++  omx_sources += 'gstomxdivxvideodec.c'
++  omx_sources += 'gstomxdivx311videodec.c'
++endif
++
++if omx_enable_encoder_heic == 'yes'
++  omx_sources += 'gstomxheicenc.c'
++endif
++
+ optional_deps = []
+ if gstgl_dep.found()
+   optional_deps += gstgl_dep
+@@ -54,7 +68,7 @@ gstomx = library('gstomx',
+ #  link_args : noseh_link_args,
+   include_directories : [configinc, omx_inc],
+   dependencies : [gstvideo_dep, gstaudio_dep, gstbase_dep, gstcontroller_dep,
+-                  libm, gmodule_dep, gstallocators_dep] + optional_deps,
++                  libm, gmodule_dep, gstallocators_dep, libgstionbuf, libgbm_dep] + optional_deps,
+   install : true,
+   install_dir : plugins_install_dir,
+ )
+-- 
+2.7.4
+

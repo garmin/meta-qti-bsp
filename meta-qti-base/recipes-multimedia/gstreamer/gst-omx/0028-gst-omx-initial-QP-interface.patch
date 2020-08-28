@@ -1,0 +1,181 @@
+From dd79d27688ec3745da34111c4bc0e2395f0828b8 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Wed, 23 Oct 2019 14:47:22 +0800
+Subject: [PATCH 28/42] gst-omx: initial QP interface
+
+inital frame QP setting interface
+to h264 encoder to configure it for good quality encode.
+
+cherry-pick from 1945681
+
+Change-Id: Iae021904086b0435ec802c75fbb90708935041e2
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ omx/gstomxvideoenc.c | 94 ++++++++++++++++++++++++++++++++++++++++++++++++++++
+ omx/gstomxvideoenc.h |  3 ++
+ 2 files changed, 97 insertions(+)
+
+diff --git a/omx/gstomxvideoenc.c b/omx/gstomxvideoenc.c
+index 42f5d30..39b86fe 100644
+--- a/omx/gstomxvideoenc.c
++++ b/omx/gstomxvideoenc.c
+@@ -249,6 +249,9 @@ enum
+   PROP_QUANT_I_FRAMES,
+   PROP_QUANT_P_FRAMES,
+   PROP_QUANT_B_FRAMES,
++  PROP_INIT_QUANT_I_FRAMES,
++  PROP_INIT_QUANT_P_FRAMES,
++  PROP_INIT_QUANT_B_FRAMES,
+   PROP_QP_MODE,
+   PROP_MIN_QP,
+   PROP_MAX_QP,
+@@ -273,6 +276,10 @@ enum
+ #define GST_OMX_VIDEO_ENC_QUANT_I_FRAMES_DEFAULT (0xffffffff)
+ #define GST_OMX_VIDEO_ENC_QUANT_P_FRAMES_DEFAULT (0xffffffff)
+ #define GST_OMX_VIDEO_ENC_QUANT_B_FRAMES_DEFAULT (0xffffffff)
++#define GST_OMX_VIDEO_ENC_INIT_QUANT_I_FRAMES_DEFAULT (0xffffffff)
++#define GST_OMX_VIDEO_ENC_INIT_QUANT_P_FRAMES_DEFAULT (0xffffffff)
++#define GST_OMX_VIDEO_ENC_INIT_QUANT_B_FRAMES_DEFAULT (0xffffffff)
++
+ #define GST_OMX_VIDEO_ENC_QP_MODE_DEFAULT (0xffffffff)
+ #define GST_OMX_VIDEO_ENC_MIN_QP_DEFAULT (10)
+ #define GST_OMX_VIDEO_ENC_MAX_QP_DEFAULT (51)
+@@ -349,6 +356,27 @@ gst_omx_video_enc_class_init (GstOMXVideoEncClass * klass)
+           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+           GST_PARAM_MUTABLE_READY));
+ 
++  g_object_class_install_property (gobject_class, PROP_INIT_QUANT_I_FRAMES,
++      g_param_spec_uint ("init-quant-i-frames", "Initial I-Frame Quantization",
++          "Initial Quantization parameter for I-frames (0xffffffff=component default)",
++          0, G_MAXUINT, GST_OMX_VIDEO_ENC_INIT_QUANT_I_FRAMES_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
++          GST_PARAM_MUTABLE_READY));
++
++  g_object_class_install_property (gobject_class, PROP_INIT_QUANT_P_FRAMES,
++      g_param_spec_uint ("init-quant-p-frames", "Initial P-Frame Quantization",
++          "Initial Quantization parameter for P-frames (0xffffffff=component default)",
++          0, G_MAXUINT, GST_OMX_VIDEO_ENC_INIT_QUANT_P_FRAMES_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
++          GST_PARAM_MUTABLE_READY));
++
++  g_object_class_install_property (gobject_class, PROP_INIT_QUANT_B_FRAMES,
++      g_param_spec_uint ("init-quant-b-frames", "Initial B-Frame Quantization",
++          "Initial Quantization parameter for B-frames (0xffffffff=component default)",
++          0, G_MAXUINT, GST_OMX_VIDEO_ENC_INIT_QUANT_B_FRAMES_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
++          GST_PARAM_MUTABLE_READY));
++
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+   g_object_class_install_property (gobject_class, PROP_QP_MODE,
+       g_param_spec_enum ("qp-mode", "QP mode",
+@@ -509,6 +537,9 @@ gst_omx_video_enc_init (GstOMXVideoEnc * self)
+   self->quant_i_frames = GST_OMX_VIDEO_ENC_QUANT_I_FRAMES_DEFAULT;
+   self->quant_p_frames = GST_OMX_VIDEO_ENC_QUANT_P_FRAMES_DEFAULT;
+   self->quant_b_frames = GST_OMX_VIDEO_ENC_QUANT_B_FRAMES_DEFAULT;
++  self->init_quant_i_frames = GST_OMX_VIDEO_ENC_INIT_QUANT_I_FRAMES_DEFAULT;
++  self->init_quant_p_frames = GST_OMX_VIDEO_ENC_INIT_QUANT_P_FRAMES_DEFAULT;
++  self->init_quant_b_frames = GST_OMX_VIDEO_ENC_INIT_QUANT_B_FRAMES_DEFAULT;
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+   self->qp_mode = GST_OMX_VIDEO_ENC_QP_MODE_DEFAULT;
+   self->min_qp = GST_OMX_VIDEO_ENC_MIN_QP_DEFAULT;
+@@ -920,6 +951,51 @@ gst_omx_video_enc_open (GstVideoEncoder * encoder)
+ 
+       }
+     }
++    if (self->init_quant_i_frames != 0xffffffff ||
++        self->init_quant_p_frames != 0xffffffff ||
++        self->init_quant_b_frames != 0xffffffff) {
++      QOMX_EXTNINDEX_VIDEO_INITIALQP initQP;
++
++      GST_OMX_INIT_STRUCT (&initQP);
++      initQP.nPortIndex = self->enc_out_port->index;
++
++      err = gst_omx_component_get_parameter (self->enc,
++          (OMX_INDEXTYPE)QOMX_IndexParamVideoInitialQp, &initQP);
++
++      if (err == OMX_ErrorNone) {
++
++        if (self->init_quant_i_frames != 0xffffffff)
++          initQP.nQpI = self->init_quant_i_frames;
++        if (self->init_quant_p_frames != 0xffffffff)
++          initQP.nQpP = self->init_quant_p_frames;
++        if (self->init_quant_b_frames != 0xffffffff)
++          initQP.nQpB = self->init_quant_b_frames;
++
++        initQP.bEnableInitQp = 1;
++
++        err =
++            gst_omx_component_set_parameter (self->enc,
++            (OMX_INDEXTYPE)QOMX_IndexParamVideoInitialQp, &initQP);
++        if (err == OMX_ErrorUnsupportedIndex) {
++          GST_WARNING_OBJECT (self,
++              "Setting initial quantization parameters not supported by the component");
++        } else if (err == OMX_ErrorUnsupportedSetting) {
++          GST_WARNING_OBJECT (self,
++              "Setting initial quantization parameters %u %u %u not supported by the component",
++              self->init_quant_i_frames, self->init_quant_p_frames, self->init_quant_b_frames);
++        } else if (err != OMX_ErrorNone) {
++          GST_ERROR_OBJECT (self,
++              "Failed to set initial quantization parameters: %s (0x%08x)",
++              gst_omx_error_to_string (err), err);
++          return FALSE;
++        }
++      } else {
++        GST_ERROR_OBJECT (self,
++            "Failed to get initial quantization parameters: %s (0x%08x)",
++            gst_omx_error_to_string (err), err);
++      }
++    }
++
+   }
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+   if (!set_zynqultrascaleplus_props (self))
+@@ -1038,6 +1114,15 @@ gst_omx_video_enc_set_property (GObject * object, guint prop_id,
+     case PROP_QUANT_B_FRAMES:
+       self->quant_b_frames = g_value_get_uint (value);
+       break;
++    case PROP_INIT_QUANT_I_FRAMES:
++      self->init_quant_i_frames = g_value_get_uint (value);
++      break;
++    case PROP_INIT_QUANT_P_FRAMES:
++      self->init_quant_p_frames = g_value_get_uint (value);
++      break;
++    case PROP_INIT_QUANT_B_FRAMES:
++      self->init_quant_b_frames = g_value_get_uint (value);
++      break;
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+     case PROP_QP_MODE:
+       self->qp_mode = g_value_get_enum (value);
+@@ -1118,6 +1203,15 @@ gst_omx_video_enc_get_property (GObject * object, guint prop_id, GValue * value,
+     case PROP_QUANT_B_FRAMES:
+       g_value_set_uint (value, self->quant_b_frames);
+       break;
++    case PROP_INIT_QUANT_I_FRAMES:
++      g_value_set_uint (value, self->init_quant_i_frames);
++      break;
++    case PROP_INIT_QUANT_P_FRAMES:
++      g_value_set_uint (value, self->init_quant_p_frames);
++      break;
++    case PROP_INIT_QUANT_B_FRAMES:
++      g_value_set_uint (value, self->init_quant_b_frames);
++      break;
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+     case PROP_QP_MODE:
+       g_value_set_enum (value, self->qp_mode);
+diff --git a/omx/gstomxvideoenc.h b/omx/gstomxvideoenc.h
+index 628a673..0d0e777 100644
+--- a/omx/gstomxvideoenc.h
++++ b/omx/gstomxvideoenc.h
+@@ -83,6 +83,9 @@ struct _GstOMXVideoEnc
+   guint32 quant_i_frames;
+   guint32 quant_p_frames;
+   guint32 quant_b_frames;
++  guint32 init_quant_i_frames;
++  guint32 init_quant_p_frames;
++  guint32 init_quant_b_frames;
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+   guint32 qp_mode;
+   guint32 min_qp;
+-- 
+2.7.4
+

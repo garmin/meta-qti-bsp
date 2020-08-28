@@ -1,0 +1,32 @@
+From 58e38307db4c074af68da1e4d94061de35742735 Mon Sep 17 00:00:00 2001
+From: Miaomiao Chen <miaochen@codeaurora.org>
+Date: Thu, 19 Dec 2019 11:30:27 +0800
+Subject: [PATCH 17/28] gstwaylandsink: Fix crash issue when print one
+ GST_WARNING log
+
+The gstwlbuf has been set to NULL before calling GST_WARNING to access
+it. This will cause crash. Fix it.
+
+Change-Id: I0e87e9f9231ce89324e20237061ffe953d25f724
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index f27801b..67adf78 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -1470,8 +1470,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+         gst_memory_map (memory, &map, GST_MAP_READ);
+         if (gstwlbuf && gstwlbuf->data != map.data) {
+           g_hash_table_remove (sink->buffer_table, &key);
+-          gstwlbuf = NULL;
+           GST_WARNING("gstwlbuf 0x%x, gstwlbuf->data 0x%x, map.data 0x%x\n", gstwlbuf, gstwlbuf->data, map.data);
++          gstwlbuf = NULL;
+         }
+         gst_memory_unmap (memory, &map);
+       }
+-- 
+2.7.4
+
