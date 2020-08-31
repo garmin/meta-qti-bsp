@@ -1,0 +1,252 @@
+From 395dbf9db6938e1917d4de90af1ae3df41ddf1c8 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Thu, 22 Aug 2019 14:36:17 +0800
+Subject: [PATCH 12/42] gst-omx: h265enc SPS/PPS generated with IDR frame, and
+ add VP8/9 enum
+
+Origin patch on mm-gst.lnx.1.0 is 2900793, 2110947
+
+Change-Id: Id963031b9797d7fe88b26239a3925f669b64bb34
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ configure.ac            |  8 +++++
+ omx/gstomxh265enc.c     | 88 ++++++++++++++++++++++++++++++++++++++++++-------
+ omx/gstomxh265enc.h     |  3 +-
+ omx/gstomxvideoenc.h    |  8 +++++
+ omx/openmax/OMX_Video.h |  3 ++
+ 5 files changed, 98 insertions(+), 12 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 351b8cb..aa8d40d 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -380,6 +380,14 @@ AC_CHECK_DECLS([OMX_VIDEO_CodingHEVC],
+   ], [[$VIDEO_HEADERS]])
+ AM_CONDITIONAL(HAVE_HEVC, test "x$HAVE_HEVC" = "xyes")
+ 
++AC_CHECK_MEMBER([PrependSPSPPSToIDRFramesParams.bEnable],
++  [
++    NO_DEF_SPSPPSPAR=no
++  ], [
++    AC_DEFINE(NO_DEF_SPSPPSPAR, 1, [SPSPPS PAR external support])
++    NO_DEF_SPSPPSPAR=yes
++  ], [[$QCOM_EXT_HEADERS]])
++AM_CONDITIONAL(NO_DEF_SPSPPSPAR, test "x$NO_DEF_SPSPPSPAR" = "xyes")
+ if test "x$ac_cv_omx_target" = "xzynqultrascaleplus"; then
+     AC_CHECK_HEADER([OMX_Allegro.h], [], [AC_ERROR([Need Allegro OMX headers to build for Zynq UltraScale+. Use --with-omx-header-path= argument to specify the path of those headers.])], [AC_INCLUDES_DEFAULT])
+ fi
+diff --git a/omx/gstomxh265enc.c b/omx/gstomxh265enc.c
+index ea14ca7..a92f0e9 100644
+--- a/omx/gstomxh265enc.c
++++ b/omx/gstomxh265enc.c
+@@ -27,6 +27,7 @@
+ 
+ #include "gstomxh265enc.h"
+ #include "gstomxh265utils.h"
++#include <OMX_QCOMExtns.h>
+ 
+ GST_DEBUG_CATEGORY_STATIC (gst_omx_h265_enc_debug_category);
+ #define GST_CAT_DEFAULT gst_omx_h265_enc_debug_category
+@@ -49,10 +50,13 @@ enum
+   PROP_B_FRAMES,
+   PROP_CONSTRAINED_INTRA_PREDICTION,
+   PROP_LOOP_FILTER_MODE,
++  PROP_INLINESPSPPSHEADERS,
+ };
+ 
+-#define GST_OMX_H265_VIDEO_ENC_PERIODICITY_OF_IDR_FRAMES_DEFAULT    (0xffffffff)
+-#define GST_OMX_H265_VIDEO_ENC_INTERVAL_OF_CODING_INTRA_FRAMES_DEFAULT (0xffffffff)
++#define GST_OMX_H265_ENC_INLINE_SPS_PPS_HEADERS_DEFAULT      TRUE
++#define GST_OMX_H265_VIDEO_ENC_INTERVAL_OF_CODING_INTRA_FRAMES_DEFAULT 25
++#define GST_OMX_H265_VIDEO_ENC_PERIODICITY_OF_IDR_FRAMES_DEFAULT    4
++
+ #define GST_OMX_H265_VIDEO_ENC_B_FRAMES_DEFAULT (0xffffffff)
+ #define GST_OMX_H265_VIDEO_ENC_CONSTRAINED_INTRA_PREDICTION_DEFAULT (FALSE)
+ #define GST_OMX_H265_VIDEO_ENC_LOOP_FILTER_MODE_DEFAULT (0xffffffff)
+@@ -126,8 +130,13 @@ gst_omx_h265_enc_class_init (GstOMXH265EncClass * klass)
+           GST_OMX_H265_VIDEO_ENC_INTERVAL_OF_CODING_INTRA_FRAMES_DEFAULT,
+           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+           GST_PARAM_MUTABLE_READY));
+-
+-#ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
++  g_object_class_install_property (gobject_class, PROP_INLINESPSPPSHEADERS,
++      g_param_spec_boolean ("inline-header",
++          "Inline SPS/PPS headers before IDR",
++          "Inline SPS/PPS header before IDR",
++          GST_OMX_H265_ENC_INLINE_SPS_PPS_HEADERS_DEFAULT,
++          G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
++          GST_PARAM_MUTABLE_READY));
+   g_object_class_install_property (gobject_class, PROP_PERIODICITYOFIDRFRAMES,
+       g_param_spec_uint ("periodicity-idr", "IDR periodicity",
+           "Periodicity of IDR frames (0xffffffff=component default)",
+@@ -135,7 +144,7 @@ gst_omx_h265_enc_class_init (GstOMXH265EncClass * klass)
+           GST_OMX_H265_VIDEO_ENC_PERIODICITY_OF_IDR_FRAMES_DEFAULT,
+           G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS |
+           GST_PARAM_MUTABLE_READY));
+-
++#ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+   g_object_class_install_property (gobject_class, PROP_B_FRAMES,
+       g_param_spec_uint ("b-frames", "Number of B-frames",
+           "Number of B-frames between two consecutive I-frames (0xffffffff=component default)",
+@@ -186,10 +195,13 @@ gst_omx_h265_enc_set_property (GObject * object, guint prop_id,
+     case PROP_INTERVALOFCODINGINTRAFRAMES:
+       self->interval_intraframes = g_value_get_uint (value);
+       break;
+-#ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+-    case PROP_PERIODICITYOFIDRFRAMES:
++  case PROP_INLINESPSPPSHEADERS:
++      self->inline_sps_pps_headers = g_value_get_boolean (value);
++      break;
++  case PROP_PERIODICITYOFIDRFRAMES:
+       self->periodicity_idr = g_value_get_uint (value);
+       break;
++#ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+     case PROP_B_FRAMES:
+       self->b_frames = g_value_get_uint (value);
+       break;
+@@ -216,10 +228,13 @@ gst_omx_h265_enc_get_property (GObject * object, guint prop_id, GValue * value,
+     case PROP_INTERVALOFCODINGINTRAFRAMES:
+       g_value_set_uint (value, self->interval_intraframes);
+       break;
+-#ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+-    case PROP_PERIODICITYOFIDRFRAMES:
++  case PROP_INLINESPSPPSHEADERS:
++      g_value_set_boolean (value, self->inline_sps_pps_headers);
++      break;
++  case PROP_PERIODICITYOFIDRFRAMES:
+       g_value_set_uint (value, self->periodicity_idr);
+       break;
++#ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+     case PROP_B_FRAMES:
+       g_value_set_uint (value, self->b_frames);
+       break;
+@@ -241,9 +256,11 @@ gst_omx_h265_enc_init (GstOMXH265Enc * self)
+ {
+   self->interval_intraframes =
+       GST_OMX_H265_VIDEO_ENC_INTERVAL_OF_CODING_INTRA_FRAMES_DEFAULT;
+-#ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
++  self->inline_sps_pps_headers =
++      GST_OMX_H265_ENC_INLINE_SPS_PPS_HEADERS_DEFAULT;
+   self->periodicity_idr =
+       GST_OMX_H265_VIDEO_ENC_PERIODICITY_OF_IDR_FRAMES_DEFAULT;
++#ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+   self->b_frames = GST_OMX_H265_VIDEO_ENC_B_FRAMES_DEFAULT;
+   self->constrained_intra_prediction =
+       GST_OMX_H265_VIDEO_ENC_CONSTRAINED_INTRA_PREDICTION_DEFAULT;
+@@ -446,7 +463,8 @@ gst_omx_h265_enc_set_format (GstOMXVideoEnc * enc, GstOMXPort * port,
+   const gchar *profile_string, *level_string, *tier_string;
+   OMX_VIDEO_HEVCPROFILETYPE profile = OMX_VIDEO_HEVCProfileUnknown;
+   OMX_VIDEO_HEVCLEVELTYPE level = OMX_VIDEO_HEVCLevelUnknown;
+-
++  PrependSPSPPSToIDRFramesParams config_inline_header;
++  QOMX_VIDEO_INTRAPERIODTYPE config_hevcintraperiod;
+ #ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+   if (self->periodicity_idr !=
+       GST_OMX_H265_VIDEO_ENC_PERIODICITY_OF_IDR_FRAMES_DEFAULT)
+@@ -505,7 +523,55 @@ gst_omx_h265_enc_set_format (GstOMXVideoEnc * enc, GstOMXPort * port,
+ 
+   if (!update_param_hevc (self, profile, level))
+     return FALSE;
++GST_OMX_INIT_STRUCT (&config_inline_header);
++
++  err = gst_omx_component_get_parameter (GST_OMX_VIDEO_ENC (self)->enc,
++      OMX_QcomIndexParamSequenceHeaderWithIDR, &config_inline_header);
++  if (err != OMX_ErrorNone) {
++    GST_ERROR_OBJECT (self,
++        "can't get OMX_QcomIndexParamSequenceHeaderWithIDR %s (0x%08x)",
++        gst_omx_error_to_string (err), err);
++    return FALSE;
++  }
++
++  if (self->inline_sps_pps_headers) {
++    config_inline_header.bEnable = OMX_TRUE;
++  } else {
++    config_inline_header.bEnable = OMX_FALSE;
++  }
++
++  err = gst_omx_component_set_parameter (GST_OMX_VIDEO_ENC (self)->enc,
++      OMX_QcomIndexParamSequenceHeaderWithIDR, &config_inline_header);
++  if (err != OMX_ErrorNone) {
++      GST_ERROR_OBJECT (self,
++          "can't set OMX_QcomIndexParamSequenceHeaderWithIDR %s (0x%08x)",
++           gst_omx_error_to_string (err), err);
++      return FALSE;
++  }
++
++  GST_OMX_INIT_STRUCT (&config_hevcintraperiod);
++  config_hevcintraperiod.nPortIndex =
++      GST_OMX_VIDEO_ENC (self)->enc_out_port->index;
++  err = gst_omx_component_get_config (GST_OMX_VIDEO_ENC (self)->enc,
++      QOMX_IndexConfigVideoIntraperiod, &config_hevcintraperiod);
++  if (err != OMX_ErrorNone) {
++    GST_ERROR_OBJECT (self,
++        "can't get QOMX_IndexConfigVideoIntraperiod %s (0x%08x)",
++        gst_omx_error_to_string (err), err);
++    return FALSE;
++  }
++
++  config_hevcintraperiod.nIDRPeriod = self->periodicity_idr;
++  config_hevcintraperiod.nPFrames = self->interval_intraframes;
+ 
++  err = gst_omx_component_set_config (GST_OMX_VIDEO_ENC (self)->enc,
++      QOMX_IndexConfigVideoIntraperiod, &config_hevcintraperiod);
++  if (err != OMX_ErrorNone) {
++    GST_ERROR_OBJECT (self,
++        "can't set QOMX_IndexConfigVideoIntraperiod %s (0x%08x)",
++        gst_omx_error_to_string (err), err);
++    return FALSE;
++  }
+   return TRUE;
+ 
+ unsupported_profile:
+diff --git a/omx/gstomxh265enc.h b/omx/gstomxh265enc.h
+index c53be18..27fa132 100644
+--- a/omx/gstomxh265enc.h
++++ b/omx/gstomxh265enc.h
+@@ -49,8 +49,9 @@ struct _GstOMXH265Enc
+ 
+   /* properties */
+   guint32 interval_intraframes;
+-#ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
++  gboolean inline_sps_pps_headers;
+   guint32 periodicity_idr;
++#ifdef USE_OMX_TARGET_ZYNQ_USCALE_PLUS
+   guint32 b_frames;
+   gboolean constrained_intra_prediction;
+   guint32 loop_filter_mode;
+diff --git a/omx/gstomxvideoenc.h b/omx/gstomxvideoenc.h
+index c84e62a..628a673 100644
+--- a/omx/gstomxvideoenc.h
++++ b/omx/gstomxvideoenc.h
+@@ -27,6 +27,14 @@
+ 
+ #include "gstomx.h"
+ 
++#ifdef NO_DEF_SPSPPSPAR
++#include "OMX_Types.h"
++typedef struct PrependSPSPPSToIDRFramesParams {
++  OMX_U32 nSize;
++  OMX_VERSIONTYPE nVersion;
++  OMX_BOOL bEnable;
++} PrependSPSPPSToIDRFramesParams;
++#endif
+ G_BEGIN_DECLS
+ 
+ #define GST_TYPE_OMX_VIDEO_ENC \
+diff --git a/omx/openmax/OMX_Video.h b/omx/openmax/OMX_Video.h
+index 163e450..766787b 100644
+--- a/omx/openmax/OMX_Video.h
++++ b/omx/openmax/OMX_Video.h
+@@ -68,6 +68,9 @@ typedef enum OMX_VIDEO_CODINGTYPE {
+     OMX_VIDEO_CodingRV,         /**< all versions of Real Video */
+     OMX_VIDEO_CodingAVC,        /**< H.264/AVC */
+     OMX_VIDEO_CodingMJPEG,      /**< Motion JPEG */
++    OMX_VIDEO_CodingVP8,        /**< Google VP8, formerly known as On2 VP8 */
++    OMX_VIDEO_CodingVP9,        /**< Google VP9 */
++    OMX_VIDEO_CodingHEVC,       /**< HEVC */
+     OMX_VIDEO_CodingKhronosExtensions = 0x6F000000, /**< Reserved region for introducing Khronos Standard Extensions */ 
+     OMX_VIDEO_CodingVendorStartUnused = 0x7F000000, /**< Reserved region for introducing Vendor Extensions */
+     OMX_VIDEO_CodingMax = 0x7FFFFFFF
+-- 
+2.7.4
+

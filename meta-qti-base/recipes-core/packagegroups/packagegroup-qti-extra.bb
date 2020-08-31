@@ -9,7 +9,7 @@ PACKAGES = "\
 ALLOW_EMPTY_${PN} = "1"
 
 RDEPENDS_${PN} += "\
-    python \ 
+    python3 \ 
     resize-service \
     openssl \
     libxml2 \

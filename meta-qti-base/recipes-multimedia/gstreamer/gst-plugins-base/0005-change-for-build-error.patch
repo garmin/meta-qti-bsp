@@ -1,0 +1,30 @@
+From b13765390a1069bd27082e3d55835bac73c24d83 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Fri, 14 Aug 2020 13:46:35 +0800
+Subject: [PATCH] change for build error
+
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ configure.ac | 3 +++
+ 1 file changed, 3 insertions(+)
+ mode change 100644 => 100755 configure.ac
+
+diff --git a/configure.ac b/configure.ac
+old mode 100644
+new mode 100755
+index 180f7aa..b367d28
+--- a/configure.ac
++++ b/configure.ac
+@@ -30,6 +30,9 @@ AM_MAINTAINER_MODE([enable])
+ dnl sets host_* variables
+ AC_CANONICAL_HOST
+ 
++dnl PKG_CONFIG_SYSROOT_DIR is a valid environment variable
++m4_pattern_allow(PKG_CONFIG_SYSROOT_DIR)
++
+ dnl use pretty build output with automake >= 1.11
+ m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])],
+   [AM_DEFAULT_VERBOSITY=1
+-- 
+2.7.4
+

@@ -17,8 +17,8 @@ S         =  "${WORKDIR}/bootable/bootloader/edk2"
 SRCREV = "${AUTOREV}"
 
 # FIXME for keymaster functionality
-SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'qti-lxc', ' file://0001-avb-bring-up-keymaster-for-LV.patch', '', d)}"
-SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'qti-lxc', ' file://0002-avb-send-dummy-ROT-and-boot-state-to-keymaster-from-.patch ', '', d)}"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'lxc', ' file://0001-avb-bring-up-keymaster-for-LV.patch', '', d)}"
+SRC_URI_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'lxc', ' file://0002-avb-send-dummy-ROT-and-boot-state-to-keymaster-from-.patch ', '', d)}"
 
 INSANE_SKIP_${PN} = "arch"
 
@@ -28,22 +28,23 @@ VERITY_ENABLED = "${@bb.utils.contains('DISTRO_FEATURES', 'dm-verity','1', '0', 
 
 EARLY_ETH = "${@bb.utils.contains('DISTRO_FEATURES', 'early-eth', '1', '0', d)}"
 
+HIBERNATION = "${@bb.utils.contains('COMBINED_FEATURES', 'hibernation', '1', '0', d)}"
+
 EXTRA_OEMAKE = "'CLANG_BIN=${CLANG_BIN_PATH}' \
                 'CLANG_PREFIX=${STAGING_BINDIR_NATIVE}/${TARGET_SYS}/${TARGET_PREFIX}' \
                 'TARGET_ARCHITECTURE=${TARGET_ARCH}'\
                 'BUILDDIR=${S}'\
                 'BOOTLOADER_OUT=${S}/out'\
                 'ENABLE_LE_VARIANT=true'\
+                'HIBERNATION_SUPPORT=${HIBERNATION}'\
                 'VERIFIED_BOOT_LE=${VBLE}'\
                 'VERITY_LE=${VERITY_ENABLED}'\
                 'INIT_BIN_LE=\"/sbin/init\"'\
                 'EDK_TOOLS_PATH=${S}/BaseTools'\
-                'EARLY_ETH_ENABLED=${EARLY_ETH}'"
+                'EARLY_ETH_ENABLED=${EARLY_ETH}'\
+                'UBSAN_UEFI_GCC_FLAG_ALIGNMENT=-Wno-misleading-indentation'"
 
 EXTRA_OEMAKE_append_qcs40x = " 'DISABLE_PARALLEL_DOWNLOAD_FLASH=1'"
-
-EXTRA_OEMAKE_append = " 'TARGET_BOARD_TYPE_AUTO=1'"
-EXTRA_OEMAKE_append = " ${@bb.utils.contains('DISTRO_FEATURES', 'dm_verity', 'VERIFIED_BOOT=1', '', d)}"
 
 do_compile () {
     export CC=${BUILD_CC}

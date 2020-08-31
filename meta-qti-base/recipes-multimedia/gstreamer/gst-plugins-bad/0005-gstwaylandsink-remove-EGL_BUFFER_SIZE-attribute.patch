@@ -1,0 +1,46 @@
+From 28b995395715d7b6c03f57f5d1b2c402199f8d8e Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Wed, 4 Sep 2019 15:49:33 +0800
+Subject: [PATCH 05/28] gstwaylandsink: remove EGL_BUFFER_SIZE attribute when
+ call eglCreateImage
+
+Origin patch on mm-gst.lnx.1.0 is 1906663
+
+Change-Id: Iccbcaa0f93b0a3fdc6a8bef9f10477f6a63ac055
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 10 ++++------
+ 1 file changed, 4 insertions(+), 6 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 1df4eda..8131318 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -778,7 +778,6 @@ gst_wayland_sink_create_wl_buffer(GstWaylandSink *sink, GstIonBufFdMeta *ionBufF
+   EGLint attribs[] = {
+     EGL_WIDTH, 0,
+     EGL_HEIGHT, 0,
+-    EGL_BUFFER_SIZE, 0,
+     EGL_LINUX_DRM_FOURCC_EXT, DRM_FORMAT_NV12,
+     EGL_DMA_BUF_PLANE0_FD_EXT, 0,
+     EGL_DMA_BUF_PLANE0_OFFSET_EXT, 0,
+@@ -790,12 +789,11 @@ gst_wayland_sink_create_wl_buffer(GstWaylandSink *sink, GstIonBufFdMeta *ionBufF
+ 
+   attribs[1]  = w;
+   attribs[3]  = h;
+-  attribs[5]  = ionBufFdMeta->size;
+-  attribs[9]  = ionBufFdMeta->fd;
+-  attribs[11] = ionBufFdMeta->offset;
+-  attribs[13] = ionBufFdMeta->fd;
++  attribs[7]  = ionBufFdMeta->fd;
++  attribs[9] = ionBufFdMeta->offset;
++  attribs[11] = ionBufFdMeta->fd;
+   /* MSM8996: Updated the offset with correct width allignment */
+-  attribs[15] = ionBufFdMeta->offset + ((w + 127) & ~127) * ((h + 31) & ~31);
++  attribs[13] = ionBufFdMeta->offset + ((w + 127) & ~127) * ((h + 31) & ~31);
+ 
+   GST_DEBUG_OBJECT(sink, "create wl buffer from elg :%p fd %d size  %d, w h %d %d",	
+     sink->egldpy,ionBufFdMeta->fd,ionBufFdMeta->size,w ,h);
+-- 
+2.7.4
+

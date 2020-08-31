@@ -1,0 +1,49 @@
+From d514c0db90c9311183b7347820a1b330e72f6f76 Mon Sep 17 00:00:00 2001
+From: Yiming Cao <cyiming@codeaurora.org>
+Date: Fri, 21 Sep 2018 14:55:31 +0800
+Subject: [PATCH 11/28] waylandsink: set opaque region for video surface
+
+Set opaque region for video surface to ensure it
+can be passed through overlay for sandwich case.
+
+Change-Id: Ie64e39b3a61dbda7d2e7d15fd74a7f897f04b919
+Signed-off-by: Yiming Cao <cyiming@codeaurora.org>
+---
+ ext/wayland/wlwindow.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
+index df83dc3..7761b02 100644
+--- a/ext/wayland/wlwindow.c
++++ b/ext/wayland/wlwindow.c
+@@ -413,6 +413,7 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
+   GstVideoRectangle src = { 0, };
+   GstVideoRectangle dst = { 0, };
+   GstVideoRectangle res;
++  struct wl_region *region;
+ 
+   /* center the video_subsurface inside area_subsurface */
+   src.w = window->video_width;
+@@ -429,14 +430,17 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
+ 
+   wl_subsurface_set_position (window->video_subsurface, res.x, res.y);
+ 
++  region = wl_compositor_create_region (window->display->compositor);
++  wl_region_add (region, 0, 0, res.w, res.h);
++  wl_surface_set_opaque_region (window->video_surface, region);
++  wl_region_destroy (region);
++
+   if (commit) {
+     wl_surface_damage (window->video_surface_wrapper, 0, 0, res.w, res.h);
+     wl_surface_commit (window->video_surface_wrapper);
+   }
+ 
+   if (gst_wl_window_is_toplevel (window)) {
+-    struct wl_region *region;
+-
+     region = wl_compositor_create_region (window->display->compositor);
+     wl_region_add (region, 0, 0, window->render_rectangle.w,
+         window->render_rectangle.h);
+-- 
+2.7.4
+

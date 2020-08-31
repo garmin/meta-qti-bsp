@@ -1,0 +1,60 @@
+From e154cb2b82d461258024f2108d09824350f6bec3 Mon Sep 17 00:00:00 2001
+From: Miaomiao Chen <miaochen@codeaurora.org>
+Date: Fri, 28 Jun 2019 14:11:35 +0800
+Subject: [PATCH 24/42] Optimize the startup speed of some streams
+
+When the reconfiguration happened, need to return GST_OMX_ACQUIRE_BUFFER_RECONFIGURE
+as soon as possible, especially when the filled length of pending buffer is
+zero. Because the OMX il will return the output buffer in the state of reconfiguration.
+It makes the output buffer been pushed back and forth between the gstomx and OMX il,
+which makes the reconfiguration too later.
+
+Change-Id: Icdefe7faef2ab68e6520de3c0af9c5c685bf8109
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ omx/gstomx.c         | 12 ++++++++++++
+ omx/gstomxvideodec.c |  2 +-
+ 2 files changed, 13 insertions(+), 1 deletion(-)
+ mode change 100644 => 100755 omx/gstomx.c
+
+diff --git a/omx/gstomx.c b/omx/gstomx.c
+old mode 100644
+new mode 100755
+index a55574c..1fbc64b
+--- a/omx/gstomx.c
++++ b/omx/gstomx.c
+@@ -2196,6 +2196,18 @@ retry:
+       GST_DEBUG_OBJECT (comp->parent,
+           "%s output port %u needs reconfiguration but has buffers pending",
+           comp->name, port->index);
++      /* When the reconfiguration happened, need to return GST_OMX_ACQUIRE_BUFFER_RECONFIGURE
++       * as soon as possible, especially when the filled length of pending buffer is
++       * zero. Because the OMX il will return the output buffer in the state of reconfiguration.
++       * It makes the output buffer been pushed back and forth between the gstomx and OMX il,
++       * which makes the reconfiguration too later.
++       */
++      _buf = g_queue_peek_head (&port->pending_buffers);
++      if (_buf && _buf->omx_buf && _buf->omx_buf->nFilledLen == 0) {
++        GST_LOG_OBJECT (comp->parent, "let pending buffer stay in queue of pending buffer");
++        ret = GST_OMX_ACQUIRE_BUFFER_RECONFIGURE;
++        goto done;
++      }
+       _buf = g_queue_pop_head (&port->pending_buffers);
+ 
+       if (port->pending_bufs_before_rect_change > 0)
+diff --git a/omx/gstomxvideodec.c b/omx/gstomxvideodec.c
+index 7469571..8dda8c0 100644
+--- a/omx/gstomxvideodec.c
++++ b/omx/gstomxvideodec.c
+@@ -1822,7 +1822,7 @@ gst_omx_video_dec_loop (GstOMXVideoDec * self)
+     OMX_PARAM_PORTDEFINITIONTYPE port_def;
+     GstVideoFormat format;
+ 
+-    GST_DEBUG_OBJECT (self, "Port settings have changed, updating caps");
++    GST_DEBUG_OBJECT (self, "Port settings have changed, updating caps. acq_ret:%d", (gint)acq_return);
+ 
+     /* Reallocate all buffers */
+     if (acq_return == GST_OMX_ACQUIRE_BUFFER_RECONFIGURE
+-- 
+2.7.4
+

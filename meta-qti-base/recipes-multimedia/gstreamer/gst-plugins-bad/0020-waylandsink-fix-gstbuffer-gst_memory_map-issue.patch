@@ -1,0 +1,62 @@
+From cb68ab4bfe883d76b425709ec457709898a1717d Mon Sep 17 00:00:00 2001
+From: Bo Fang <bofang1@codeaurora.org>
+Date: Sat, 14 Mar 2020 17:39:32 +0800
+Subject: [PATCH 20/28] waylandsink: fix gstbuffer gst_memory_map issue for sw
+ dec case
+
+Since we check gstbuffer's underlying memory through gst_memory_map() to decide
+whether need to re-create wlbuffer, sw decoder case also need attach some
+memory to gstbuffer. Previously, it use gst_buffer_new() to create gstbuffer
+for sw dec case, but gst_buffer_new() won't attach memory. This patch use
+gst_buffer_new_wrapped_full() to create gstbuffer, it will attach memory to the
+created gstbuffer.
+
+Change-Id: If002244a83a543e8f64737c6d105e6161e1c18fc
+Signed-off-by: Bo Fang <bofang1@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+ mode change 100755 => 100644 ext/wayland/gstwaylandsink.c
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+old mode 100755
+new mode 100644
+index 472e28b..b3d29cb
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -98,6 +98,7 @@ typedef struct {
+   int meta_fd;
+   struct gbm_bo *bo;
+   unsigned char* mem_cpu_addr;
++  int mapsz;
+   int status;//0 no alloc; 1 alloc but idle; 2 using;
+   GMutex* plock;
+ } swfrm_gbm_item;
+@@ -1075,6 +1076,7 @@ static int gbm_swframe_mem_alloc_map(GstWaylandSink* sink, int w, int h, int idx
+     mgr->gbm_swfrms[idx].meta_fd = meta_fd;
+     mgr->gbm_swfrms[idx].bo = bo;
+     mgr->gbm_swfrms[idx].mem_cpu_addr = p;
++    mgr->gbm_swfrms[idx].mapsz = mapsz;
+     mgr->gbm_swfrms[idx].w = w;
+     mgr->gbm_swfrms[idx].h = h;
+     mgr->gbm_swfrms[idx].status = 1;
+@@ -1137,13 +1139,12 @@ void gbm_swframe_displayed(swfrm_gbm_item* item)
+ static GstBuffer * gbm_swframe_create(GstWaylandSink* sink, int idx)
+ {
+   swfrm_gbm_manager* mgr = (swfrm_gbm_manager*)sink->swframe_manager;
+-  int mapsz = VENUS_Y_STRIDE(COLOR_FMT_NV12, mgr->w) * VENUS_Y_SCANLINES(COLOR_FMT_NV12, mgr->h) + VENUS_UV_STRIDE(COLOR_FMT_NV12, mgr->w) * VENUS_UV_SCANLINES(COLOR_FMT_NV12, mgr->h);
+-  GstBuffer * out_buf = gst_buffer_new();
++  GstBuffer * out_buf = gst_buffer_new_wrapped_full(0, (gpointer)mgr->gbm_swfrms[idx].mem_cpu_addr, mgr->gbm_swfrms[idx].mapsz, 0, mgr->gbm_swfrms[idx].mapsz, NULL, NULL);
+   if (out_buf) {
+     GstIonBufFdMeta *meta = NULL;
+-    GST_DEBUG_OBJECT(sink, "Found buffer meta: size %u, offset %u and fd %d  meta_fd %d", mapsz, 0, mgr->gbm_swfrms[idx].bo_fd, mgr->gbm_swfrms[idx].meta_fd);
++    GST_DEBUG_OBJECT(sink, "Found buffer meta: size %u, offset %u and fd %d  meta_fd %d", mgr->gbm_swfrms[idx].mapsz, 0, mgr->gbm_swfrms[idx].bo_fd, mgr->gbm_swfrms[idx].meta_fd);
+     //gst_buffer_add_ionbuf_meta() is depended on USE_GBM. If not define USE_GBM, parameter list for this function is different.
+-    meta = gst_buffer_add_ionbuf_meta(out_buf, mgr->gbm_swfrms[idx].bo_fd, 0, mapsz, FALSE, mgr->gbm_swfrms[idx].meta_fd, 0, 0, 0);//this 0,0,0 haven't been used
++    meta = gst_buffer_add_ionbuf_meta(out_buf, mgr->gbm_swfrms[idx].bo_fd, 0, mgr->gbm_swfrms[idx].mapsz, FALSE, mgr->gbm_swfrms[idx].meta_fd, 0, 0, 0);//this 0,0,0 haven't been used
+ 
+     if (!meta) {
+       GST_ERROR_OBJECT(sink, "Addition of ionBufInfo metadata to gbm sw frame buffer failed.\n");
+-- 
+2.7.4
+

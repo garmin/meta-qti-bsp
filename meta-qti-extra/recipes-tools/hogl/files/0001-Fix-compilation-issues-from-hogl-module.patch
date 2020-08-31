@@ -1,0 +1,40 @@
+From 9dcb330e3c3310880846e553381d56b9f768bf1b Mon Sep 17 00:00:00 2001
+From: Naresh Munagala <nareshm@codeaurora.org>
+Date: Wed, 24 Jun 2020 11:49:16 +0530
+Subject: [PATCH] Fix compilation issues from hogl module
+
+Signed-off-by: Naresh Munagala <nareshm@codeaurora.org>
+---
+ configure.ac     | 2 +-
+ generate-version | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 39ecd03..1fc4778 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -4,7 +4,7 @@ AC_INIT(hogl, 1.0)
+ 
+ AC_CANONICAL_SYSTEM
+ 
+-AM_INIT_AUTOMAKE([silent-rules subdir-objects])
++AM_INIT_AUTOMAKE([silent-rules subdir-objects foreign])
+ AM_SILENT_RULES([yes])
+ 
+ dnl Checks for programs.
+diff --git a/generate-version b/generate-version
+index 01497b5..9a0d3c9 100755
+--- a/generate-version
++++ b/generate-version
+@@ -7,7 +7,7 @@ if [ "$out" = "" ]; then
+ 	exit 1
+ fi
+ 
+-ver=`git describe --tags --abbrev=14`
++ver=`git describe --always --tags --abbrev=14`
+ if [ "$ver" = "" ]; then
+ 	echo "Hmm, \'git describe\' returned an empty string"
+ 	exit 1
+-- 
+2.7.4
+

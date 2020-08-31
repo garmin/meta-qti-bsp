@@ -1,0 +1,140 @@
+From d8cda2d91fd786116ddfe92db2c047524bbec62e Mon Sep 17 00:00:00 2001
+From: Bo Fang <bofang1@codeaurora.org>
+Date: Mon, 25 May 2020 00:51:18 +0800
+Subject: [PATCH 26/28] waylandsink: remove gstwlbuf one by one after
+ resolution change
+
+Previously, after resolution change, only those gstwlbuf whose key isn't
+changed(means the frame memory is reused for new resolution), will be
+removed from table. Actually, all old gstwlbufs should be removed. Each
+time, only remove one old gstwlbuf to save time cost.
+
+Change-Id: Id892d0a9353c65418ad88dd6a7afdf44a4a64720
+Signed-off-by: Bo Fang <bofang1@codeaurora.org>
+Signed-off-by: Miaomiao Chen <miaochen@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 71 ++++++++++++++++++++++++++++++--------------
+ ext/wayland/gstwaylandsink.h |  1 +
+ 2 files changed, 49 insertions(+), 23 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 13f3870..ab7f9cb 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -1229,12 +1229,34 @@ static int gbm_swframe_fill(GstWaylandSink* sink, int idx, GstBuffer* gbm_buf, G
+ }
+ #endif
+ 
+-void
+-_set_old_flag_for_old_wlbuffer (gpointer key, gpointer value, gpointer user_data)
++gboolean
++_set_old_flag_and_remove_too_old (gpointer key, gpointer value, gpointer user_data)
+ {
+   GstWlBuffer *wl_buf = (GstWlBuffer*) value;
+-  if (wl_buf)
+-    wl_buf->old_config = TRUE;
++  if (wl_buf) {
++    if (wl_buf->old_config) {
++      GST_DEBUG("will remove gstwlbuf %p, data %p", wl_buf, wl_buf->data);
++      return TRUE;  //that wl_buf is too old, belong to previous of previous resolution, should remove
++    }else{
++      wl_buf->old_config = TRUE;  //that wl_buf belong to previous resolution, set old flag
++    }
++  }
++  return FALSE;
++}
++
++gboolean
++_remove_old_n (gpointer key, gpointer value, gpointer user_data)
++{
++  int n = *(int*)user_data;
++  GstWlBuffer *wl_buf = (GstWlBuffer*) value;
++  if (n <= 0) {
++    return FALSE;
++  }else if (wl_buf && wl_buf->old_config) {
++    *(int*)user_data = n - 1;  //count - 1
++    GST_DEBUG("will remove gstwlbuf %p, data %p, n %d", wl_buf, wl_buf->data, n);
++    return TRUE;  //remove this item
++  }
++  return FALSE;
+ }
+ 
+ static GstFlowReturn
+@@ -1290,9 +1312,11 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+         gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
+      sink->window->video_height = info->height;
+ 
+-     /*mark the old wayland buffer of buffer table while video info change */
+-     if (sink->buffer_table)
+-         g_hash_table_foreach (sink->buffer_table, _set_old_flag_for_old_wlbuffer, NULL);
++     /*remove too old wayland bufs, and mark other wayland bufs as old in table while video info change */
++     if (sink->buffer_table) {
++         g_hash_table_foreach_remove (sink->buffer_table, _set_old_flag_and_remove_too_old, NULL);
++         sink->buffer_table_has_old = TRUE;
++     }
+ 
+      /* set the initial size to be the same as the reported video size */
+      if (gst_wl_window_is_toplevel (sink->window))
+@@ -1479,30 +1503,31 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+ 
+     if (gst_buffer_n_memory (buffer)) {
+       GstMapInfo map;
+-
+       memory = gst_buffer_get_memory (buffer, 0);
+       gst_memory_map (memory, &map, GST_MAP_READ);
+-      key = (gint64)map.data;
+       data_bak = map.data;
+-      gstwlbuf = (GstWlBuffer *) g_hash_table_lookup(sink->buffer_table, &key);
+-
+-      if (gstwlbuf && gstwlbuf->data) {
+-        if (gstwlbuf->data != map.data || gstwlbuf->old_config) {
+-          g_hash_table_remove (sink->buffer_table, &key);
+-          if (gstwlbuf->old_config) {
+-            GST_LOG_OBJECT (sink, "remove the old wl buffer:%p", gstwlbuf);
+-          }
+-          GST_WARNING("gstwlbuf 0x%x, gstwlbuf->data 0x%x, map.data 0x%x\n", gstwlbuf, gstwlbuf->data, map.data);
+-          gstwlbuf = NULL;
+-        }
+-      }
+       gst_memory_unmap (memory, &map);
+-    }else{
+-      g_warn_if_fail(FALSE && "Only support gbm/ion buf with valid memory and data address!");
+     }
+     if (memory)
+       gst_memory_unref (memory);
+ 
++    g_warn_if_fail(data_bak && "Only support gbm/ion buf with valid memory and data addr!");
++    if (data_bak) {
++      int need_remove_cnt = 1;
++      key = (gint64)data_bak;
++      gstwlbuf = (GstWlBuffer *) g_hash_table_lookup(sink->buffer_table, &key);
++      if (gstwlbuf && gstwlbuf->old_config) {
++        GST_INFO_OBJECT (sink, "remove the old wl buffer: %p, gstwlbuf->data %p, data addr %p", gstwlbuf, gstwlbuf->data, data_bak);
++        g_hash_table_remove (sink->buffer_table, &key);
++        gstwlbuf = NULL;
++        need_remove_cnt = 0;
++      }
++
++      if (need_remove_cnt > 0 && sink->buffer_table_has_old) {
++        sink->buffer_table_has_old = (0 == g_hash_table_foreach_remove(sink->buffer_table, _remove_old_n, &need_remove_cnt)) ? FALSE : TRUE;
++      }
++    }
++
+     /* it would be better to just initiate ops once at global resource
+      * registry and move related parts to wlbuffer module */
+     if (sink->display->gbmbuf_backend) {
+diff --git a/ext/wayland/gstwaylandsink.h b/ext/wayland/gstwaylandsink.h
+index 3879fef..83afb97 100644
+--- a/ext/wayland/gstwaylandsink.h
++++ b/ext/wayland/gstwaylandsink.h
+@@ -80,6 +80,7 @@ struct _GstWaylandSink
+   GstBuffer *last_buffer;
+   void * swframe_manager;//To manage those frame buffers which are from 3rd party software dec or filter
+   struct timeval render_time;
++  gboolean buffer_table_has_old;
+ };
+ 
+ struct _GstWaylandSinkClass
+-- 
+2.7.4
+

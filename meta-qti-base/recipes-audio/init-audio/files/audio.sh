@@ -28,6 +28,7 @@
 # demo app for early audio to measure boot kpi
 sleep 0.2s
 /bin/mount -o ro /dev/sde4 /firmware
+/bin/mount -o ro /dev/mmcblk0p28 /firmware
 /bin/echo 0 > /sys/module/subsystem_restart/parameters/enable_debug;
 /bin/echo 1 > /sys/kernel/boot_adsp/boot
 

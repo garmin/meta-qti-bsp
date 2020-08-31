@@ -1,0 +1,47 @@
+From 329a8f614b06d9bddb9de596e4b4f825b8bc5234 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Thu, 15 Aug 2019 18:30:36 +0800
+Subject: [PATCH 10/42] gst-omx: enc: change for encode bitrate error
+
+Origin patch on mm-gst.lnx.1.0 is 2218933:
+gstomxvideoenc: Avoid setting default target bitrate on output port
+
+Change-Id: I2fa51503c6e3e7ae21a7f9e87ae6695c0bbf77e6
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ omx/gstomxvideoenc.c | 12 +++++++-----
+ 1 file changed, 7 insertions(+), 5 deletions(-)
+
+diff --git a/omx/gstomxvideoenc.c b/omx/gstomxvideoenc.c
+index 70322c2..557c0c7 100644
+--- a/omx/gstomxvideoenc.c
++++ b/omx/gstomxvideoenc.c
+@@ -873,9 +873,10 @@ gst_omx_video_enc_open (GstVideoEncoder * encoder)
+   {
+     OMX_ERRORTYPE err;
+ 
+-    if (!gst_omx_video_enc_set_bitrate (self))
+-      return FALSE;
+-
++    if (self->control_rate != 0xffffffff || self->target_bitrate != 0xffffffff) {
++      if (!gst_omx_video_enc_set_bitrate (self))
++        return FALSE;
++    }
+     if (self->quant_i_frames != 0xffffffff ||
+         self->quant_p_frames != 0xffffffff ||
+         self->quant_b_frames != 0xffffffff) {
+@@ -2383,8 +2384,9 @@ gst_omx_video_enc_set_format (GstVideoEncoder * encoder,
+ 
+   /* Some OMX implementations reset the bitrate after setting the compression
+    * format, see bgo#698049, so re-set it */
+-  gst_omx_video_enc_set_bitrate (self);
+-
++  if (self->control_rate != 0xffffffff || self->target_bitrate != 0xffffffff) {
++    gst_omx_video_enc_set_bitrate (self);
++  }
+   if (self->input_state)
+     gst_video_codec_state_unref (self->input_state);
+   self->input_state = gst_video_codec_state_ref (state);
+-- 
+2.7.4
+

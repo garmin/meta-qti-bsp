@@ -1,0 +1,31 @@
+From 509a9d5ee4c5842b02931080c122a79285c3ab12 Mon Sep 17 00:00:00 2001
+From: Bo Fang <bofang1@codeaurora.org>
+Date: Sat, 28 Mar 2020 23:50:33 +0800
+Subject: [PATCH 21/28] waylandsink: add GST_LOG_OBJECT log after creating new
+ wl buffer
+
+Generally speaking, shouldn't create new wl buf for each frame showing. Only at
+the beginning of playback, need to create new wl buf. If found log of creating
+new wl buf for each frame showing, should check code.
+
+Change-Id: I296528216c1e0184dca51714ca9fbe92246df8c5
+Signed-off-by: Bo Fang <bofang1@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index b3d29cb..a5e2240 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -1510,6 +1510,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+       *bufkey = key;
+ 
+       wlbufops.create (sink, gstwlbuf, ionBufFdMeta);
++      GST_LOG_OBJECT(sink, "Created new wl buf %p. Usually, needn't create new wl buf for each frame showing", gstwlbuf->wlbuffer);
+ 
+       if (gstwlbuf->wlbuffer) {
+         wlbufops.add (buffer, sink->display, gstwlbuf);
+-- 
+2.7.4
+

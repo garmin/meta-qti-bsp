@@ -1,0 +1,101 @@
+From a0c4555a3322ddb5ba99391a04ecb1f963ee4178 Mon Sep 17 00:00:00 2001
+From: kmeng <kmeng@codeaurora.org>
+Date: Thu, 6 Aug 2020 10:11:51 +0800
+Subject: [PATCH] libinput: fix libinput/udev-cold-plug race issue
+
+Signed-off-by: kmeng <kmeng@codeaurora.org>
+---
+ src/udev-seat.c | 29 ++++++++++++++++++++++++++---
+ 1 file changed, 26 insertions(+), 3 deletions(-)
+ mode change 100644 => 100755 src/udev-seat.c
+
+diff --git a/src/udev-seat.c b/src/udev-seat.c
+old mode 100644
+new mode 100755
+index ce96ece..18b1187
+--- a/src/udev-seat.c
++++ b/src/udev-seat.c
+@@ -27,12 +27,14 @@
+ #include <stdlib.h>
+ #include <stdio.h>
+ #include <string.h>
++#include <pthread.h>
+ 
+ #include "evdev.h"
+ #include "udev-seat.h"
+ 
+ static const char default_seat[] = "seat0";
+ static const char default_seat_name[] = "default";
++static pthread_mutex_t thread_mutex = PTHREAD_MUTEX_INITIALIZER;
+ 
+ static struct udev_seat *
+ udev_seat_create(struct udev_input *input,
+@@ -46,9 +48,9 @@ device_added(struct udev_device *udev_device,
+ 	     struct udev_input *input,
+ 	     const char *seat_name)
+ {
+-	struct evdev_device *device;
++	struct evdev_device *device, *next;
+ 	const char *devnode, *sysname;
+-	const char *device_seat, *output_name;
++	const char *device_seat, *output_name, *syspath;
+ 	struct udev_seat *seat;
+ 
+ 	device_seat = udev_device_get_property_value(udev_device, "ID_SEAT");
+@@ -63,6 +65,23 @@ device_added(struct udev_device *udev_device,
+ 
+ 	devnode = udev_device_get_devnode(udev_device);
+ 	sysname = udev_device_get_sysname(udev_device);
++	syspath = udev_device_get_syspath(udev_device);
++
++	if (!seat_name) {
++		list_for_each(seat, &input->base.seat_list, base.link) {
++			list_for_each_safe(device, next,
++					&seat->base.devices_list, base.link) {
++				if (streq(syspath,
++							udev_device_get_syspath(device->udev_device))) {
++					log_info(&input->base,
++							"input device %s, %s duplicate removed\n",
++							device->devname,
++							udev_device_get_devnode(device->udev_device));
++					return 0;
++				}
++			}
++		}
++	}
+ 
+ 	/* Search for matching logical seat */
+ 	if (!seat_name)
+@@ -159,12 +178,15 @@ udev_input_add_devices(struct udev_input *input, struct udev *udev)
+ 			continue;
+ 		}
+ 
++		pthread_mutex_lock(&thread_mutex);
+ 		if (device_added(device, input, NULL) < 0) {
++			pthread_mutex_unlock(&thread_mutex);
+ 			udev_device_unref(device);
+ 			udev_enumerate_unref(e);
+ 			return -1;
+ 		}
+ 
++		pthread_mutex_unlock(&thread_mutex);
+ 		udev_device_unref(device);
+ 	}
+ 	udev_enumerate_unref(e);
+@@ -190,11 +212,12 @@ evdev_udev_handler(void *data)
+ 	if (strncmp("event", udev_device_get_sysname(udev_device), 5) != 0)
+ 		goto out;
+ 
++	pthread_mutex_lock(&thread_mutex);
+ 	if (streq(action, "add"))
+ 		device_added(udev_device, input, NULL);
+ 	else if (streq(action, "remove"))
+ 		device_removed(udev_device, input);
+-
++	pthread_mutex_unlock(&thread_mutex);
+ out:
+ 	udev_device_unref(udev_device);
+ }
+-- 
+2.7.4
+

@@ -131,3 +131,4 @@ addtask do_rebuild_verity_cmdline after do_patch before do_compile
 do_shared_workdir[dirs] = "${DEPLOYDIR}"
 
 INHIBIT_PACKAGE_STRIP = "1"
+KERNEL_VERSION_SANITY_SKIP = "1"

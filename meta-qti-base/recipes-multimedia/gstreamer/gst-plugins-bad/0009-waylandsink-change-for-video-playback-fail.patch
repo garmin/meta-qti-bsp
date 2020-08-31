@@ -1,0 +1,70 @@
+From 2f7a979c03030169d46f78d39cc70260abbd8323 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Wed, 13 Nov 2019 18:26:47 +0800
+Subject: [PATCH 09/28] waylandsink: change for video playback fail after yocto
+ 3.0 upgrade
+
+yiming add memory structure check about creating gbm buffer because fd
+isn't frame unique ID for total lifecycle of pipeline, but the memory
+structure create and delete everytime, so check memory is not right, change
+memory check to mapped data address check, for data check should be unique
+in normal case.
+
+Change-Id: I584f64a6e113482a0870fbd462f827cea2e2efed
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 14 ++++++++++++--
+ ext/wayland/wlbuffer.h       |  2 +-
+ 2 files changed, 13 insertions(+), 3 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 00dfdb5..8bba30f 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -1132,10 +1132,17 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+ 			  * has same fd and offset of an old gstbuffer to which a gstwlbuf
+ 			  * was related */
+ 			 if (gst_buffer_n_memory (buffer)) {
++			   GstMapInfo map;
++
+ 			   mem_bak = memory = gst_buffer_get_memory (buffer, 0);
+-			   if (gstwlbuf && gstwlbuf->memory != memory) {
++			   if(gstwlbuf && gstwlbuf->data){
++			     gst_memory_map (memory, &map, GST_MAP_READ);
++			     if (gstwlbuf && gstwlbuf->data != map.data) {
+ 				 g_hash_table_remove (sink->buffer_table, &key);
+ 				 gstwlbuf = NULL;
++				 printf("gstwlbuf 0x%x, gstwlbuf->data 0x%x, map.data 0x%x\n", gstwlbuf, gstwlbuf->data, map.data);
++			     }
++			     gst_memory_unmap (memory, &map);
+ 			   }
+ 			 }
+ 			 if (memory)
+@@ -1163,7 +1170,10 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+              wlbufops.add (buffer, sink->display, gstwlbuf);
+              /* although memory pointer won't be set to NULL,
+               * remove the indicated dependence */
+-             gstwlbuf->memory = mem_bak;
++             GstMapInfo map1;
++             gst_memory_map (mem_bak, &map1, GST_MAP_READ);
++             gstwlbuf->data = map1.data;
++             gst_memory_unmap (mem_bak, &map1);
+              g_hash_table_insert (sink->buffer_table, bufkey, gstwlbuf);
+            } else {
+              g_object_unref (gstwlbuf);
+diff --git a/ext/wayland/wlbuffer.h b/ext/wayland/wlbuffer.h
+index 15b0011..2a2e648 100644
+--- a/ext/wayland/wlbuffer.h
++++ b/ext/wayland/wlbuffer.h
+@@ -43,7 +43,7 @@ struct _GstWlBuffer
+   GstBuffer *gstbuffer;
+ 
+   GstWlDisplay *display;
+-  GstMemory *memory;
++  guint8 *data;
+   gboolean used_by_compositor;
+ };
+ 
+-- 
+2.7.4
+

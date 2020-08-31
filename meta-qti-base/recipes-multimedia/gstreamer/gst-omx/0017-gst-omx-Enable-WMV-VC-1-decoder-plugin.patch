@@ -1,0 +1,32 @@
+From 79af5317656c0fb1ec4d35179a3dc91cbcbfc495 Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Fri, 18 Oct 2019 12:29:41 +0800
+Subject: [PATCH 17/42] gst-omx: Enable WMV/VC-1 decoder plugin
+
+cherry-pick from 1953697
+
+Change-Id: Idd36c095963e2e61174c1cc98d5fe9a19d1a0909
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ omx/gstomxwmvdec.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+ mode change 100644 => 100755 omx/gstomxwmvdec.c
+
+diff --git a/omx/gstomxwmvdec.c b/omx/gstomxwmvdec.c
+old mode 100644
+new mode 100755
+index 1475827..b3bf42b
+--- a/omx/gstomxwmvdec.c
++++ b/omx/gstomxwmvdec.c
+@@ -68,7 +68,7 @@ gst_omx_wmv_dec_class_init (GstOMXWMVDecClass * klass)
+       "Decode WMV video streams",
+       "Sebastian Dröge <sebastian.droege@collabora.co.uk>");
+ 
+-  gst_omx_set_default_role (&videodec_class->cdata, "video_decoder.wmv");
++  gst_omx_set_default_role (&videodec_class->cdata, "video_decoder.vc1");
+ }
+ 
+ static void
+-- 
+2.7.4
+

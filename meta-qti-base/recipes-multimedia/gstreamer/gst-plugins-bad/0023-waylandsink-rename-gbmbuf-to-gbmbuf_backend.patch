@@ -1,0 +1,109 @@
+From 2e91237850948f46e716e068e5c73f2964e29316 Mon Sep 17 00:00:00 2001
+From: Bo Fang <bofang1@codeaurora.org>
+Date: Thu, 21 May 2020 16:54:13 +0800
+Subject: [PATCH 23/28] waylandsink: rename gbmbuf to gbmbuf_backend and add
+ some comment
+
+Since this gbmbuf var is for gbm buffer backend protocol with renderer,
+rename it as gbmbuf_backend. It's not refer to decoder's gbm buf.
+
+Change-Id: I29cae61b0950bea118b1a0e05610151958670f7b
+Signed-off-by: Bo Fang <bofang1@codeaurora.org>
+---
+ ext/wayland/gstwaylandsink.c | 13 +++++++++----
+ ext/wayland/wldisplay.c      |  6 +++---
+ ext/wayland/wldisplay.h      |  2 +-
+ 3 files changed, 13 insertions(+), 8 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 927d06c..e1e0496 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -979,8 +979,8 @@ gst_wayland_sink_create_wl_buffer_gbm (GstWaylandSink *sink,GstWlBuffer * self,
+ #ifdef USE_GBM
+         char * depth_flag;
+         int i=0;
+-        if (sink->display->gbmbuf) {
+-           struct gbm_buffer_params *params = gbm_buffer_backend_create_params(sink->display->gbmbuf);
++        if (sink->display->gbmbuf_backend) {
++           struct gbm_buffer_params *params = gbm_buffer_backend_create_params(sink->display->gbmbuf_backend);
+            gbm_buffer_params_add_listener(params, &gbmbuf_params_listener, self);
+ 
+            GST_DEBUG_OBJECT(self, "Fd : %d, Meta Fd : %d",ionBufFdMeta->fd, ionBufFdMeta->meta_fd);
+@@ -1328,6 +1328,10 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+   wlbuffer = gst_buffer_get_wl_buffer (buffer);
+ 
+   if (G_LIKELY (wlbuffer && wlbuffer->display == sink->display)) {
++    //Usually, this log display once because the "1st" frame is just that prerolled frame.
++    //Generally speaking, those subsequent gstbuf are new created by hw decoder each time.
++    //However, for qvconv and some other plugin, they won't create gstbuf each time. Then,
++    //below log could occur for each frame.
+     GST_LOG_OBJECT (sink, "buffer %p has a wl_buffer from our display, "
+         "writing directly", buffer);
+     to_render = buffer;
+@@ -1335,6 +1339,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+   }
+ 
+   ionBufFdMeta = gst_wayland_sink_read_ionbuffd(sink, buffer);
++  g_warn_if_fail(ionBufFdMeta && "Do not support non ion-like buffer any more!");
+   if (!ionBufFdMeta) {
+ #ifdef DISABLE_SHM
+     GST_ERROR_OBJECT (sink, "As shm is disabled, code should not go here");
+@@ -1494,7 +1499,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+ 
+     /* it would be better to just initiate ops once at global resource
+      * registry and move related parts to wlbuffer module */
+-    if (sink->display->gbmbuf) {
++    if (sink->display->gbmbuf_backend) {
+       wlbufops.create = gst_wayland_sink_create_wl_buffer_gbm;
+       wlbufops.add = gst_buffer_add_gbm_wl_buffer;
+       wlbufops.set = gst_buffer_set_gbm_wl_buffer;
+@@ -1523,7 +1528,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+         g_hash_table_insert (sink->buffer_table, bufkey, gstwlbuf);
+       } else {
+         g_object_unref (gstwlbuf);
+-        if (sink->display->gbmbuf) {
++        if (sink->display->gbmbuf_backend) {
+           GST_WARNING_OBJECT (sink,
+                  " we can not get the wl buffer in time, ignore it");
+           goto done;
+diff --git a/ext/wayland/wldisplay.c b/ext/wayland/wldisplay.c
+index e5bef2b..9174a20 100644
+--- a/ext/wayland/wldisplay.c
++++ b/ext/wayland/wldisplay.c
+@@ -87,8 +87,8 @@ gst_wl_display_finalize (GObject * gobject)
+   if (self->dmabuf)
+     zwp_linux_dmabuf_v1_destroy (self->dmabuf);
+ 
+-  if (self->gbmbuf)
+-    gbm_buffer_backend_destroy(self->gbmbuf);
++  if (self->gbmbuf_backend)
++    gbm_buffer_backend_destroy(self->gbmbuf_backend);
+ 
+   if (self->wl_shell)
+     wl_shell_destroy (self->wl_shell);
+@@ -239,7 +239,7 @@ registry_handle_global (void *data, struct wl_registry *registry,
+   else if (g_strcmp0 (interface, "gbm_buffer_backend") == 0) {
+     GST_LOG("GBM BUF Interface registry");
+     /*Adding gbm_buffer here*/
+-    self->gbmbuf = wl_registry_bind(registry, id,
++    self->gbmbuf_backend = wl_registry_bind(registry, id,
+         &gbm_buffer_backend_interface, 1);
+   }
+ 
+diff --git a/ext/wayland/wldisplay.h b/ext/wayland/wldisplay.h
+index ef16690..ca3a6d1 100644
+--- a/ext/wayland/wldisplay.h
++++ b/ext/wayland/wldisplay.h
+@@ -66,7 +66,7 @@ struct _GstWlDisplay
+   struct ivi_application *ivi_application;
+   struct wp_viewporter *viewporter;
+   struct zwp_linux_dmabuf_v1 *dmabuf;
+-  struct gbm_buffer_backend *gbmbuf;
++  struct gbm_buffer_backend *gbmbuf_backend;
+   GArray *shm_formats;
+   GArray *dmabuf_formats;
+ 
+-- 
+2.7.4
+

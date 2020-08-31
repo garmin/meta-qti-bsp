@@ -23,5 +23,5 @@ RDEPENDS_${PN} += "\
     system-prop \
     ${@bb.utils.contains('DISTRO_FEATURES', 'q-hypervisor', '', 'memory-hotplug', d)} \
     ${@bb.utils.contains("DISTRO_FEATURES", "early_init", "early-init", "" ,d)} \
-    ${@bb.utils.contains('DISTRO_FEATURES', 'qti-lxc', 'qti-lxc', '', d)} \
+    ${@bb.utils.contains("COMBINED_FEATURES", "hibernation", "hibernation", "" ,d)} \
     "
