@@ -6,6 +6,7 @@ SRC_URI += "file://0001-gst-plugins-base-add-NV12_UBWC-and-RGBA_UBWC.patch \
             file://0003-Support-NV12_512-color-format-in-Gstreamer.patch \
             file://0004-videodecoder-expose-function-push_event.patch \
             file://0005-change-for-build-error.patch \
+            file://0006-do-not-create-eglsink.patch \
             "
 
 PACKAGECONFIG ??= " \

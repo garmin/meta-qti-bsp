@@ -1,0 +1,32 @@
+From 669514fa8c59830a7331a34234fbd74741a0475f Mon Sep 17 00:00:00 2001
+From: Lily Li <lali@codeaurora.org>
+Date: Wed, 9 Sep 2020 17:02:14 +0800
+Subject: [PATCH] do not create eglsink
+
+Signed-off-by: Lily Li <lali@codeaurora.org>
+---
+ ext/meson.build             | 1 -
+ gst-libs/gst/gl/meson.build | 0
+ 2 files changed, 1 deletion(-)
+ mode change 100644 => 100755 ext/meson.build
+ mode change 100644 => 100755 gst-libs/gst/gl/meson.build
+
+diff --git a/ext/meson.build b/ext/meson.build
+old mode 100644
+new mode 100755
+index d984b50..c748465
+--- a/ext/meson.build
++++ b/ext/meson.build
+@@ -1,6 +1,5 @@
+ subdir('alsa')
+ subdir('cdparanoia')
+-subdir('gl')
+ subdir('libvisual')
+ subdir('ogg')
+ subdir('opus')
+diff --git a/gst-libs/gst/gl/meson.build b/gst-libs/gst/gl/meson.build
+old mode 100644
+new mode 100755
+-- 
+2.7.4
+
