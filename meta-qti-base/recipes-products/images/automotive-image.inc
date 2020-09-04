@@ -13,4 +13,5 @@ IMAGE_INSTALL += " \
     ${@bb.utils.contains('COMBINED_FEATURES', 'qti-ros', 'packagegroup-qti-ros', '', d)} \
     ${@bb.utils.contains('COMBINED_FEATURES', 'qti-qdrive', 'packagegroup-qti-qdrive', '', d)} \
     ${@bb.utils.contains('COMBINED_FEATURES', 'qti-location', 'packagegroup-qti-location-hal', '', d)} \
+    ${@bb.utils.contains('DISTRO_FEATURES', 'kdump-support', 'kexec-tools makedumpfile linux-msm-capture', '', d)} \
     "
