@@ -1,0 +1,26 @@
+From 1f9def22ea36f1e9eb3e41762c457a7c07658c4f Mon Sep 17 00:00:00 2001
+From: kmeng <kmeng@codeaurora.org>
+Date: Fri, 31 Jul 2020 18:40:56 +0800
+Subject: [PATCH] makedumpfile: integration for kdump on gen3_auto
+
+Signed-off-by: kmeng <kmeng@codeaurora.org>
+---
+ arch/arm64.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64.c b/arch/arm64.c
+index 0535193..0abf812 100644
+--- a/arch/arm64.c
++++ b/arch/arm64.c
+@@ -73,7 +73,7 @@ static unsigned long kimage_voffset;
+ #define PTRS_PER_PMD		PTRS_PER_PTE
+ 
+ #define PAGE_PRESENT		(1 << 0)
+-#define SECTIONS_SIZE_BITS	30
++#define SECTIONS_SIZE_BITS	29
+ /* Highest possible physical address supported */
+ #define PHYS_MASK_SHIFT		48
+ #define PHYS_MASK		((1UL << PHYS_MASK_SHIFT) - 1)
+-- 
+2.7.4
+
