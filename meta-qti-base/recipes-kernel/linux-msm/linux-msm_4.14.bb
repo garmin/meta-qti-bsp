@@ -21,23 +21,6 @@ TARGET_CXXFLAGS += "-Wno-format"
 EXTRA_OEMAKE_append += "INSTALL_MOD_STRIP=1"
 KERNEL_EXTRA_ARGS += "${@bb.utils.contains('MACHINE_FEATURES', 'dt-overlay', 'DTC_EXT=${STAGING_BINDIR_NATIVE}/dtc CONFIG_BUILD_ARM64_DT_OVERLAY=y', '', d)}"
 
-do_kernel_metadata_prepend() {
-    set +e
-    if [ -n "${KBUILD_DEFCONFIG}" ]; then
-        if [ -f "${S}/arch/${ARCH}/configs/${KBUILD_DEFCONFIG}" ]; then
-            if [ -f "${WORKDIR}/defconfig" ]; then
-                # If the two defconfig's are different, warn that we didn't overwrite the
-                # one already placed in WORKDIR by the fetcher.
-                cmp "${WORKDIR}/defconfig" "${S}/arch/${ARCH}/configs/${KBUILD_DEFCONFIG}"
-                if [ $? -ne 0 ]; then
-                    bbwarn "defconfig detected in WORKDIR. ${KBUILD_DEFCONFIG} overide"
-                    cp -f ${S}/arch/${ARCH}/configs/${KBUILD_DEFCONFIG} ${WORKDIR}/defconfig
-                fi
-            fi
-        fi
-    fi
-}
-
 do_shared_workdir_append () {
         cp Makefile $kerneldir/
         cp -fR usr $kerneldir/
