@@ -30,6 +30,11 @@ case $1/$2 in
   pre/*)
     echo "Entering into $2..."
 
+    # set all usb mode to none
+    echo none > /sys/devices/platform/soc/a400000.ssusb/mode
+    echo none > /sys/devices/platform/soc/a600000.ssusb/mode
+    echo none > /sys/devices/platform/soc/a800000.ssusb/mode
+
     systemctl stop audiod.service
     if [ $2 == "hibernate" ]; then
         echo 0 > /sys/kernel/boot_adsp/boot
@@ -38,15 +43,12 @@ case $1/$2 in
     # disable BT as hsuart could block suspend
     systemctl stop synergy.service
 
-    # set all usb mode to none
-    echo none > /sys/devices/platform/soc/a600000.ssusb/mode
-    echo none > /sys/devices/platform/soc/a800000.ssusb/mode
+    # WA: wait for ack from cdsp/adsp on DIAG USB disconnect event.
+    # It's a wakeup source IRQ which would break suspend.
+    sleep 0.2
     ;;
   post/*)
     echo "Exiting from $2..."
-
-    echo peripheral > /sys/devices/platform/soc/a600000.ssusb/mode
-    echo host > /sys/devices/platform/soc/a800000.ssusb/mode
 
     systemctl restart synergy.service
 
@@ -54,5 +56,10 @@ case $1/$2 in
         echo 1 > /sys/kernel/boot_adsp/boot
     fi
     systemctl restart audiod.service
+
+    # restore all usb mode
+    echo host > /sys/devices/platform/soc/a400000.ssusb/mode
+    echo peripheral > /sys/devices/platform/soc/a600000.ssusb/mode
+    echo host > /sys/devices/platform/soc/a800000.ssusb/mode
     ;;
 esac
