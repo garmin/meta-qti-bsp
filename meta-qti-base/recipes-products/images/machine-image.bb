@@ -25,5 +25,5 @@ python __anonymous () {
 ROOTFS_POSTPROCESS_COMMAND_prepend = "${@bb.utils.contains('DISTRO_FEATURES', 'kdump-support', ' add_kdump_ramdisk; ', '', d)}"
 
 add_kdump_ramdisk() {
-   cp ${DEPLOY_DIR_IMAGE}/machine-kdump-image-${PRODUCT}.cpio.gz ${IMAGE_ROOTFS}/boot/${BASEMACHINE}.cpio.gz
+   cp ${DEPLOY_DIR_IMAGE}/machine-kdump-image-${PRODUCT}.cpio.gz ${IMAGE_ROOTFS}/boot/kdump-ramdisk.cpio.gz
 }

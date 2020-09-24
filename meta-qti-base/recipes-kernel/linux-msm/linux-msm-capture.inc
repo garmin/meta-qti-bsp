@@ -55,9 +55,10 @@ do_compile () {
 
 kernel_do_install() {
     install -d ${D}/boot
+    install -m 0644 ${KERNEL_OUTPUT_DIR}/Image ${D}/boot/
     install -m 0644 ${KERNEL_OUTPUT_DIR}/dts/qcom/sa8155p-v2-adp-star-capture.dtb ${D}/boot/
     install -m 0644 ${KERNEL_OUTPUT_DIR}/dts/qcom/sa8155p-v2-adp-air-capture.dtb ${D}/boot/
-    install -m 0644 ${KERNEL_OUTPUT_DIR}/Image ${D}/boot/
+    install -m 0644 ${KERNEL_OUTPUT_DIR}/dts/qcom/sa8195p-v2-adp-air-capture.dtb ${D}/boot/
 }
 
 FILES_${PN} += "/boot/*"
